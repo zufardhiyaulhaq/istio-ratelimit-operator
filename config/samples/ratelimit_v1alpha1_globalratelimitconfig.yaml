@@ -1,0 +1,7 @@
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimitConfig
+metadata:
+  name: globalratelimitconfig-sample
+spec:
+  # Add fields here
+  foo: bar

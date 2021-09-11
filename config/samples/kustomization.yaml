@@ -1,0 +1,5 @@
+## Append samples you want in your CSV to this file as resources ##
+resources:
+- ratelimit_v1alpha1_globalratelimitconfig.yaml
+- ratelimit_v1alpha1_globalratelimit.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples

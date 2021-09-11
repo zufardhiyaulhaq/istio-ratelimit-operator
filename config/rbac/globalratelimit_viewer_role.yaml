@@ -1,0 +1,20 @@
+# permissions for end users to view globalratelimits.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: globalratelimit-viewer-role
+rules:
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - globalratelimits
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - globalratelimits/status
+  verbs:
+  - get
