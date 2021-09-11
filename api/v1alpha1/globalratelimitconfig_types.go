@@ -33,7 +33,8 @@ type GlobalRateLimitConfigSpec struct {
 }
 
 type GlobalRateLimitConfigSelector struct {
-	Labels map[string]string `json:"labels"`
+	Labels       map[string]string `json:"labels"`
+	IstioVersion []string          `json:"istio_version"`
 }
 
 type GlobalRateLimitConfigRatelimit struct {
