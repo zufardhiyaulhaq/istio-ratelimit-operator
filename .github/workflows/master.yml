@@ -92,7 +92,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
       - name: deploy charts
-        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
+        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=latest
       - name: waiting istio-ratelimit-operator to start
         run: sleep 180
       - name: check pod
