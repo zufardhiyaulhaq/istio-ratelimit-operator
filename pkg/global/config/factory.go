@@ -12,6 +12,9 @@ type GlobalRateLimitConfigEnvoyFilterFactory interface {
 }
 
 func GetConfigFactory(version string, config v1alpha1.GlobalRateLimitConfig) (GlobalRateLimitConfigEnvoyFilterFactory, error) {
+	if version == "1.8" {
+		return NewConfig1_8Builder(config), nil
+	}
 	if version == "1.9" {
 		return NewConfig1_9Builder(config), nil
 	}

@@ -11,17 +11,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type Config1_9Builder struct {
+type Config1_8Builder struct {
 	Config v1alpha1.GlobalRateLimitConfig
 }
 
-func NewConfig1_9Builder(config v1alpha1.GlobalRateLimitConfig) *Config1_9Builder {
-	return &Config1_9Builder{
+func NewConfig1_8Builder(config v1alpha1.GlobalRateLimitConfig) *Config1_8Builder {
+	return &Config1_8Builder{
 		Config: config,
 	}
 }
 
-func (g *Config1_9Builder) Build() (*clientnetworking.EnvoyFilter, error) {
+func (g *Config1_8Builder) Build() (*clientnetworking.EnvoyFilter, error) {
 	httpFilter, err := g.buildHttpFilterPatch()
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (g *Config1_9Builder) Build() (*clientnetworking.EnvoyFilter, error) {
 			Namespace: g.Config.Namespace,
 			Labels: map[string]string{
 				"generator":     "istio-rateltimit-operator",
-				"istio/version": "1.9",
+				"istio/version": "1.8",
 			},
 		},
 		Spec: networking.EnvoyFilter{
@@ -59,11 +59,11 @@ func (g *Config1_9Builder) Build() (*clientnetworking.EnvoyFilter, error) {
 	return envoyfilter, nil
 }
 
-func (g *Config1_9Builder) buildName() string {
-	return g.Config.Name + "-1.9"
+func (g *Config1_8Builder) buildName() string {
+	return g.Config.Name + "-1.8"
 }
 
-func (g *Config1_9Builder) buildHttpFilterPatch() (*networking.EnvoyFilter_EnvoyConfigObjectPatch, error) {
+func (g *Config1_8Builder) buildHttpFilterPatch() (*networking.EnvoyFilter_EnvoyConfigObjectPatch, error) {
 	value, err := g.buildHttpFilterPatchValue()
 	if err != nil {
 		return nil, err
@@ -96,7 +96,7 @@ func (g *Config1_9Builder) buildHttpFilterPatch() (*networking.EnvoyFilter_Envoy
 	return patches, nil
 }
 
-func (g *Config1_9Builder) buildHttpFilterPatchValue() (string, error) {
+func (g *Config1_8Builder) buildHttpFilterPatchValue() (string, error) {
 	values := types.HttpFilterPatchValues{
 		Name: "envoy.filters.http.ratelimit",
 		TypedConfig: types.TypedConfig{
@@ -124,7 +124,7 @@ func (g *Config1_9Builder) buildHttpFilterPatchValue() (string, error) {
 	return string(bytes), nil
 }
 
-func (g *Config1_9Builder) buildClusterPatch() (*networking.EnvoyFilter_EnvoyConfigObjectPatch, error) {
+func (g *Config1_8Builder) buildClusterPatch() (*networking.EnvoyFilter_EnvoyConfigObjectPatch, error) {
 	value, err := g.buildClusterPatchValue()
 	if err != nil {
 		return nil, err
@@ -150,7 +150,7 @@ func (g *Config1_9Builder) buildClusterPatch() (*networking.EnvoyFilter_EnvoyCon
 	return patches, nil
 }
 
-func (g *Config1_9Builder) buildClusterPatchValue() (string, error) {
+func (g *Config1_8Builder) buildClusterPatchValue() (string, error) {
 	values := types.ClusterPatchValues{
 		Name:                 g.Config.Name,
 		Type:                 "STRICT_DNS",
@@ -186,7 +186,7 @@ func (g *Config1_9Builder) buildClusterPatchValue() (string, error) {
 	return string(bytes), nil
 }
 
-func (g *Config1_9Builder) buildContext() networking.EnvoyFilter_PatchContext {
+func (g *Config1_8Builder) buildContext() networking.EnvoyFilter_PatchContext {
 	if g.Config.Spec.Type == "gateway" {
 		return networking.EnvoyFilter_GATEWAY
 	}
@@ -194,10 +194,10 @@ func (g *Config1_9Builder) buildContext() networking.EnvoyFilter_PatchContext {
 	return networking.EnvoyFilter_GATEWAY
 }
 
-func (g *Config1_9Builder) buildProxyMatch() *networking.EnvoyFilter_ProxyMatch {
+func (g *Config1_8Builder) buildProxyMatch() *networking.EnvoyFilter_ProxyMatch {
 	return &networking.EnvoyFilter_ProxyMatch{
-		ProxyVersion: utils.WellKnownVersions["1.9"],
+		ProxyVersion: utils.WellKnownVersions["1.8"],
 	}
 }
 
-var RateLimit1_9Patch = `{"name": "envoy.filters.http.ratelimit","typed_config": {"@type": "type.googleapis.com/envoy.extensions.filters.http.ratelimit.v3.RateLimit","domain": "%s","failure_mode_deny": %t,"rate_limit_service": {"grpc_service": {"envoy_grpc": {"cluster_name": "%s"},"timeout": "%s"},"transport_api_version": "V3"}}}`
+var RateLimit1_8Patch = `{"name": "envoy.filters.http.ratelimit","typed_config": {"@type": "type.googleapis.com/envoy.extensions.filters.http.ratelimit.v3.RateLimit","domain": "%s","failure_mode_deny": %t,"rate_limit_service": {"grpc_service": {"envoy_grpc": {"cluster_name": "%s"},"timeout": "%s"},"transport_api_version": "V3"}}}`

@@ -1218,6 +1218,8 @@ istio.io/api v0.0.0-20210910210758-d6ce87e3e159/go.mod h1:nsSFw1LIMmGL7r/+6fJI6F
 istio.io/client-go v1.8.1/go.mod h1:Qymv71lwIqjDTkaE2NqBYLL+Bl5KsCfzEDhntXypHYY=
 istio.io/client-go v1.11.2 h1:oZGVVfQXitFmehk+vHgT2b3xoT6ldcv7rcGp9H6BkxM=
 istio.io/client-go v1.11.2/go.mod h1:LY+kPcgIYdp56G40ZeypEXqCWEJ0muT18HzckczqtiY=
+istio.io/client-go v1.12.0-alpha.1 h1:Ybnswye0ZWNY5wf9kATHrGos90Om3aCmetNl2ZSCoFA=
+istio.io/client-go v1.12.0-alpha.1/go.mod h1:d5/jFg+zkfBN7VZ411unjsnWhlqqs+q8CHMCPR0uLW8=
 istio.io/gogo-genproto v0.0.0-20190930162913-45029607206a/go.mod h1:OzpAts7jljZceG4Vqi5/zXy/pOg1b209T3jb7Nv5wIs=
 istio.io/gogo-genproto v0.0.0-20210113155706-4daf5697332f h1:9710FpGLvIJ1GGEbpuTh1smVBv+r8cJfR3G82ouSxIQ=
 istio.io/gogo-genproto v0.0.0-20210113155706-4daf5697332f/go.mod h1:6BwTZRNbWS570wHX/uR1Wqk5e0157TofTAUMzT7N4+s=

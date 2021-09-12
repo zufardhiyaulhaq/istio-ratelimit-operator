@@ -25,12 +25,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	ratelimitv1alpha1 "github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
+	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/client/istio"
 )
 
 // GlobalRateLimitReconciler reconciles a GlobalRateLimit object
 type GlobalRateLimitReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	IstioClient istio.ClientInterface
+	Scheme      *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimits,verbs=get;list;watch;create;update;patch;delete
