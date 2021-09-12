@@ -20,8 +20,10 @@ import (
 	"context"
 	"fmt"
 
+	funk "github.com/thoas/go-funk"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/client/istio"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/global/config"
+	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/utils"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -66,6 +68,23 @@ func (r *GlobalRateLimitConfigReconciler) Reconcile(ctx context.Context, req ctr
 		return ctrl.Result{}, fmt.Errorf("empty envoyfilter from builder")
 	}
 
+	allVersionEnvoyFilterNames := utils.BuildEnvoyFilterNameAllVersion(globalRateLimitConfig.Name)
+	EnvoyFilterNames := utils.BuildEnvoyFilterName(globalRateLimitConfig.Name, globalRateLimitConfig.Spec.Selector.IstioVersion)
+
+	deleteEnvoyFilters, _ := funk.DifferenceString(allVersionEnvoyFilterNames, EnvoyFilterNames)
+	for _, deleteEnvoyFilter := range deleteEnvoyFilters {
+		_, err := r.IstioClient.GetEnvoyFilter(ctx, globalRateLimitConfig.Namespace, deleteEnvoyFilter)
+		if err != nil {
+			continue
+		}
+
+		log.Info("delete unused envoyfilter")
+		err = r.IstioClient.DeleteEnvoyFilter(ctx, globalRateLimitConfig.Namespace, deleteEnvoyFilter)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	log.Info("create envoyfilters")
 	for _, envoyFilter := range envoyFilters {
 		log.Info("set reference envoyfilter")
@@ -93,7 +112,7 @@ func (r *GlobalRateLimitConfigReconciler) Reconcile(ctx context.Context, req ctr
 			createdEnvoyFilter.Spec = envoyFilter.Spec
 
 			log.Info("update envoyfilter")
-			r.IstioClient.UpdateEnvoyFilter(ctx, envoyFilter.Namespace, envoyFilter)
+			r.IstioClient.UpdateEnvoyFilter(ctx, envoyFilter.Namespace, createdEnvoyFilter)
 		}
 	}
 

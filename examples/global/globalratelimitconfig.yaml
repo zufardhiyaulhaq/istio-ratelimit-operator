@@ -9,8 +9,8 @@ spec:
     labels:
       "app": "istio-public-gateway"
     istio_version:
-      - "1.8"
       - "1.9"
+    sni: "bar.zufardhiyaulhaq.dev"
   ratelimit:
     spec:
       domain: "public-gateway"

@@ -69,21 +69,17 @@ func (g *Config1_9Builder) buildHttpFilterPatch() (*networking.EnvoyFilter_Envoy
 		return nil, err
 	}
 
+	listener, err := g.buildHttpFilterListener()
+	if err != nil {
+		return nil, err
+	}
+
 	patches := &networking.EnvoyFilter_EnvoyConfigObjectPatch{
 		ApplyTo: networking.EnvoyFilter_HTTP_FILTER,
 		Match: &networking.EnvoyFilter_EnvoyConfigObjectMatch{
 			Context: g.buildContext(),
 			ObjectTypes: &networking.EnvoyFilter_EnvoyConfigObjectMatch_Listener{
-				Listener: &networking.EnvoyFilter_ListenerMatch{
-					FilterChain: &networking.EnvoyFilter_ListenerMatch_FilterChainMatch{
-						Filter: &networking.EnvoyFilter_ListenerMatch_FilterMatch{
-							Name: "envoy.filters.network.http_connection_manager",
-							SubFilter: &networking.EnvoyFilter_ListenerMatch_SubFilterMatch{
-								Name: "envoy.filters.http.router",
-							},
-						},
-					},
-				},
+				Listener: listener,
 			},
 			Proxy: g.buildProxyMatch(),
 		},
@@ -94,6 +90,25 @@ func (g *Config1_9Builder) buildHttpFilterPatch() (*networking.EnvoyFilter_Envoy
 	}
 
 	return patches, nil
+}
+
+func (g *Config1_9Builder) buildHttpFilterListener() (*networking.EnvoyFilter_ListenerMatch, error) {
+	listener := &networking.EnvoyFilter_ListenerMatch{
+		FilterChain: &networking.EnvoyFilter_ListenerMatch_FilterChainMatch{
+			Filter: &networking.EnvoyFilter_ListenerMatch_FilterMatch{
+				Name: "envoy.filters.network.http_connection_manager",
+				SubFilter: &networking.EnvoyFilter_ListenerMatch_SubFilterMatch{
+					Name: "envoy.filters.http.router",
+				},
+			},
+		},
+	}
+
+	if g.Config.Spec.Selector.SNI != nil {
+		listener.FilterChain.Sni = *g.Config.Spec.Selector.SNI
+	}
+
+	return listener, nil
 }
 
 func (g *Config1_9Builder) buildHttpFilterPatchValue() (string, error) {

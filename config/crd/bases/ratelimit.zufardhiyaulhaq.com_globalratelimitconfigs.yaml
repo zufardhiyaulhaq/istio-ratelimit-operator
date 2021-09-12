@@ -76,6 +76,8 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  sni:
+                    type: string
                 required:
                 - istio_version
                 - labels

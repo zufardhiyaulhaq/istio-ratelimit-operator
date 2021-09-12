@@ -14,6 +14,7 @@ type ClientInterface interface {
 	GetEnvoyFilter(ctx context.Context, namespace string, name string) (*v1alpha3.EnvoyFilter, error)
 	CreateEnvoyFilter(ctx context.Context, namespace string, envoyFilter *v1alpha3.EnvoyFilter) (*v1alpha3.EnvoyFilter, error)
 	UpdateEnvoyFilter(ctx context.Context, namespace string, envoyFilter *v1alpha3.EnvoyFilter) (*v1alpha3.EnvoyFilter, error)
+	DeleteEnvoyFilter(ctx context.Context, namespace string, name string) error
 }
 type Client struct {
 	cfg    *rest.Config
@@ -39,4 +40,8 @@ func (r *Client) UpdateEnvoyFilter(ctx context.Context, namespace string, envoyF
 
 func (r *Client) CreateEnvoyFilter(ctx context.Context, namespace string, envoyFilter *v1alpha3.EnvoyFilter) (*v1alpha3.EnvoyFilter, error) {
 	return r.client.NetworkingV1alpha3().EnvoyFilters(namespace).Create(ctx, envoyFilter, v1.CreateOptions{})
+}
+
+func (r *Client) DeleteEnvoyFilter(ctx context.Context, namespace string, name string) error {
+	return r.client.NetworkingV1alpha3().EnvoyFilters(namespace).Delete(ctx, name, v1.DeleteOptions{})
 }
