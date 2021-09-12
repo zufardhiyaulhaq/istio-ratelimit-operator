@@ -45,6 +45,7 @@ type GlobalRateLimitConfigReconciler struct {
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimitconfigs,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimitconfigs/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimitconfigs/finalizers,verbs=update
+//+kubebuilder:rbac:groups=networking.istio.io,resources=envoyfilters,verbs=get;list;watch;create;update;patch;delete
 
 func (r *GlobalRateLimitConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
@@ -112,7 +113,10 @@ func (r *GlobalRateLimitConfigReconciler) Reconcile(ctx context.Context, req ctr
 			createdEnvoyFilter.Spec = envoyFilter.Spec
 
 			log.Info("update envoyfilter")
-			r.IstioClient.UpdateEnvoyFilter(ctx, envoyFilter.Namespace, createdEnvoyFilter)
+			_, err := r.IstioClient.UpdateEnvoyFilter(ctx, envoyFilter.Namespace, createdEnvoyFilter)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
 		}
 	}
 

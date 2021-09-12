@@ -1,0 +1,41 @@
+{{ template "chart.header" . }}
+{{ template "chart.description" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}[![made with Go](https://img.shields.io/badge/made%20with-Go-brightgreen)](http://golang.org) [![Github master branch build](https://img.shields.io/github/workflow/status/zufardhiyaulhaq/istio-ratelimit-operator/Master)](https://github.com/zufardhiyaulhaq/istio-ratelimit-operator/actions/workflows/master.yml) [![GitHub issues](https://img.shields.io/github/issues/zufardhiyaulhaq/istio-ratelimit-operator)](https://github.com/zufardhiyaulhaq/istio-ratelimit-operator/issues) [![GitHub pull requests](https://img.shields.io/github/issues-pr/zufardhiyaulhaq/istio-ratelimit-operator)](https://github.com/zufardhiyaulhaq/istio-ratelimit-operator/pulls)
+
+## Installing
+
+To install the chart with the release name `my-release`:
+
+```console
+helm repo add zufardhiyaulhaq https://charts.zufardhiyaulhaq.com/
+helm install my-release zufardhiyaulhaq/istio-ratelimit-operator --values values.yaml
+```
+
+## Usage
+1. Apply Global ratelimit example
+```console
+kubectl apply -f examples/global/
+```
+
+2. Check Object
+```
+kubectl get GlobalRateLimitConfig
+kubectl get GlobalRateLimit
+```
+
+3. Check EnvoyFilter
+```
+kubectl get envoyfilter
+NAME                                            AGE
+helloworld-zufardhiyaulhaq-dev-1.8              9m58s
+helloworld-zufardhiyaulhaq-dev-1.9              9m54s
+public-gateway-1.8                              14m
+public-gateway-1.9                              14m
+```
+
+{{ template "chart.requirementsSection" . }}
+
+{{ template "chart.valuesSection" . }}
+
+{{ template "helm-docs.versionFooter" . }}

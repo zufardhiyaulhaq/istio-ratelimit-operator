@@ -1,0 +1,174 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.6.1
+  creationTimestamp: null
+  name: globalratelimits.ratelimit.zufardhiyaulhaq.com
+spec:
+  group: ratelimit.zufardhiyaulhaq.com
+  names:
+    kind: GlobalRateLimit
+    listKind: GlobalRateLimitList
+    plural: globalratelimits
+    singular: globalratelimit
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: GlobalRateLimit is the Schema for the globalratelimits API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: GlobalRateLimitSpec defines the desired state of GlobalRateLimit
+            properties:
+              config:
+                type: string
+              rate_limits:
+                items:
+                  properties:
+                    destination_cluster:
+                      type: object
+                    generic_key:
+                      properties:
+                        descriptor_key:
+                          description: An optional key to use in the descriptor entry.
+                            If not set it defaults to 'generic_key' as the descriptor
+                            key.
+                          type: string
+                        descriptor_value:
+                          description: The value to use in the descriptor entry.
+                          type: string
+                      type: object
+                    header_value_match:
+                      properties:
+                        descriptor_value:
+                          description: The value to use in the descriptor entry.
+                          type: string
+                        expect_match:
+                          description: If set to true, the action will append a descriptor
+                            entry when the request matches the headers. If set to
+                            false, the action will append a descriptor entry when
+                            the request does not match the headers. The default value
+                            is true.
+                          type: boolean
+                        headers:
+                          description: Specifies a set of headers that the rate limit
+                            action should match on. The action will check the request’s
+                            headers against all the specified headers in the config.
+                            A match will happen if all the headers in the config are
+                            present in the request with the same values (or based
+                            on presence if the value field is not in the config).
+                          items:
+                            properties:
+                              contains_match:
+                                type: string
+                              exact_match:
+                                description: Specifies how the header match will be
+                                  performed to route the request.
+                                type: string
+                              invert_match:
+                                description: "If specified, the match result will
+                                  be inverted before checking. Defaults to false.
+                                  \n Examples: \n * The regex ``\\d{3}`` does not
+                                  match the value *1234*, so it will match when inverted.
+                                  * The range [-10,0) will match the value -1, so
+                                  it will not match when inverted."
+                                type: boolean
+                              name:
+                                description: Specifies the name of the header in the
+                                  request.
+                                type: string
+                              prefix_match:
+                                type: string
+                              present_match:
+                                type: boolean
+                              range_match:
+                                properties:
+                                  end:
+                                    description: end of the range (exclusive)
+                                    format: int64
+                                    type: integer
+                                  start:
+                                    description: start of the range (inclusive)
+                                    format: int64
+                                    type: integer
+                                type: object
+                              regex_match:
+                                type: string
+                              safe_regex_match:
+                                properties:
+                                  regex:
+                                    type: string
+                                type: object
+                              suffix_match:
+                                type: string
+                            type: object
+                          type: array
+                      type: object
+                    remote_address:
+                      type: object
+                    request_headers:
+                      properties:
+                        descriptor_key:
+                          description: The key to use in the descriptor entry.
+                          type: string
+                        header_name:
+                          description: The header name to be queried from the request
+                            headers. The header’s value is used to populate the value
+                            of the descriptor entry for the descriptor_key.
+                          type: string
+                        skip_if_absent:
+                          description: If set to true, Envoy skips the descriptor
+                            while calling rate limiting service when header is not
+                            present in the request. By default it skips calling the
+                            rate limiting service if this header is not present in
+                            the request.
+                          type: boolean
+                      type: object
+                    source_cluster:
+                      type: object
+                  type: object
+                type: array
+              selector:
+                properties:
+                  route:
+                    type: string
+                  vhost:
+                    type: string
+                required:
+                - vhost
+                type: object
+            required:
+            - config
+            - rate_limits
+            - selector
+            type: object
+          status:
+            description: GlobalRateLimitStatus defines the observed state of GlobalRateLimit
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

@@ -1,3 +1,5 @@
+# GlobalRateLimitConfig is object to enable ratelimiting
+# in specific gateway or sidecar and connect to external ratelimit service
 apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: GlobalRateLimitConfig
 metadata:

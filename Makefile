@@ -201,3 +201,18 @@ catalog-build: opm ## Build a catalog image.
 .PHONY: catalog-push
 catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)
+
+.PHONY: readme
+readme:
+	GO111MODULE=on go get github.com/norwoodj/helm-docs/cmd/helm-docs
+	helm-docs -c ./charts/istio-ratelimit-operator -d > README.md
+	helm-docs -c ./charts/istio-ratelimit-operator
+
+.PHONY: helm.create.releases
+helm.create.releases:
+	helm package charts/istio-ratelimit-operator --destination charts/releases
+
+.PHONY: lint
+lint: 
+	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
+	golangci-lint run --verbose

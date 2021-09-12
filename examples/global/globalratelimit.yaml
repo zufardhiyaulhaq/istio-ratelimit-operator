@@ -1,3 +1,6 @@
+# GlobalRateLimit is object to configure ratelimit
+# based on GlobalRateLimitConfig defined in spec.config
+# and vhost and route defined in spec.selector
 apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: GlobalRateLimit
 metadata:
