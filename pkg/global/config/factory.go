@@ -11,9 +11,9 @@ type GlobalRateLimitConfigEnvoyFilterFactory interface {
 	Build() (*istioClientNetworking.EnvoyFilter, error)
 }
 
-func GetGlobalRateLimitConfigEnvoyFilterFactory(version string, config v1alpha1.GlobalRateLimitConfig) (GlobalRateLimitConfigEnvoyFilterFactory, error) {
+func GetConfigFactory(version string, config v1alpha1.GlobalRateLimitConfig) (GlobalRateLimitConfigEnvoyFilterFactory, error) {
 	if version == "1.9" {
-		return NewGlobalRateLimitConfig1_9EnvoyFilterBuilder(config), nil
+		return NewConfig1_9Builder(config), nil
 	}
 
 	return nil, fmt.Errorf("version not supported")

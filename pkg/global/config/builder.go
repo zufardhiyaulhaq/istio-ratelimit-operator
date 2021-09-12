@@ -5,23 +5,23 @@ import (
 	istioClientNetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
 )
 
-type GlobalRateLimitConfigEnvoyFilterBuilder struct {
+type ConfigBuilder struct {
 	Config v1alpha1.GlobalRateLimitConfig
 }
 
-func NewGlobalRateLimitConfigEnvoyFilterBuilder() *GlobalRateLimitConfigEnvoyFilterBuilder {
-	return &GlobalRateLimitConfigEnvoyFilterBuilder{}
+func NewConfigBuilder() *ConfigBuilder {
+	return &ConfigBuilder{}
 }
 
-func (g *GlobalRateLimitConfigEnvoyFilterBuilder) SetSpec(config v1alpha1.GlobalRateLimitConfig) *GlobalRateLimitConfigEnvoyFilterBuilder {
+func (g *ConfigBuilder) SetSpec(config v1alpha1.GlobalRateLimitConfig) *ConfigBuilder {
 	g.Config = config
 	return g
 }
 
-func (g *GlobalRateLimitConfigEnvoyFilterBuilder) Build() ([]*istioClientNetworking.EnvoyFilter, error) {
+func (g *ConfigBuilder) Build() ([]*istioClientNetworking.EnvoyFilter, error) {
 	var envoyFilters []*istioClientNetworking.EnvoyFilter
 	for _, version := range g.Config.Spec.Selector.IstioVersion {
-		factory, err := GetGlobalRateLimitConfigEnvoyFilterFactory(version, g.Config)
+		factory, err := GetConfigFactory(version, g.Config)
 		if err != nil {
 			return nil, err
 		}

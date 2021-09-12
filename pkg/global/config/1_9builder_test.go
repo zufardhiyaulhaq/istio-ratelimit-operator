@@ -10,13 +10,13 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type GlobalRateLimitConfig1_9EnvoyFilterBuilderTestCase struct {
+type Config1_9BuilderTestCase struct {
 	name          string
 	config        v1alpha1.GlobalRateLimitConfig
 	expectedError bool
 }
 
-var testGrid = []GlobalRateLimitConfig1_9EnvoyFilterBuilderTestCase{
+var testGrid = []Config1_9BuilderTestCase{
 	{
 		name: "given correct ratelimit",
 		config: v1alpha1.GlobalRateLimitConfig{
@@ -48,20 +48,22 @@ var testGrid = []GlobalRateLimitConfig1_9EnvoyFilterBuilderTestCase{
 				},
 			},
 		},
-		expectedError: true,
+		expectedError: false,
 	},
 }
 
 func TestConfigurationBuilder(t *testing.T) {
 	for _, test := range testGrid {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := config.NewGlobalRateLimitConfig1_9EnvoyFilterBuilder(test.config).
+			envoyfilter, err := config.NewConfig1_9Builder(test.config).
 				Build()
 
 			if test.expectedError {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
+				assert.Equal(t, test.config.Name, envoyfilter.Name)
+				assert.Equal(t, test.config.Namespace, envoyfilter.Namespace)
 			}
 		})
 	}
