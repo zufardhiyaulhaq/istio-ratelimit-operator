@@ -214,5 +214,3 @@ func (g *Config1_8Builder) buildProxyMatch() *networking.EnvoyFilter_ProxyMatch 
 		ProxyVersion: utils.WellKnownVersions["1.8"],
 	}
 }
-
-var RateLimit1_8Patch = `{"name": "envoy.filters.http.ratelimit","typed_config": {"@type": "type.googleapis.com/envoy.extensions.filters.http.ratelimit.v3.RateLimit","domain": "%s","failure_mode_deny": %t,"rate_limit_service": {"grpc_service": {"envoy_grpc": {"cluster_name": "%s"},"timeout": "%s"},"transport_api_version": "V3"}}}`

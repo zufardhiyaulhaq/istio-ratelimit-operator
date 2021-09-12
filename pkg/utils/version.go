@@ -12,7 +12,7 @@ var WellKnownVersions = map[string]string{
 	"1.12": `^1\.12.*`,
 }
 
-func BuildEnvoyFilterNameAllVersion(base string) []string {
+func BuildEnvoyFilterNamesAllVersion(base string) []string {
 	var names []string
 	for version := range WellKnownVersions {
 		names = append(names, base+"-"+version)
@@ -21,7 +21,7 @@ func BuildEnvoyFilterNameAllVersion(base string) []string {
 	return names
 }
 
-func BuildEnvoyFilterName(base string, versions []string) []string {
+func BuildEnvoyFilterNames(base string, versions []string) []string {
 	var names []string
 	for _, version := range versions {
 		names = append(names, base+"-"+version)

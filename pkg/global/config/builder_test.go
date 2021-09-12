@@ -56,7 +56,7 @@ func TestNewConfigBuilder(t *testing.T) {
 	for _, test := range configBuildertestGrid {
 		t.Run(test.name, func(t *testing.T) {
 			envoyfilters, err := config.NewConfigBuilder().
-				SetSpec(test.config).
+				SetConfig(test.config).
 				Build()
 
 			if test.expectedError {

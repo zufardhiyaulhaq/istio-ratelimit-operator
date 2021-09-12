@@ -4,7 +4,9 @@ go 1.16
 
 require (
 	github.com/champly/lib4go v0.0.0-20210810011059-eb374f933ec2
+	github.com/envoyproxy/go-control-plane v0.9.9 // indirect
 	github.com/gogo/protobuf v1.3.2
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.13.0
 	github.com/stretchr/testify v1.7.0
