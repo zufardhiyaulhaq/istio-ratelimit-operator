@@ -1,0 +1,20 @@
+# permissions for end users to view ratelimitservices.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ratelimitservice-viewer-role
+rules:
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - ratelimitservices
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - ratelimitservices/status
+  verbs:
+  - get

@@ -38,7 +38,14 @@ spec:
             properties:
               config:
                 type: string
-              rate_limits:
+              limit:
+                properties:
+                  request_per_unit:
+                    type: integer
+                  unit:
+                    type: string
+                type: object
+              matcher:
                 items:
                   properties:
                     destination_cluster:
@@ -155,7 +162,7 @@ spec:
                 type: object
             required:
             - config
-            - rate_limits
+            - matcher
             - selector
             type: object
           status:

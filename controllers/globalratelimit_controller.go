@@ -41,7 +41,7 @@ import (
 
 // GlobalRateLimitReconciler reconciles a GlobalRateLimit object
 type GlobalRateLimitReconciler struct {
-	client.Client
+	Client      client.Client
 	IstioClient istio.ClientInterface
 	Scheme      *runtime.Scheme
 }
@@ -49,14 +49,13 @@ type GlobalRateLimitReconciler struct {
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimits,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimits/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimits/finalizers,verbs=update
-//+kubebuilder:rbac:groups=networking.istio.io,resources=envoyfilters,verbs=get;list;watch;create;update;patch;delete
 
 func (r *GlobalRateLimitReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 	log.Info("Start GlobalRateLimit Reconciler")
 
 	globalRateLimit := &ratelimitv1alpha1.GlobalRateLimit{}
-	err := r.Client.Get(context.TODO(), req.NamespacedName, globalRateLimit)
+	err := r.Client.Get(ctx, req.NamespacedName, globalRateLimit)
 	if err != nil {
 		return ctrl.Result{}, nil
 	}
@@ -67,9 +66,22 @@ func (r *GlobalRateLimitReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	globalRateLimitConfig := &ratelimitv1alpha1.GlobalRateLimitConfig{}
-	err = r.Client.Get(context.TODO(), globalRateLimitConfigName, globalRateLimitConfig)
+	err = r.Client.Get(ctx, globalRateLimitConfigName, globalRateLimitConfig)
 	if err != nil {
 		return ctrl.Result{}, err
+	}
+
+	err = controllerutil.SetOwnerReference(globalRateLimitConfig, globalRateLimit, r.Scheme)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if len(globalRateLimit.OwnerReferences) == 0 {
+		log.Info("set owner reference of globalRateLimit")
+		err = r.Client.Update(ctx, globalRateLimit, &client.UpdateOptions{})
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	log.Info("Build envoyfilters")
@@ -103,15 +115,15 @@ func (r *GlobalRateLimitReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	for _, envoyFilter := range envoyFilters {
-		log.Info("set reference envoyfilter")
-		if err := controllerutil.SetControllerReference(globalRateLimitConfig, envoyFilter, r.Scheme); err != nil {
-			return ctrl.Result{}, err
-		}
-
 		log.Info("get envoyfilter")
 		createdEnvoyFilter, err := r.IstioClient.GetEnvoyFilter(ctx, envoyFilter.Namespace, envoyFilter.Name)
 		if err != nil {
 			if errors.IsNotFound(err) {
+				log.Info("set reference envoyfilter")
+				if err := controllerutil.SetControllerReference(globalRateLimit, envoyFilter, r.Scheme); err != nil {
+					return ctrl.Result{}, err
+				}
+
 				log.Info("create envoyfilter")
 				_, err := r.IstioClient.CreateEnvoyFilter(ctx, envoyFilter.Namespace, envoyFilter)
 				if err != nil {
@@ -135,7 +147,7 @@ func (r *GlobalRateLimitReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		}
 	}
 
-	return ctrl.Result{RequeueAfter: time.Second * 60}, nil
+	return ctrl.Result{RequeueAfter: 60 * time.Second}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

@@ -22,14 +22,20 @@ import (
 
 // GlobalRateLimitSpec defines the desired state of GlobalRateLimit
 type GlobalRateLimitSpec struct {
-	Config     string                  `json:"config"`
-	Selector   GlobalRateLimitSelector `json:"selector"`
-	RateLimits []*RateLimit_Action     `json:"rate_limits"`
+	Config   string                  `json:"config"`
+	Selector GlobalRateLimitSelector `json:"selector"`
+	Matcher  []*RateLimit_Action     `json:"matcher"`
+	Limit    *GlobalRateLimit_Limit  `json:"limit,omitempty"`
 }
 
 type GlobalRateLimitSelector struct {
 	VHost string  `json:"vhost"`
 	Route *string `json:"route,omitempty"`
+}
+
+type GlobalRateLimit_Limit struct {
+	Unit           string `json:"unit,omitempty"`
+	RequestPerUnit int    `json:"request_per_unit,omitempty"`
 }
 
 type RateLimit_Action struct {

@@ -51,9 +51,12 @@ spec:
                             type: string
                           port:
                             type: integer
+                          type:
+                            type: string
                         required:
                         - address
                         - port
+                        - type
                         type: object
                       timeout:
                         type: string

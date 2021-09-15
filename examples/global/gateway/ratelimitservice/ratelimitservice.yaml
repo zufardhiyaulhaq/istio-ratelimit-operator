@@ -1,0 +1,25 @@
+# RateLimitService create external ratelimit service deployment
+# GlobalRateLimitConfig can select this RateLimitService object
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: RateLimitService
+metadata:
+  name: public-gateway-ratelimit-service
+  namespace: istio-system
+spec:
+  kubernetes:
+    replica_count: 2
+    auto_scaling:
+      max_replicas: 3
+      min_replicas: 2
+    resources:
+      limits:
+        cpu: "256m"
+        memory: "256Mi"
+      requests:
+        cpu: "128m"
+        memory: "128Mi"     
+  backend:
+    redis:
+      type: "single"
+      url:
+        - "192.168.1.10:6379"

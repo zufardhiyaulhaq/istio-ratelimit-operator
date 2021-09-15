@@ -20,5 +20,6 @@ spec:
       failure_mode_deny: false
       timeout: "10s"
       service:
+        type: "fqdn"
         address: "ratelimit.infrastructure.cluster.svc.local"
         port: 8081

@@ -1,0 +1,20 @@
+# GlobalRateLimit is object to configure ratelimit
+# based on GlobalRateLimitConfig defined in spec.config
+# and vhost and route defined in spec.selector
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimit
+metadata:
+  name: helloworld-zufardhiyaulhaq-dev
+  namespace: istio-system
+spec:
+  config: "public-gateway"
+  selector:
+    vhost: "helloworld.zufardhiyaulhaq.dev:443"
+    route: "ratelimit-examples-helloworld-v1-default-route"
+  matcher:
+  - request_headers:
+      header_name: ":method"
+      descriptor_key: "method"
+  limit:
+    unit: hour
+    request_per_unit: 60

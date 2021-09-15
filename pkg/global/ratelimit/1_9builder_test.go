@@ -62,7 +62,7 @@ var config1_9BuilderTestGrid = []Config1_9BuilderTestCase{
 				Selector: v1alpha1.GlobalRateLimitSelector{
 					VHost: "hello.zufardhiyaulhaq.dev:443",
 				},
-				RateLimits: []*v1alpha1.RateLimit_Action{
+				Matcher: []*v1alpha1.RateLimit_Action{
 					{
 						RequestHeaders: &v1alpha1.RateLimit_Action_RequestHeaders{
 							HeaderName:    ":method",

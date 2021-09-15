@@ -50,6 +50,8 @@ func init() {
 }
 
 func main() {
+	//+kubebuilder:rbac:groups=networking.istio.io,resources=envoyfilters,verbs=get;list;watch;create;update;patch;delete
+
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
@@ -99,6 +101,14 @@ func main() {
 		Scheme:      mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "GlobalRateLimit")
+		os.Exit(1)
+	}
+	if err = (&controllers.RateLimitServiceReconciler{
+		Client:      mgr.GetClient(),
+		IstioClient: istioClient,
+		Scheme:      mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "RateLimitService")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

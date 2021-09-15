@@ -38,8 +38,9 @@ func (g *Config1_8Builder) Build() (*clientnetworking.EnvoyFilter, error) {
 			Name:      g.buildName(),
 			Namespace: g.RateLimit.Namespace,
 			Labels: map[string]string{
-				"generator":     "istio-rateltimit-operator",
-				"istio/version": "1.8",
+				"app.kubernetes.io/created-by": "istio-rateltimit-operator",
+				"app.kubernetes.io/managed-by": "istio-rateltimit-operator",
+				"istio/version":                "1.8",
 			},
 		},
 		Spec: networking.EnvoyFilter{
@@ -110,7 +111,7 @@ func (g *Config1_8Builder) buildHttpRoutePatchValue() (string, error) {
 		Route: types.Route{
 			Ratelimits: []types.RateLimits{
 				{
-					Actions: g.RateLimit.Spec.RateLimits,
+					Actions: g.RateLimit.Spec.Matcher,
 				},
 			},
 		},

@@ -47,6 +47,7 @@ type GlobalRateLimitConfigRatelimitSpec struct {
 }
 
 type GlobalRateLimitConfigRatelimitSpecService struct {
+	Type    string `json:"type"`
 	Address string `json:"address"`
 	Port    int    `json:"port"`
 }

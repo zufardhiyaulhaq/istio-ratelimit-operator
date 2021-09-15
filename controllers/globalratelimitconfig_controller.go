@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/client/istio"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/global/config"
@@ -37,7 +38,7 @@ import (
 
 // GlobalRateLimitConfigReconciler reconciles a GlobalRateLimitConfig object
 type GlobalRateLimitConfigReconciler struct {
-	client.Client
+	Client      client.Client
 	IstioClient istio.ClientInterface
 	Scheme      *runtime.Scheme
 }
@@ -45,14 +46,13 @@ type GlobalRateLimitConfigReconciler struct {
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimitconfigs,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimitconfigs/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimitconfigs/finalizers,verbs=update
-//+kubebuilder:rbac:groups=networking.istio.io,resources=envoyfilters,verbs=get;list;watch;create;update;patch;delete
 
 func (r *GlobalRateLimitConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 	log.Info("Start GlobalRateLimitConfig Reconciler")
 
 	globalRateLimitConfig := &ratelimitv1alpha1.GlobalRateLimitConfig{}
-	err := r.Client.Get(context.TODO(), req.NamespacedName, globalRateLimitConfig)
+	err := r.Client.Get(ctx, req.NamespacedName, globalRateLimitConfig)
 	if err != nil {
 		return ctrl.Result{}, nil
 	}
@@ -120,7 +120,7 @@ func (r *GlobalRateLimitConfigReconciler) Reconcile(ctx context.Context, req ctr
 		}
 	}
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{RequeueAfter: 60 * time.Second}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
