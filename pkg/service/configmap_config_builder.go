@@ -81,30 +81,22 @@ func NewRateLimitDescriptor(globalRateLimitList []v1alpha1.GlobalRateLimit) ([]t
 
 func SyncDescriptors(descriptorsData []types.RateLimit_Service_Descriptor) []types.RateLimit_Service_Descriptor {
 	var descriptors []types.RateLimit_Service_Descriptor
+	descriptors = append(descriptors, descriptorsData[0])
 
-	for i := 0; i <= (len(descriptorsData) - 1); {
-		if i == len(descriptorsData)-1 {
-			descriptors = append(descriptors, descriptorsData[i])
+	for _, descriptorData := range descriptorsData[1:] {
+		shouldAppend := true
 
-			i += 1
-			continue
+		for descriptorIndex, descriptor := range descriptors {
+			if descriptor.Key == descriptorData.Key && descriptor.Value == descriptorData.Value {
+				descriptors[descriptorIndex].Descriptors = SyncDescriptors(append(descriptors[descriptorIndex].Descriptors, descriptorData.Descriptors...))
+				shouldAppend = false
+				continue
+			}
 		}
 
-		if descriptorsData[i].Key == descriptorsData[i+1].Key && descriptorsData[i].Value == descriptorsData[i+1].Value {
-			descriptors = append(descriptors, types.RateLimit_Service_Descriptor{
-				Key:         descriptorsData[i].Key,
-				Value:       descriptorsData[i].Value,
-				Descriptors: append(descriptorsData[i].Descriptors, descriptorsData[i+1].Descriptors...),
-			})
-
-			descriptors[len(descriptors)-1].Descriptors = SyncDescriptors(descriptors[len(descriptors)-1].Descriptors)
-
-			i += 2
-			continue
+		if shouldAppend {
+			descriptors = append(descriptors, descriptorData)
 		}
-
-		descriptors = append(descriptors, descriptorsData[i])
-		i += 1
 	}
 
 	return descriptors
