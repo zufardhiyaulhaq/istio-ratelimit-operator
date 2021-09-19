@@ -50,8 +50,6 @@ func init() {
 }
 
 func main() {
-	//+kubebuilder:rbac:groups=networking.istio.io,resources=envoyfilters,verbs=get;list;watch;create;update;patch;delete
-
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
