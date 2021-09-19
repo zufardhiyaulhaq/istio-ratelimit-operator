@@ -41,7 +41,6 @@ func (g *Config1_8Builder) Build() (*clientnetworking.EnvoyFilter, error) {
 			Name:      g.buildName(),
 			Namespace: g.Config.Namespace,
 			Labels: map[string]string{
-				"generator":     "istio-rateltimit-operator",
 				"istio/version": "1.8",
 			},
 		},

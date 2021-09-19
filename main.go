@@ -25,12 +25,12 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/controllers"
-	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/client/istio"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	ratelimitv1alpha1 "github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
+	clientnetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -44,8 +44,8 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-
 	utilruntime.Must(ratelimitv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(clientnetworking.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -79,26 +79,25 @@ func main() {
 		os.Exit(1)
 	}
 
-	istioClient, err := istio.NewClient(mgr.GetConfig())
-	if err != nil {
-		setupLog.Error(err, "unable to start istio client")
-		os.Exit(1)
-	}
-
 	if err = (&controllers.GlobalRateLimitConfigReconciler{
-		Client:      mgr.GetClient(),
-		IstioClient: istioClient,
-		Scheme:      mgr.GetScheme(),
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "GlobalRateLimitConfig")
 		os.Exit(1)
 	}
 	if err = (&controllers.GlobalRateLimitReconciler{
-		Client:      mgr.GetClient(),
-		IstioClient: istioClient,
-		Scheme:      mgr.GetScheme(),
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "GlobalRateLimit")
+		os.Exit(1)
+	}
+	if err = (&controllers.RateLimitServiceReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "RateLimitService")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

@@ -7,17 +7,19 @@ metadata:
     app.kubernetes.io/name: {{ .Release.Name }}
     helm.sh/chart: {{ template "istio-ratelimit-operator.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    manager: {{ .Release.Service }}
   name: {{ .Release.Name }}-controller-manager
 spec:
   replicas: {{ .Values.operator.replica }}
   selector:
     matchLabels:
       control-plane: controller-manager
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
         control-plane: controller-manager
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
       - args:

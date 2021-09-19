@@ -7,6 +7,42 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
   - networking.istio.io
   resources:
   - envoyfilters
@@ -66,6 +102,32 @@ rules:
   - ratelimit.zufardhiyaulhaq.com
   resources:
   - globalratelimits/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - ratelimitservices
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - ratelimitservices/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - ratelimitservices/status
   verbs:
   - get
   - patch

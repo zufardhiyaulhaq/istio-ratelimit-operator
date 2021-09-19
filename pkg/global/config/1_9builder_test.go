@@ -23,9 +23,6 @@ var config1_9BuilderTestGrid = []Config1_9BuilderTestCase{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "foo",
 				Namespace: "istio-system",
-				Labels: map[string]string{
-					"generator": "istio-rateltimit-operator",
-				},
 			},
 			Spec: v1alpha1.GlobalRateLimitConfigSpec{
 				Type: "gateway",

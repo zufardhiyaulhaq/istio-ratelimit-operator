@@ -24,17 +24,11 @@ var config1_9BuilderTestGrid = []Config1_9BuilderTestCase{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "public-gateway-config",
 				Namespace: "istio-system",
-				Labels: map[string]string{
-					"generator": "istio-rateltimit-operator",
-				},
 			},
 			Spec: v1alpha1.GlobalRateLimitConfigSpec{
 				Type: "gateway",
 				Selector: v1alpha1.GlobalRateLimitConfigSelector{
 					IstioVersion: []string{"1.9"},
-					Labels: map[string]string{
-						"app": "istio-public-gateway",
-					},
 				},
 				Ratelimit: v1alpha1.GlobalRateLimitConfigRatelimit{
 					Spec: v1alpha1.GlobalRateLimitConfigRatelimitSpec{
@@ -53,18 +47,15 @@ var config1_9BuilderTestGrid = []Config1_9BuilderTestCase{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "hello-zufardhiyaulhaq-dev",
 				Namespace: "istio-system",
-				Labels: map[string]string{
-					"generator": "istio-rateltimit-operator",
-				},
 			},
 			Spec: v1alpha1.GlobalRateLimitSpec{
 				Config: "public-gateway-config",
 				Selector: v1alpha1.GlobalRateLimitSelector{
 					VHost: "hello.zufardhiyaulhaq.dev:443",
 				},
-				RateLimits: []*v1alpha1.RateLimit_Action{
+				Matcher: []*v1alpha1.GlobalRateLimit_Action{
 					{
-						RequestHeaders: &v1alpha1.RateLimit_Action_RequestHeaders{
+						RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
 							HeaderName:    ":method",
 							DescriptorKey: "hello-zufardhiyaulhaq-dev-header-method",
 						},

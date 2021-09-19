@@ -7,11 +7,14 @@ metadata:
   name: helloworld-zufardhiyaulhaq-dev
   namespace: istio-system
 spec:
+  # config define the GlobalRateLimitConfig
   config: "public-gateway"
+  # we can select specifict virtual host and route defined
   selector:
     vhost: "helloworld.zufardhiyaulhaq.dev:443"
     route: "ratelimit-examples-helloworld-v1-default-route"
-  rate_limits:
+  # implement the ratelimit matchers
+  matcher:
   - request_headers:
       header_name: ":method"
       descriptor_key: "method"

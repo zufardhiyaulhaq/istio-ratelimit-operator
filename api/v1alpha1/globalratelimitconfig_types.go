@@ -47,8 +47,10 @@ type GlobalRateLimitConfigRatelimitSpec struct {
 }
 
 type GlobalRateLimitConfigRatelimitSpecService struct {
-	Address string `json:"address"`
-	Port    int    `json:"port"`
+	Type    string `json:"type"`
+	Name    string `json:"name,omitempty"`
+	Address string `json:"address,omitempty"`
+	Port    int    `json:"port,omitempty"`
 }
 
 // GlobalRateLimitConfigStatus defines the observed state of GlobalRateLimitConfig

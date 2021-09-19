@@ -6,8 +6,44 @@ metadata:
     app.kubernetes.io/name: {{ .Release.Name }}
     helm.sh/chart: {{ template "istio-ratelimit-operator.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    manager: {{ .Release.Service }}
 rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - networking.istio.io
   resources:
@@ -72,11 +108,43 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - ratelimitservices
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - ratelimitservices/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - ratelimitservices/status
+  verbs:
+  - get
+  - patch
+  - update
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: {{ .Release.Name }}-metrics-reader
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ template "istio-ratelimit-operator.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    manager: {{ .Release.Service }}
 rules:
 - nonResourceURLs:
   - /metrics
@@ -87,6 +155,11 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: {{ .Release.Name }}-proxy-role
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ template "istio-ratelimit-operator.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    manager: {{ .Release.Service }}
 rules:
 - apiGroups:
   - authentication.k8s.io
