@@ -13,5 +13,5 @@ type Route struct {
 }
 
 type RateLimits struct {
-	Actions []*v1alpha1.RateLimit_Action `json:"actions,omitempty" yaml:"actions,omitempty"`
+	Actions []*v1alpha1.GlobalRateLimit_Action `json:"actions,omitempty" yaml:"actions,omitempty"`
 }

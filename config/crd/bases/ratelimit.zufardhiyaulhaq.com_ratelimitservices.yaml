@@ -43,15 +43,8 @@ spec:
                       type:
                         type: string
                       url:
-                        items:
-                          type: string
-                        type: array
-                    required:
-                    - type
-                    - url
+                        type: string
                     type: object
-                required:
-                - redis
                 type: object
               kubernetes:
                 properties:
@@ -95,8 +88,6 @@ spec:
                         type: object
                     type: object
                 type: object
-            required:
-            - backend
             type: object
           status:
             type: object

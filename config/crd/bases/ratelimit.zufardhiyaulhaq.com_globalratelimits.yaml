@@ -40,7 +40,7 @@ spec:
                 type: string
               limit:
                 properties:
-                  request_per_unit:
+                  requests_per_unit:
                     type: integer
                   unit:
                     type: string

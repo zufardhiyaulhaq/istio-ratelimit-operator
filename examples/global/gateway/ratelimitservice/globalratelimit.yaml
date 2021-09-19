@@ -4,17 +4,113 @@
 apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: GlobalRateLimit
 metadata:
-  name: helloworld-zufardhiyaulhaq-dev
+  name: helloworld-zufardhiyaulhaq-com-foo-route
   namespace: istio-system
 spec:
-  config: "public-gateway"
+  config: "istio-public-gateway"
   selector:
-    vhost: "helloworld.zufardhiyaulhaq.dev:443"
-    route: "ratelimit-examples-helloworld-v1-default-route"
+    vhost: "helloworld.zufardhiyaulhaq.com:443"
+    route: "foo-route"
   matcher:
   - request_headers:
       header_name: ":method"
       descriptor_key: "method"
+  - request_headers:
+      header_name: ":path"
+      descriptor_key: "path"
+  - request_headers:
+      header_name: "x-user-id"
+      descriptor_key: "userid"
+  - request_headers:
+      header_name: "x-machine-id"
+      descriptor_key: "machineid"
+  - generic_key:
+      descriptor_value: "foo-route"
+      descriptor_key: "foo-route"
   limit:
     unit: hour
-    request_per_unit: 60
+    requests_per_unit: 60
+---
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimit
+metadata:
+  name: helloworld-zufardhiyaulhaq-com-bar-route
+  namespace: istio-system
+spec:
+  config: "istio-public-gateway"
+  selector:
+    vhost: "helloworld.zufardhiyaulhaq.com:443"
+    route: "bar-route"
+  matcher:
+  - request_headers:
+      header_name: ":method"
+      descriptor_key: "method"
+  - request_headers:
+      header_name: ":path"
+      descriptor_key: "path"
+  - request_headers:
+      header_name: "x-user-id"
+      descriptor_key: "userid"
+  - request_headers:
+      header_name: "x-machine-id"
+      descriptor_key: "machineid"
+  - generic_key:
+      descriptor_value: "bar-route"
+      descriptor_key: "bar-route"
+  limit:
+    unit: hour
+    requests_per_unit: 120
+---
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimit
+metadata:
+  name: helloworld-zufardhiyaulhaq-com-baz-route
+  namespace: istio-system
+spec:
+  config: "istio-public-gateway"
+  selector:
+    vhost: "helloworld.zufardhiyaulhaq.com:443"
+    route: "baz-route"
+  matcher:
+  - request_headers:
+      header_name: ":method"
+      descriptor_key: "method"
+  - request_headers:
+      header_name: ":path"
+      descriptor_key: "path"
+  - request_headers:
+      header_name: "x-machine-id"
+      descriptor_key: "machineid"
+  - generic_key:
+      descriptor_value: "baz-route"
+      descriptor_key: "baz-route"
+  limit:
+    unit: hour
+    requests_per_unit: 90
+---
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimit
+metadata:
+  name: helloworld-zufardhiyaulhaq-com-qux-route
+  namespace: istio-system
+spec:
+  config: "istio-public-gateway"
+  selector:
+    vhost: "helloworld.zufardhiyaulhaq.com:443"
+    route: "qux-route"
+  matcher:
+  - request_headers:
+      header_name: ":method"
+      descriptor_key: "method"
+  - request_headers:
+      header_name: ":path"
+      descriptor_key: "path"
+  - request_headers:
+      header_name: "x-machine-id"
+      descriptor_key: "machineid"
+  - generic_key:
+      descriptor_value: "qux-route"
+      descriptor_key: "qux-route"
+  limit:
+    unit: hour
+    requests_per_unit: 90

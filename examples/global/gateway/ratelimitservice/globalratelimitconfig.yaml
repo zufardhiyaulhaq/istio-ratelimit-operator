@@ -3,7 +3,7 @@
 apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: GlobalRateLimitConfig
 metadata:
-  name: public-gateway
+  name: istio-public-gateway
   namespace: istio-system
 spec:
   type: "gateway"
@@ -13,7 +13,7 @@ spec:
     istio_version:
       - "1.8"
       - "1.9"
-    sni: "helloworld.zufardhiyaulhaq.dev"
+    sni: "helloworld.zufardhiyaulhaq.com"
   ratelimit:
     spec:
       domain: "public-gateway"

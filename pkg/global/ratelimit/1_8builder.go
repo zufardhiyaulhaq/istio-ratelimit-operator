@@ -38,9 +38,7 @@ func (g *Config1_8Builder) Build() (*clientnetworking.EnvoyFilter, error) {
 			Name:      g.buildName(),
 			Namespace: g.RateLimit.Namespace,
 			Labels: map[string]string{
-				"app.kubernetes.io/created-by": "istio-rateltimit-operator",
-				"app.kubernetes.io/managed-by": "istio-rateltimit-operator",
-				"istio/version":                "1.8",
+				"istio/version": "1.8",
 			},
 		},
 		Spec: networking.EnvoyFilter{

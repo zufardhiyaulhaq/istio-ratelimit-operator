@@ -24,9 +24,6 @@ var config1_8BuilderTestGrid = []Config1_8BuilderTestCase{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "public-gateway-config",
 				Namespace: "istio-system",
-				Labels: map[string]string{
-					"generator": "istio-rateltimit-operator",
-				},
 			},
 			Spec: v1alpha1.GlobalRateLimitConfigSpec{
 				Type: "gateway",
@@ -53,18 +50,15 @@ var config1_8BuilderTestGrid = []Config1_8BuilderTestCase{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "hello-zufardhiyaulhaq-dev",
 				Namespace: "istio-system",
-				Labels: map[string]string{
-					"generator": "istio-rateltimit-operator",
-				},
 			},
 			Spec: v1alpha1.GlobalRateLimitSpec{
 				Config: "public-gateway-config",
 				Selector: v1alpha1.GlobalRateLimitSelector{
 					VHost: "hello.zufardhiyaulhaq.dev:443",
 				},
-				Matcher: []*v1alpha1.RateLimit_Action{
+				Matcher: []*v1alpha1.GlobalRateLimit_Action{
 					{
-						RequestHeaders: &v1alpha1.RateLimit_Action_RequestHeaders{
+						RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
 							HeaderName:    ":method",
 							DescriptorKey: "hello-zufardhiyaulhaq-dev-header-method",
 						},

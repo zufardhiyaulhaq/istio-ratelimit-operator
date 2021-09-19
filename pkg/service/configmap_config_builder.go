@@ -1,52 +1,188 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
+	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/types"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type ConfigBuilder struct {
-	Name      string
-	Namespace string
-	Spec      v1alpha1.RateLimitServiceSpec
+	Config           string
+	RateLimitService v1alpha1.RateLimitService
 }
 
 func NewConfigBuilder() *ConfigBuilder {
 	return &ConfigBuilder{}
 }
 
-func (n *ConfigBuilder) SetName(name string) *ConfigBuilder {
-	n.Name = name
+func (n *ConfigBuilder) SetRateLimitService(rateLimitService v1alpha1.RateLimitService) *ConfigBuilder {
+	n.RateLimitService = rateLimitService
 	return n
 }
 
-func (n *ConfigBuilder) SetNamespace(namespace string) *ConfigBuilder {
-	n.Namespace = namespace
-	return n
-}
-
-func (n *ConfigBuilder) SetSpec(spec v1alpha1.RateLimitServiceSpec) *ConfigBuilder {
-	n.Spec = spec
+func (n *ConfigBuilder) SetConfig(config string) *ConfigBuilder {
+	n.Config = config
 	return n
 }
 
 func (n *ConfigBuilder) Build() (*corev1.ConfigMap, error) {
 	configMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      n.Name + "-config",
-			Namespace: n.Namespace,
-			Labels: map[string]string{
-				"app.kubernetes.io/name":       n.Name + "-config",
-				"app.kubernetes.io/created-by": "istio-rateltimit-operator",
-				"app.kubernetes.io/managed-by": "istio-rateltimit-operator",
-			},
+			Name:      n.RateLimitService.Name + "-config",
+			Namespace: n.RateLimitService.Namespace,
+			Labels:    n.buildLabels(),
 		},
 		Data: map[string]string{
-			"config.yaml": "lol",
+			"config.yaml": n.Config,
 		},
 	}
 
 	return configMap, nil
+}
+
+func (n *ConfigBuilder) buildLabels() map[string]string {
+	var labels = map[string]string{
+		"app.kubernetes.io/name":       n.RateLimitService.Name + "-config",
+		"app.kubernetes.io/managed-by": "istio-rateltimit-operator",
+		"app.kubernetes.io/created-by": n.RateLimitService.Name,
+	}
+
+	return labels
+}
+
+func NewRateLimitConfig(domain string, descriptors []types.RateLimit_Service_Descriptor) (types.RateLimit_Service_Config, error) {
+	config := types.RateLimit_Service_Config{
+		Domain:      domain,
+		Descriptors: descriptors,
+	}
+
+	return config, nil
+}
+
+func NewRateLimitDescriptor(globalRateLimitList []v1alpha1.GlobalRateLimit) ([]types.RateLimit_Service_Descriptor, error) {
+	var descriptor []types.RateLimit_Service_Descriptor
+
+	for _, globalRateLimit := range globalRateLimitList {
+		globalRateLimitDescriptor, err := NewRateLimitDescriptorFromGlobalRateLimit(globalRateLimit)
+		if err != nil {
+			return descriptor, err
+		}
+
+		descriptor = append(descriptor, globalRateLimitDescriptor...)
+	}
+
+	descriptor = SyncDescriptors(descriptor)
+	return descriptor, nil
+}
+
+func SyncDescriptors(descriptorsData []types.RateLimit_Service_Descriptor) []types.RateLimit_Service_Descriptor {
+	var descriptors []types.RateLimit_Service_Descriptor
+
+	for i := 0; i <= (len(descriptorsData) - 1); {
+		if i == len(descriptorsData)-1 {
+			descriptors = append(descriptors, descriptorsData[i])
+
+			i += 1
+			continue
+		}
+
+		if descriptorsData[i].Key == descriptorsData[i+1].Key && descriptorsData[i].Value == descriptorsData[i+1].Value {
+			descriptors = append(descriptors, types.RateLimit_Service_Descriptor{
+				Key:         descriptorsData[i].Key,
+				Value:       descriptorsData[i].Value,
+				Descriptors: append(descriptorsData[i].Descriptors, descriptorsData[i+1].Descriptors...),
+			})
+
+			descriptors[len(descriptors)-1].Descriptors = SyncDescriptors(descriptors[len(descriptors)-1].Descriptors)
+
+			i += 2
+			continue
+		}
+
+		descriptors = append(descriptors, descriptorsData[i])
+		i += 1
+	}
+
+	return descriptors
+}
+
+func NewRateLimitDescriptorFromGlobalRateLimit(globalRateLimit v1alpha1.GlobalRateLimit) ([]types.RateLimit_Service_Descriptor, error) {
+	var descriptor []types.RateLimit_Service_Descriptor
+	var sanitizeMatchers []*v1alpha1.GlobalRateLimit_Action
+
+	for _, matcher := range globalRateLimit.Spec.Matcher {
+		if matcher.RequestHeaders != nil || matcher.GenericKey != nil {
+			sanitizeMatchers = append(sanitizeMatchers, matcher)
+			continue
+		}
+	}
+
+	if len(sanitizeMatchers) == 0 {
+		return descriptor, nil
+	}
+
+	descriptor, err := NewRateLimitDescriptorFromMatcher(sanitizeMatchers, globalRateLimit.Spec.Limit)
+	if err != nil {
+		return descriptor, err
+	}
+
+	return descriptor, nil
+}
+
+func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Action, limit *v1alpha1.GlobalRateLimit_Limit) ([]types.RateLimit_Service_Descriptor, error) {
+	descriptor := []types.RateLimit_Service_Descriptor{
+		{},
+	}
+
+	matcher := matchers[0]
+
+	if matcher.RequestHeaders != nil {
+		descriptor[0].Key = matcher.RequestHeaders.DescriptorKey
+
+		if len(matchers) == 1 {
+			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
+			descriptor[0].RateLimit.Unit = limit.Unit
+
+			return descriptor, nil
+		}
+
+		nestedDescriptor, err := NewRateLimitDescriptorFromMatcher(matchers[1:], limit)
+		if err != nil {
+			return descriptor, fmt.Errorf("error")
+		}
+		descriptor[0].Descriptors = nestedDescriptor
+
+		return descriptor, nil
+	}
+
+	if matcher.GenericKey != nil {
+		if matcher.GenericKey.DescriptorKey != nil {
+			descriptor[0].Key = *matcher.GenericKey.DescriptorKey
+		} else {
+			descriptor[0].Key = "generic_key"
+		}
+
+		descriptor[0].Value = matcher.GenericKey.DescriptorValue
+
+		if len(matchers) == 1 {
+			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
+			descriptor[0].RateLimit.Unit = limit.Unit
+
+			return descriptor, nil
+		}
+
+		nestedDescriptor, err := NewRateLimitDescriptorFromMatcher(matchers[1:], limit)
+		if err != nil {
+			return descriptor, fmt.Errorf("error")
+		}
+
+		descriptor[0].Descriptors = nestedDescriptor
+		return descriptor, nil
+	}
+
+	return descriptor, fmt.Errorf("error")
 }

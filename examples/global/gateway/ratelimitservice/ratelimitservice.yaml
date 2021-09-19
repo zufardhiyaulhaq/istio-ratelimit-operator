@@ -21,5 +21,4 @@ spec:
   backend:
     redis:
       type: "single"
-      url:
-        - "192.168.1.10:6379"
+      url: "172.30.0.13:6379"

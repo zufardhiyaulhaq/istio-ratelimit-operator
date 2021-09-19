@@ -21,26 +21,26 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/client/istio"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/global/config"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/utils"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	funk "github.com/thoas/go-funk"
 	ratelimitv1alpha1 "github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
+	clientnetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
+	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // GlobalRateLimitConfigReconciler reconciles a GlobalRateLimitConfig object
 type GlobalRateLimitConfigReconciler struct {
-	Client      client.Client
-	IstioClient istio.ClientInterface
-	Scheme      *runtime.Scheme
+	Client client.Client
+	Scheme *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimitconfigs,verbs=get;list;watch;create;update;patch;delete
@@ -57,7 +57,32 @@ func (r *GlobalRateLimitConfigReconciler) Reconcile(ctx context.Context, req ctr
 		return ctrl.Result{}, nil
 	}
 
-	log.Info("Build envoyfilters")
+	// if GlobalRateLimitConfig refer to RateLimitService, fetch the Kubernetes Service
+	// and update the information
+	if globalRateLimitConfig.Spec.Ratelimit.Spec.Service.Type == "service" {
+		rateLimitService := &ratelimitv1alpha1.RateLimitService{}
+		err := r.Client.Get(ctx, types.NamespacedName{
+			Name:      globalRateLimitConfig.Spec.Ratelimit.Spec.Service.Name,
+			Namespace: req.Namespace,
+		}, rateLimitService)
+		if err != nil {
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+		}
+
+		rateLimitServiceObject := &corev1.Service{}
+		err = r.Client.Get(ctx, types.NamespacedName{
+			Name:      globalRateLimitConfig.Spec.Ratelimit.Spec.Service.Name,
+			Namespace: req.Namespace,
+		}, rateLimitServiceObject)
+		if err != nil {
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+		}
+
+		globalRateLimitConfig.Spec.Ratelimit.Spec.Service.Address = rateLimitServiceObject.Name + "." + rateLimitServiceObject.Namespace + ".svc"
+		globalRateLimitConfig.Spec.Ratelimit.Spec.Service.Port = 8081
+	}
+
+	log.Info("Build globalratelimitconfig envoyfilters")
 	envoyFilters, err := config.NewConfigBuilder().
 		SetConfig(*globalRateLimitConfig).
 		Build()
@@ -66,44 +91,46 @@ func (r *GlobalRateLimitConfigReconciler) Reconcile(ctx context.Context, req ctr
 	}
 
 	if len(envoyFilters) == 0 {
-		return ctrl.Result{}, fmt.Errorf("empty envoyfilter from builder")
+		return ctrl.Result{}, fmt.Errorf("empty globalratelimitconfig envoyfilter from builder")
 	}
 
 	allVersionEnvoyFilterNames := utils.BuildEnvoyFilterNamesAllVersion(globalRateLimitConfig.Name)
 	EnvoyFilterNames := utils.BuildEnvoyFilterNames(globalRateLimitConfig.Name, globalRateLimitConfig.Spec.Selector.IstioVersion)
 
 	deleteEnvoyFilters, _ := funk.DifferenceString(allVersionEnvoyFilterNames, EnvoyFilterNames)
-	for _, deleteEnvoyFilter := range deleteEnvoyFilters {
-		_, err := r.IstioClient.GetEnvoyFilter(ctx, globalRateLimitConfig.Namespace, deleteEnvoyFilter)
+	for _, deleteEnvoyFilterName := range deleteEnvoyFilters {
+		deleteEnvoyFilter := &clientnetworking.EnvoyFilter{}
+		err := r.Client.Get(ctx, types.NamespacedName{Name: deleteEnvoyFilterName, Namespace: req.Namespace}, deleteEnvoyFilter)
 		if err != nil {
 			continue
 		}
 
-		log.Info("delete unused envoyfilter")
-		err = r.IstioClient.DeleteEnvoyFilter(ctx, globalRateLimitConfig.Namespace, deleteEnvoyFilter)
+		log.Info("delete unused globalratelimitconfig envoyfilter")
+		err = r.Client.Delete(ctx, deleteEnvoyFilter, &client.DeleteOptions{})
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
-	log.Info("create envoyfilters")
+	log.Info("create globalratelimitconfig envoyfilters")
 	for _, envoyFilter := range envoyFilters {
-		log.Info("set reference envoyfilter")
-		if err := controllerutil.SetControllerReference(globalRateLimitConfig, envoyFilter, r.Scheme); err != nil {
+		err := ctrl.SetControllerReference(globalRateLimitConfig, envoyFilter, r.Scheme)
+		if err != nil {
 			return ctrl.Result{}, err
 		}
 
-		log.Info("get envoyfilter")
-		createdEnvoyFilter, err := r.IstioClient.GetEnvoyFilter(ctx, envoyFilter.Namespace, envoyFilter.Name)
+		log.Info("get globalratelimitconfig envoyfilter")
+		createdEnvoyFilter := &clientnetworking.EnvoyFilter{}
+		err = r.Client.Get(ctx, types.NamespacedName{Name: envoyFilter.Name, Namespace: envoyFilter.Namespace}, createdEnvoyFilter)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				log.Info("create envoyfilter")
-				_, err := r.IstioClient.CreateEnvoyFilter(ctx, envoyFilter.Namespace, envoyFilter)
+				log.Info("create globalratelimitconfig envoyfilter")
+				err := r.Client.Create(ctx, envoyFilter, &client.CreateOptions{})
 				if err != nil {
 					return ctrl.Result{}, err
 				}
 
-				return ctrl.Result{Requeue: true}, nil
+				return ctrl.Result{RequeueAfter: 60 * time.Second}, nil
 			} else {
 				return ctrl.Result{}, err
 			}
@@ -112,8 +139,8 @@ func (r *GlobalRateLimitConfigReconciler) Reconcile(ctx context.Context, req ctr
 		if !equality.Semantic.DeepEqual(createdEnvoyFilter.Spec, envoyFilter.Spec) {
 			createdEnvoyFilter.Spec = envoyFilter.Spec
 
-			log.Info("update envoyfilter")
-			_, err := r.IstioClient.UpdateEnvoyFilter(ctx, envoyFilter.Namespace, createdEnvoyFilter)
+			log.Info("update globalratelimitconfig envoyfilter")
+			err := r.Client.Update(ctx, createdEnvoyFilter, &client.UpdateOptions{})
 			if err != nil {
 				return ctrl.Result{}, err
 			}
