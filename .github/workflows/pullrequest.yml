@@ -90,4 +90,4 @@ jobs:
       - name: check pod
         run: kubectl get pod -A
       - name: check pod log
-        run: kubectl get pod -A
+        run: kubectl logs deployment/istio-ratelimit-operator-controller-manager -c manager --tail 50
