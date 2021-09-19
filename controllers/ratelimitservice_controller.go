@@ -93,13 +93,13 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 
 	// check all GlobalRateLimitConfig have the same ratelimit domain
-	for i, _ := range globalRateLimitConfigList.Items {
-		for j, _ := range globalRateLimitConfigList.Items {
-			if i == j {
+	for a, configA := range globalRateLimitConfigList.Items {
+		for b, configB := range globalRateLimitConfigList.Items {
+			if a == b {
 				continue
 			}
 
-			if globalRateLimitConfigList.Items[i].Spec.Ratelimit.Spec.Domain != globalRateLimitConfigList.Items[j].Spec.Ratelimit.Spec.Domain {
+			if configA.Spec.Ratelimit.Spec.Domain != configB.Spec.Ratelimit.Spec.Domain {
 				return ctrl.Result{}, fmt.Errorf("globalRateLimitConfig use different domain")
 			}
 		}
