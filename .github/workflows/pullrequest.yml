@@ -89,3 +89,5 @@ jobs:
         run: sleep 180
       - name: check pod
         run: kubectl get pod -A
+      - name: check pod log
+        run: kubectl get pod -A

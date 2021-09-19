@@ -16,3 +16,4 @@ spec:
     targetPort: https
   selector:
     control-plane: controller-manager
+    app.kubernetes.io/instance: {{ .Release.Name }}
