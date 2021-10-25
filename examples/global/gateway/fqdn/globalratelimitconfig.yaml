@@ -13,6 +13,7 @@ spec:
     istio_version:
       - "1.8"
       - "1.9"
+      - "1.10"
     sni: "helloworld.zufardhiyaulhaq.dev"
   ratelimit:
     spec:
