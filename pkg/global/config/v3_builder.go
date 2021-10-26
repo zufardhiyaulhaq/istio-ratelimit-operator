@@ -11,17 +11,19 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type Config1_8Builder struct {
-	Config v1alpha1.GlobalRateLimitConfig
+type V3Builder struct {
+	Config  v1alpha1.GlobalRateLimitConfig
+	Version string
 }
 
-func NewConfig1_8Builder(config v1alpha1.GlobalRateLimitConfig) *Config1_8Builder {
-	return &Config1_8Builder{
-		Config: config,
+func NewV3Builder(config v1alpha1.GlobalRateLimitConfig, version string) *V3Builder {
+	return &V3Builder{
+		Config:  config,
+		Version: version,
 	}
 }
 
-func (g *Config1_8Builder) Build() (*clientnetworking.EnvoyFilter, error) {
+func (g *V3Builder) Build() (*clientnetworking.EnvoyFilter, error) {
 	httpFilter, err := g.buildHttpFilterPatch()
 	if err != nil {
 		return nil, err
@@ -41,7 +43,7 @@ func (g *Config1_8Builder) Build() (*clientnetworking.EnvoyFilter, error) {
 			Name:      g.buildName(),
 			Namespace: g.Config.Namespace,
 			Labels: map[string]string{
-				"istio/version": "1.8",
+				"istio/version": g.Version,
 			},
 		},
 		Spec: networking.EnvoyFilter{
@@ -58,11 +60,11 @@ func (g *Config1_8Builder) Build() (*clientnetworking.EnvoyFilter, error) {
 	return envoyfilter, nil
 }
 
-func (g *Config1_8Builder) buildName() string {
-	return g.Config.Name + "-1.8"
+func (g *V3Builder) buildName() string {
+	return g.Config.Name + "-" + g.Version
 }
 
-func (g *Config1_8Builder) buildHttpFilterPatch() (*networking.EnvoyFilter_EnvoyConfigObjectPatch, error) {
+func (g *V3Builder) buildHttpFilterPatch() (*networking.EnvoyFilter_EnvoyConfigObjectPatch, error) {
 	value, err := g.buildHttpFilterPatchValue()
 	if err != nil {
 		return nil, err
@@ -91,7 +93,7 @@ func (g *Config1_8Builder) buildHttpFilterPatch() (*networking.EnvoyFilter_Envoy
 	return patches, nil
 }
 
-func (g *Config1_8Builder) buildHttpFilterListener() (*networking.EnvoyFilter_ListenerMatch, error) {
+func (g *V3Builder) buildHttpFilterListener() (*networking.EnvoyFilter_ListenerMatch, error) {
 	listener := &networking.EnvoyFilter_ListenerMatch{
 		FilterChain: &networking.EnvoyFilter_ListenerMatch_FilterChainMatch{
 			Filter: &networking.EnvoyFilter_ListenerMatch_FilterMatch{
@@ -110,7 +112,7 @@ func (g *Config1_8Builder) buildHttpFilterListener() (*networking.EnvoyFilter_Li
 	return listener, nil
 }
 
-func (g *Config1_8Builder) buildHttpFilterPatchValue() (string, error) {
+func (g *V3Builder) buildHttpFilterPatchValue() (string, error) {
 	values := types.HttpFilterPatchValues{
 		Name: "envoy.filters.http.ratelimit",
 		TypedConfig: types.TypedConfig{
@@ -138,7 +140,7 @@ func (g *Config1_8Builder) buildHttpFilterPatchValue() (string, error) {
 	return string(bytes), nil
 }
 
-func (g *Config1_8Builder) buildClusterPatch() (*networking.EnvoyFilter_EnvoyConfigObjectPatch, error) {
+func (g *V3Builder) buildClusterPatch() (*networking.EnvoyFilter_EnvoyConfigObjectPatch, error) {
 	value, err := g.buildClusterPatchValue()
 	if err != nil {
 		return nil, err
@@ -164,7 +166,7 @@ func (g *Config1_8Builder) buildClusterPatch() (*networking.EnvoyFilter_EnvoyCon
 	return patches, nil
 }
 
-func (g *Config1_8Builder) buildClusterPatchValue() (string, error) {
+func (g *V3Builder) buildClusterPatchValue() (string, error) {
 	values := types.ClusterPatchValues{
 		Name:                 g.Config.Name,
 		Type:                 "STRICT_DNS",
@@ -200,7 +202,7 @@ func (g *Config1_8Builder) buildClusterPatchValue() (string, error) {
 	return string(bytes), nil
 }
 
-func (g *Config1_8Builder) buildContext() networking.EnvoyFilter_PatchContext {
+func (g *V3Builder) buildContext() networking.EnvoyFilter_PatchContext {
 	if g.Config.Spec.Type == "gateway" {
 		return networking.EnvoyFilter_GATEWAY
 	}
@@ -208,8 +210,8 @@ func (g *Config1_8Builder) buildContext() networking.EnvoyFilter_PatchContext {
 	return networking.EnvoyFilter_GATEWAY
 }
 
-func (g *Config1_8Builder) buildProxyMatch() *networking.EnvoyFilter_ProxyMatch {
+func (g *V3Builder) buildProxyMatch() *networking.EnvoyFilter_ProxyMatch {
 	return &networking.EnvoyFilter_ProxyMatch{
-		ProxyVersion: utils.WellKnownVersions["1.8"],
+		ProxyVersion: utils.WellKnownVersions[g.Version],
 	}
 }

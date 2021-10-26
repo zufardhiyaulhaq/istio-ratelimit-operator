@@ -13,10 +13,13 @@ type globalRateLimitEnvoyFilterFactory interface {
 
 func GetConfigFactory(version string, config v1alpha1.GlobalRateLimitConfig, ratelimit v1alpha1.GlobalRateLimit) (globalRateLimitEnvoyFilterFactory, error) {
 	if version == "1.8" {
-		return NewConfig1_8Builder(config, ratelimit), nil
+		return NewV3Builder(config, ratelimit, version), nil
 	}
 	if version == "1.9" {
-		return NewConfig1_9Builder(config, ratelimit), nil
+		return NewV3Builder(config, ratelimit, version), nil
+	}
+	if version == "1.10" {
+		return NewV3Builder(config, ratelimit, version), nil
 	}
 
 	return nil, fmt.Errorf("version not supported")

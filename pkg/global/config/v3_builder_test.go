@@ -10,13 +10,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type Config1_8BuilderTestCase struct {
+type V3BuilderTestCase struct {
 	name          string
 	config        v1alpha1.GlobalRateLimitConfig
 	expectedError bool
 }
 
-var config1_8BuilderTestGrid = []Config1_8BuilderTestCase{
+var mockIstioVersion = "1.8"
+var v3BuilderTestGrid = []V3BuilderTestCase{
 	{
 		name: "given correct ratelimit",
 		config: v1alpha1.GlobalRateLimitConfig{
@@ -27,7 +28,7 @@ var config1_8BuilderTestGrid = []Config1_8BuilderTestCase{
 			Spec: v1alpha1.GlobalRateLimitConfigSpec{
 				Type: "gateway",
 				Selector: v1alpha1.GlobalRateLimitConfigSelector{
-					IstioVersion: []string{"1.8"},
+					IstioVersion: []string{mockIstioVersion},
 					Labels: map[string]string{
 						"app": "istio-public-gateway",
 					},
@@ -49,17 +50,17 @@ var config1_8BuilderTestGrid = []Config1_8BuilderTestCase{
 	},
 }
 
-func TestNewConfig1_8Builder(t *testing.T) {
-	for _, test := range config1_8BuilderTestGrid {
+func TestNewV3Builder(t *testing.T) {
+	for _, test := range v3BuilderTestGrid {
 		t.Run(test.name, func(t *testing.T) {
-			envoyfilter, err := config.NewConfig1_8Builder(test.config).
+			envoyfilter, err := config.NewV3Builder(test.config, mockIstioVersion).
 				Build()
 
 			if test.expectedError {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, test.config.Name+"-1.8", envoyfilter.Name)
+				assert.Equal(t, test.config.Name+"-"+mockIstioVersion, envoyfilter.Name)
 				assert.Equal(t, test.config.Namespace, envoyfilter.Namespace)
 			}
 		})
