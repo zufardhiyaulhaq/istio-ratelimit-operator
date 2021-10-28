@@ -20,7 +20,7 @@ spec:
       descriptor_key: "path"
   - generic_key:
       descriptor_value: "foo-route"
-      descriptor_key: "foo-route"
+      descriptor_key: "route"
   limit:
     unit: hour
     requests_per_unit: 60
@@ -44,7 +44,7 @@ spec:
       descriptor_key: "path"
   - generic_key:
       descriptor_value: "bar-route"
-      descriptor_key: "bar-route"
+      descriptor_key: "route"
   limit:
     unit: hour
     requests_per_unit: 120
@@ -68,7 +68,7 @@ spec:
       descriptor_key: "machineid"
   - generic_key:
       descriptor_value: "baz-route"
-      descriptor_key: "baz-route"
+      descriptor_key: "route"
   limit:
     unit: hour
     requests_per_unit: 90
@@ -92,7 +92,7 @@ spec:
       descriptor_key: "machineid"
   - generic_key:
       descriptor_value: "qux-route"
-      descriptor_key: "qux-route"
+      descriptor_key: "route"
   limit:
     unit: hour
     requests_per_unit: 90
@@ -113,7 +113,7 @@ spec:
       descriptor_key: "path"
   - generic_key:
       descriptor_value: "quux-route"
-      descriptor_key: "quux-route"
+      descriptor_key: "route"
   limit:
     unit: hour
     requests_per_unit: 60
@@ -134,7 +134,7 @@ spec:
       descriptor_key: "path"
   - generic_key:
       descriptor_value: "corge-route"
-      descriptor_key: "corge-route"
+      descriptor_key: "route"
   limit:
     unit: hour
     requests_per_unit: 120
@@ -155,7 +155,7 @@ spec:
       descriptor_key: "method"
   - generic_key:
       descriptor_value: "grault-route"
-      descriptor_key: "grault-route"
+      descriptor_key: "route"
   limit:
     unit: hour
     requests_per_unit: 60
@@ -176,7 +176,7 @@ spec:
       descriptor_key: "method"
   - generic_key:
       descriptor_value: "garply-route"
-      descriptor_key: "garply-route"
+      descriptor_key: "route"
   limit:
     unit: hour
     requests_per_unit: 120
