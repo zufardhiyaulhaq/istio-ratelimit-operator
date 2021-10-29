@@ -20,10 +20,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type ConfigContext string
+
+const (
+	Gateway ConfigContext = "gateway"
+	Sidecar               = "sidecar"
+)
+
 // GlobalRateLimitConfigSpec defines the desired state of GlobalRateLimitConfig
 type GlobalRateLimitConfigSpec struct {
-	// +kubebuilder:validation:Enum=gateway
-	Type string `json:"type"`
+	// +kubebuilder:validation:Enum=gateway;sidecar
+	Type ConfigContext `json:"type"`
 
 	Selector  GlobalRateLimitConfigSelector  `json:"selector"`
 	Ratelimit GlobalRateLimitConfigRatelimit `json:"ratelimit"`
@@ -46,11 +53,19 @@ type GlobalRateLimitConfigRatelimitSpec struct {
 	Service         GlobalRateLimitConfigRatelimitSpecService `json:"service"`
 }
 
+type RateLimitType string
+
+const (
+	Service RateLimitType = "service"
+	FQDN                  = "fqdn"
+)
+
 type GlobalRateLimitConfigRatelimitSpecService struct {
-	Type    string `json:"type"`
-	Name    string `json:"name,omitempty"`
-	Address string `json:"address,omitempty"`
-	Port    int    `json:"port,omitempty"`
+	// +kubebuilder:validation:Enum=service;fqdn
+	Type    RateLimitType `json:"type"`
+	Name    string        `json:"name,omitempty"`
+	Address string        `json:"address,omitempty"`
+	Port    int           `json:"port,omitempty"`
 }
 
 // GlobalRateLimitConfigStatus defines the observed state of GlobalRateLimitConfig

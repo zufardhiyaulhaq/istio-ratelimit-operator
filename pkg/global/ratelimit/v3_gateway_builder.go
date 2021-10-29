@@ -11,21 +11,21 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type V3Builder struct {
+type V3GatewayBuilder struct {
 	Config    v1alpha1.GlobalRateLimitConfig
 	RateLimit v1alpha1.GlobalRateLimit
 	Version   string
 }
 
-func NewV3Builder(config v1alpha1.GlobalRateLimitConfig, ratelimit v1alpha1.GlobalRateLimit, version string) *V3Builder {
-	return &V3Builder{
+func NewV3GatewayBuilder(config v1alpha1.GlobalRateLimitConfig, ratelimit v1alpha1.GlobalRateLimit, version string) *V3GatewayBuilder {
+	return &V3GatewayBuilder{
 		Config:    config,
 		RateLimit: ratelimit,
 		Version:   version,
 	}
 }
 
-func (g *V3Builder) Build() (*clientnetworking.EnvoyFilter, error) {
+func (g *V3GatewayBuilder) Build() (*clientnetworking.EnvoyFilter, error) {
 	httpRoute, err := g.buildHttpRoutePatch()
 	if err != nil {
 		return nil, err
@@ -37,10 +37,10 @@ func (g *V3Builder) Build() (*clientnetworking.EnvoyFilter, error) {
 			APIVersion: "networking.istio.io/v1alpha3",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      g.buildName(),
+			Name:      g.RateLimit.Name + "-" + g.Version,
 			Namespace: g.RateLimit.Namespace,
 			Labels: map[string]string{
-				"istio/version": "1.9",
+				"istio/version": g.Version,
 			},
 		},
 		Spec: networking.EnvoyFilter{
@@ -56,11 +56,7 @@ func (g *V3Builder) Build() (*clientnetworking.EnvoyFilter, error) {
 	return envoyfilter, nil
 }
 
-func (g *V3Builder) buildName() string {
-	return g.RateLimit.Name + "-1.9"
-}
-
-func (g *V3Builder) buildHttpRoutePatch() (*networking.EnvoyFilter_EnvoyConfigObjectPatch, error) {
+func (g *V3GatewayBuilder) buildHttpRoutePatch() (*networking.EnvoyFilter_EnvoyConfigObjectPatch, error) {
 	value, err := g.buildHttpRoutePatchValue()
 	if err != nil {
 		return nil, err
@@ -74,7 +70,7 @@ func (g *V3Builder) buildHttpRoutePatch() (*networking.EnvoyFilter_EnvoyConfigOb
 	patches := &networking.EnvoyFilter_EnvoyConfigObjectPatch{
 		ApplyTo: networking.EnvoyFilter_HTTP_ROUTE,
 		Match: &networking.EnvoyFilter_EnvoyConfigObjectMatch{
-			Context: g.buildContext(),
+			Context: networking.EnvoyFilter_GATEWAY,
 			ObjectTypes: &networking.EnvoyFilter_EnvoyConfigObjectMatch_RouteConfiguration{
 				RouteConfiguration: routeConfiguration,
 			},
@@ -89,7 +85,7 @@ func (g *V3Builder) buildHttpRoutePatch() (*networking.EnvoyFilter_EnvoyConfigOb
 	return patches, nil
 }
 
-func (g *V3Builder) buildHttpRouteConfiguration() (*networking.EnvoyFilter_RouteConfigurationMatch, error) {
+func (g *V3GatewayBuilder) buildHttpRouteConfiguration() (*networking.EnvoyFilter_RouteConfigurationMatch, error) {
 	routeConfiguration := &networking.EnvoyFilter_RouteConfigurationMatch{
 		Vhost: &networking.EnvoyFilter_RouteConfigurationMatch_VirtualHostMatch{
 			Name: g.RateLimit.Spec.Selector.VHost,
@@ -106,7 +102,7 @@ func (g *V3Builder) buildHttpRouteConfiguration() (*networking.EnvoyFilter_Route
 	return routeConfiguration, nil
 }
 
-func (g *V3Builder) buildHttpRoutePatchValue() (string, error) {
+func (g *V3GatewayBuilder) buildHttpRoutePatchValue() (string, error) {
 	values := types.RoutePatchValues{
 		Route: types.Route{
 			Ratelimits: []types.RateLimits{
@@ -125,15 +121,7 @@ func (g *V3Builder) buildHttpRoutePatchValue() (string, error) {
 	return string(bytes), nil
 }
 
-func (g *V3Builder) buildContext() networking.EnvoyFilter_PatchContext {
-	if g.Config.Spec.Type == "gateway" {
-		return networking.EnvoyFilter_GATEWAY
-	}
-
-	return networking.EnvoyFilter_GATEWAY
-}
-
-func (g *V3Builder) buildProxyMatch() *networking.EnvoyFilter_ProxyMatch {
+func (g *V3GatewayBuilder) buildProxyMatch() *networking.EnvoyFilter_ProxyMatch {
 	return &networking.EnvoyFilter_ProxyMatch{
 		ProxyVersion: utils.WellKnownVersions["1.9"],
 	}

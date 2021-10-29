@@ -2,7 +2,7 @@ package ratelimit
 
 import (
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
-	istioClientNetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
+	clientnetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
 )
 
 type ConfigBuilder struct {
@@ -36,8 +36,8 @@ func (g *ConfigBuilder) SetLabels(labels map[string]string) *ConfigBuilder {
 	return g
 }
 
-func (g *ConfigBuilder) Build() ([]*istioClientNetworking.EnvoyFilter, error) {
-	var envoyFilters []*istioClientNetworking.EnvoyFilter
+func (g *ConfigBuilder) Build() ([]*clientnetworking.EnvoyFilter, error) {
+	var envoyFilters []*clientnetworking.EnvoyFilter
 	for _, version := range g.Config.Spec.Selector.IstioVersion {
 		factory, err := GetConfigFactory(version, g.Config, g.RateLimit)
 		if err != nil {

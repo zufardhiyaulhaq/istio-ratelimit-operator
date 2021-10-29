@@ -3,6 +3,7 @@ module github.com/zufardhiyaulhaq/istio-ratelimit-operator
 go 1.16
 
 require (
+	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/champly/lib4go v0.0.0-20210810011059-eb374f933ec2
 	github.com/gogo/protobuf v1.3.2
 	github.com/norwoodj/helm-docs v1.6.0 // indirect

@@ -2,15 +2,11 @@ package config
 
 import (
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
-	istioClientNetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
+	clientnetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
 )
 
 type ConfigBuilder struct {
 	Config v1alpha1.GlobalRateLimitConfig
-}
-
-func NewConfigBuilder() *ConfigBuilder {
-	return &ConfigBuilder{}
 }
 
 func (g *ConfigBuilder) SetConfig(config v1alpha1.GlobalRateLimitConfig) *ConfigBuilder {
@@ -18,10 +14,10 @@ func (g *ConfigBuilder) SetConfig(config v1alpha1.GlobalRateLimitConfig) *Config
 	return g
 }
 
-func (g *ConfigBuilder) Build() ([]*istioClientNetworking.EnvoyFilter, error) {
-	var envoyFilters []*istioClientNetworking.EnvoyFilter
+func (g *ConfigBuilder) Build() ([]*clientnetworking.EnvoyFilter, error) {
+	var envoyFilters []*clientnetworking.EnvoyFilter
 	for _, version := range g.Config.Spec.Selector.IstioVersion {
-		factory, err := GetConfigFactory(version, g.Config)
+		factory, err := NewConfigFactory(version, g.Config)
 		if err != nil {
 			return nil, err
 		}
@@ -35,4 +31,8 @@ func (g *ConfigBuilder) Build() ([]*istioClientNetworking.EnvoyFilter, error) {
 	}
 
 	return envoyFilters, nil
+}
+
+func NewConfigBuilder() *ConfigBuilder {
+	return &ConfigBuilder{}
 }
