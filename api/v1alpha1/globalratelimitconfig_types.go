@@ -24,7 +24,7 @@ type ConfigContext string
 
 const (
 	Gateway ConfigContext = "gateway"
-	Sidecar               = "sidecar"
+	Sidecar ConfigContext = "sidecar"
 )
 
 // GlobalRateLimitConfigSpec defines the desired state of GlobalRateLimitConfig
@@ -57,7 +57,7 @@ type RateLimitType string
 
 const (
 	Service RateLimitType = "service"
-	FQDN                  = "fqdn"
+	FQDN    RateLimitType = "fqdn"
 )
 
 type GlobalRateLimitConfigRatelimitSpecService struct {
