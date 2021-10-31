@@ -28,6 +28,9 @@ func GetConfigFactory(v string, config v1alpha1.GlobalRateLimitConfig, ratelimit
 		if config.Spec.Type == v1alpha1.Gateway {
 			return NewV3GatewayBuilder(config, ratelimit, v), nil
 		}
+		if config.Spec.Type == v1alpha1.Sidecar {
+			return NewV3SidecarBuilder(config, ratelimit, v), nil
+		}
 	}
 
 	return nil, fmt.Errorf("version not supported")

@@ -98,9 +98,9 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
-	// check all GlobalRateLimitConfig have the same ratelimit domain
-	for a, configA := range globalRateLimitConfigList.Items {
-		for b, configB := range globalRateLimitConfigList.Items {
+	// check all ownGlobalRateLimitConfigList have the same ratelimit domain
+	for a, configA := range ownGlobalRateLimitConfigList {
+		for b, configB := range ownGlobalRateLimitConfigList {
 			if a == b {
 				continue
 			}

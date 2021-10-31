@@ -18,7 +18,7 @@ type ConfigBuilderTestCase struct {
 
 var configBuildertestGrid = []ConfigBuilderTestCase{
 	{
-		name: "given correct ratelimit",
+		name: "given correct gateway ratelimit",
 		config: v1alpha1.GlobalRateLimitConfig{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "foo",
@@ -30,6 +30,36 @@ var configBuildertestGrid = []ConfigBuilderTestCase{
 					IstioVersion: []string{"1.9"},
 					Labels: map[string]string{
 						"app": "istio-public-gateway",
+					},
+				},
+				Ratelimit: v1alpha1.GlobalRateLimitConfigRatelimit{
+					Spec: v1alpha1.GlobalRateLimitConfigRatelimitSpec{
+						Domain:          "foo",
+						FailureModeDeny: false,
+						Timeout:         "10s",
+						Service: v1alpha1.GlobalRateLimitConfigRatelimitSpecService{
+							Address: "grpc-testing.default",
+							Port:    3000,
+						},
+					},
+				},
+			},
+		},
+		expectedError: false,
+	},
+	{
+		name: "given correct sidecar ratelimit",
+		config: v1alpha1.GlobalRateLimitConfig{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "foo",
+				Namespace: "bar",
+			},
+			Spec: v1alpha1.GlobalRateLimitConfigSpec{
+				Type: "sidecar",
+				Selector: v1alpha1.GlobalRateLimitConfigSelector{
+					IstioVersion: []string{"1.9"},
+					Labels: map[string]string{
+						"app": "foo",
 					},
 				},
 				Ratelimit: v1alpha1.GlobalRateLimitConfigRatelimit{

@@ -5,6 +5,7 @@
 Global Rate Limit in Envoy uses a gRPC API for requesting quota from a rate limiting service. Istio Ratelimit Operator can help you create rate limiting service with `RateLimitService` object. It's deploying [Envoy ratelimit service](https://github.com/envoyproxy/ratelimit). You only need to provide Redis information:
 
 ```
+---
 apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: RateLimitService
 metadata:
@@ -27,12 +28,34 @@ spec:
     redis:
       type: "single"
       url: "172.30.0.13:6379"
+---
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: RateLimitService
+metadata:
+  name: echo-redis-ratelimit-service
+  namespace: default
+spec:
+  kubernetes:
+    replica_count: 2
+    auto_scaling:
+      max_replicas: 3
+      min_replicas: 2
+    resources:
+      limits:
+        cpu: "256m"
+        memory: "256Mi"
+      requests:
+        cpu: "128m"
+        memory: "128Mi"     
+  backend:
+    redis:
+      type: "single"
+      url: "172.30.0.13:6379"
 ```
 
 It's support single, sentinel, or clustered Redis. `spec.backend.redis.url` is very depends on `spec.backend.redis.type`. You can check official [Envoy ratelimit service](https://github.com/envoyproxy/ratelimit#redis-type) service for Sentinel and Clustered Redis.
 
 ## Gateway
-
 To setup rate limit in Gateway, the first thing you need to do is to make sure the gateway is aware of external rate limit service, you can create `GlobalRateLimitConfig` object to enable that:
 
 ```
@@ -105,4 +128,61 @@ You must define the `GlobalRateLimitConfig` in the `spec.config`. Also you must 
 - **route**: route name you define in VirtualService object
 
 ## Sidecar
-Not supported
+To setup rate limit in Sidecar, it's kinda similar with Gateway. First, create GlobalRateLimitConfig
+
+```
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimitConfig
+metadata:
+  name: echo-redis
+  namespace: default
+spec:
+  type: "sidecar"
+  selector:
+    labels:
+      "app": "echo-redis"
+    istio_version:
+      - "1.8"
+      - "1.9"
+      - "1.10"
+  ratelimit:
+    spec:
+      domain: "echo-redis"
+      failure_mode_deny: false
+      timeout: "10s"
+      service:
+        type: "service"
+        name: "echo-redis-ratelimit-service"
+```
+
+Please make sure `.spec.type` is sidecar and `.spec.selector.sni` is not supported in sidecar. The next step is to define the rate limit configuration using `GlobalRateLimit` object, for example:
+
+```
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimit
+metadata:
+  name: echo-redis-http-8080
+  namespace: default
+spec:
+  config: "echo-redis"
+  selector:
+    vhost: "inbound|http|8080"
+  matcher:
+  - request_headers:
+      header_name: ":method"
+      descriptor_key: "method"
+  - request_headers:
+      header_name: ":path"
+      descriptor_key: "path"
+  - generic_key:
+      descriptor_value: "echo-redis"
+      descriptor_key: "app"
+  - generic_key:
+      descriptor_value: "8080"
+      descriptor_key: "port"
+  limit:
+    unit: hour
+    requests_per_unit: 60
+```
+
+We only support vhost selector in sidecar, with combination of `inbound|<port-name>|<port-number>`.

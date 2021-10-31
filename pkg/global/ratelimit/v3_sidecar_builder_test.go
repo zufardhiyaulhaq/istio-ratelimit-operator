@@ -10,14 +10,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type V3GatewayBuilderTestCase struct {
+type V3SidecarBuilderTestCase struct {
 	name          string
 	config        v1alpha1.GlobalRateLimitConfig
 	ratelimit     v1alpha1.GlobalRateLimit
 	expectedError bool
 }
 
-var V3GatewayBuilderTestGrid = []V3GatewayBuilderTestCase{
+var V3SidecarBuilderTestGrid = []V3SidecarBuilderTestCase{
 	{
 		name: "given correct ratelimit",
 		config: v1alpha1.GlobalRateLimitConfig{
@@ -67,10 +67,10 @@ var V3GatewayBuilderTestGrid = []V3GatewayBuilderTestCase{
 	},
 }
 
-func TestNewV3GatewayBuilder(t *testing.T) {
-	for _, test := range V3GatewayBuilderTestGrid {
+func TestNewV3SidecarBuilder(t *testing.T) {
+	for _, test := range V3SidecarBuilderTestGrid {
 		t.Run(test.name, func(t *testing.T) {
-			envoyfilter, err := ratelimit.NewV3GatewayBuilder(test.config, test.ratelimit, "1.9").
+			envoyfilter, err := ratelimit.NewV3SidecarBuilder(test.config, test.ratelimit, "1.9").
 				Build()
 
 			if test.expectedError {

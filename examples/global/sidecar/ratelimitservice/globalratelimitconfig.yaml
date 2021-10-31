@@ -1,0 +1,24 @@
+# GlobalRateLimitConfig is object to enable ratelimiting
+# in specific gateway or sidecar and connect to external ratelimit service
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimitConfig
+metadata:
+  name: echo-redis
+  namespace: default
+spec:
+  type: "sidecar"
+  selector:
+    labels:
+      "app": "echo-redis"
+    istio_version:
+      - "1.8"
+      - "1.9"
+      - "1.10"
+  ratelimit:
+    spec:
+      domain: "echo-redis"
+      failure_mode_deny: false
+      timeout: "10s"
+      service:
+        type: "service"
+        name: "echo-redis-ratelimit-service"

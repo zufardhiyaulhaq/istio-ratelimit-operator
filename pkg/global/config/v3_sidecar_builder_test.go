@@ -10,26 +10,26 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type V3GatewayBuilderTestCase struct {
+type V3SidecarBuilderTestCase struct {
 	name          string
 	config        v1alpha1.GlobalRateLimitConfig
 	expectedError bool
 }
 
-var V3GatewayBuilderTestGrid = []V3GatewayBuilderTestCase{
+var V3SidecarBuilderTestGrid = []V3SidecarBuilderTestCase{
 	{
 		name: "given correct ratelimit",
 		config: v1alpha1.GlobalRateLimitConfig{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "foo",
-				Namespace: "istio-system",
+				Namespace: "foo",
 			},
 			Spec: v1alpha1.GlobalRateLimitConfigSpec{
-				Type: "gateway",
+				Type: "sidecar",
 				Selector: v1alpha1.GlobalRateLimitConfigSelector{
 					IstioVersion: []string{"1.8"},
 					Labels: map[string]string{
-						"app": "istio-public-gateway",
+						"app": "foo",
 					},
 				},
 				Ratelimit: v1alpha1.GlobalRateLimitConfigRatelimit{
@@ -49,10 +49,10 @@ var V3GatewayBuilderTestGrid = []V3GatewayBuilderTestCase{
 	},
 }
 
-func TestNewV3GatewayBuilder(t *testing.T) {
-	for _, test := range V3GatewayBuilderTestGrid {
+func TestNewV3SidecarBuilder(t *testing.T) {
+	for _, test := range V3SidecarBuilderTestGrid {
 		t.Run(test.name, func(t *testing.T) {
-			envoyfilter, err := config.NewV3GatewayBuilder(test.config, "1.8").
+			envoyfilter, err := config.NewV3SidecarBuilder(test.config, "1.8").
 				Build()
 
 			if test.expectedError {

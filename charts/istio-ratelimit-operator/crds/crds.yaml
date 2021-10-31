@@ -54,6 +54,9 @@ spec:
                           port:
                             type: integer
                           type:
+                            enum:
+                            - service
+                            - fqdn
                             type: string
                         required:
                         - type
@@ -88,6 +91,7 @@ spec:
               type:
                 enum:
                 - gateway
+                - sidecar
                 type: string
             required:
             - ratelimit

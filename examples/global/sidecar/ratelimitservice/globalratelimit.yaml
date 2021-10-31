@@ -1,0 +1,54 @@
+# GlobalRateLimit is object to configure ratelimit
+# based on GlobalRateLimitConfig defined in spec.config
+# and vhost and route defined in spec.selector
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimit
+metadata:
+  name: echo-redis-http-8080
+  namespace: default
+spec:
+  config: "echo-redis"
+  selector:
+    vhost: "inbound|http|8080"
+  matcher:
+  - request_headers:
+      header_name: ":method"
+      descriptor_key: "method"
+  - request_headers:
+      header_name: ":path"
+      descriptor_key: "path"
+  - generic_key:
+      descriptor_value: "echo-redis"
+      descriptor_key: "app"
+  - generic_key:
+      descriptor_value: "8080"
+      descriptor_key: "port"
+  limit:
+    unit: hour
+    requests_per_unit: 60
+---
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimit
+metadata:
+  name: echo-redis-http-8081
+  namespace: default
+spec:
+  config: "echo-redis"
+  selector:
+    vhost: "inbound|http|8081"
+  matcher:
+  - request_headers:
+      header_name: ":method"
+      descriptor_key: "method"
+  - request_headers:
+      header_name: ":path"
+      descriptor_key: "path"
+  - generic_key:
+      descriptor_value: "echo-redis"
+      descriptor_key: "app"
+  - generic_key:
+      descriptor_value: "8081"
+      descriptor_key: "port"
+  limit:
+    unit: hour
+    requests_per_unit: 60
