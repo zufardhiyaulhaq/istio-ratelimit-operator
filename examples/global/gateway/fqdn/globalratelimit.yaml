@@ -18,3 +18,9 @@ spec:
   - request_headers:
       header_name: ":method"
       descriptor_key: "method"
+  - generic_key:
+      descriptor_value: "ratelimit-examples-helloworld-v1-default-route"
+      descriptor_key: "route"
+  limit:
+    unit: hour
+    requests_per_unit: 60

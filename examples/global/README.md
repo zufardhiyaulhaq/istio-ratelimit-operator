@@ -94,15 +94,59 @@ spec:
       descriptor_key: "path"
   - generic_key:
       descriptor_value: "foo-route"
-      descriptor_key: "foo-route"
+      descriptor_key: "route"
   limit:
     unit: hour
     requests_per_unit: 60
+---
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimit
+metadata:
+  name: helloworld-zufardhiyaulhaq-com-bar-route
+  namespace: istio-system
+spec:
+  config: "istio-public-gateway"
+  selector:
+    vhost: "helloworld.zufardhiyaulhaq.com:443"
+    route: "bar-route"
+  matcher:
+  - request_headers:
+      header_name: ":method"
+      descriptor_key: "method"
+  - request_headers:
+      header_name: ":path"
+      descriptor_key: "path"
+  - generic_key:
+      descriptor_value: "bar-route"
+      descriptor_key: "route"
+  limit:
+    unit: hour
+    requests_per_unit: 120
 ```
 
 You must define the `GlobalRateLimitConfig` in the `spec.config`. Also you must define the selector, which is contain two things:
 - **vhost**: combination of domain and port from Gateway object
 - **route**: route name you define in VirtualService object
+
+Istio Ratelimit Operator will generate two Envoyfilter and descriptors configuration based on [Envoy ratelimit service](https://github.com/envoyproxy/ratelimit). Descriptor example:
+```
+domain: public-gateway
+descriptors:
+- key: method
+  descriptors:
+  - key: path
+    descriptors:
+    - key: route
+      value: foo-route
+      rate_limit:
+        unit: hour
+        requests_per_unit: 60
+    - key: route
+      value: bar-route
+      rate_limit:
+        unit: hour
+        requests_per_unit: 120
+```
 
 ## Sidecar
 Not supported
