@@ -51,6 +51,7 @@ spec:
     redis:
       type: "single"
       url: "172.30.0.13:6379"
+      auth: "password"
 ```
 
 It's support single, sentinel, or clustered Redis. `spec.backend.redis.url` is very depends on `spec.backend.redis.type`. You can check official [Envoy ratelimit service](https://github.com/envoyproxy/ratelimit#redis-type) service for Sentinel and Clustered Redis.
