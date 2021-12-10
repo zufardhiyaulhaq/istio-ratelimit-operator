@@ -134,6 +134,9 @@ spec:
                         descriptor_key:
                           description: The key to use in the descriptor entry.
                           type: string
+                        descriptor_value:
+                          description: The value to use in the descriptor entry.
+                          type: string
                         header_name:
                           description: The header name to be queried from the request
                             headers. The header’s value is used to populate the value

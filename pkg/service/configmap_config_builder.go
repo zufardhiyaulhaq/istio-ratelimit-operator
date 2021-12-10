@@ -134,6 +134,9 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 
 	if matcher.RequestHeaders != nil {
 		descriptor[0].Key = matcher.RequestHeaders.DescriptorKey
+		if matcher.RequestHeaders.DescriptorValue != "" {
+			descriptor[0].Value = matcher.RequestHeaders.DescriptorValue
+		}
 
 		if len(matchers) == 1 {
 			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit

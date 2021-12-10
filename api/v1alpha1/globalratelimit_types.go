@@ -58,6 +58,8 @@ type GlobalRateLimit_Action_RequestHeaders struct {
 	HeaderName string `json:"header_name,omitempty" yaml:"header_name,omitempty"`
 	// The key to use in the descriptor entry.
 	DescriptorKey string `json:"descriptor_key,omitempty" yaml:"descriptor_key,omitempty"`
+	// The value to use in the descriptor entry.
+	DescriptorValue string `json:"descriptor_value,omitempty" yaml:"descriptor_value,omitempty"`
 	// If set to true, Envoy skips the descriptor while calling rate limiting service
 	// when header is not present in the request. By default it skips calling the
 	// rate limiting service if this header is not present in the request.
