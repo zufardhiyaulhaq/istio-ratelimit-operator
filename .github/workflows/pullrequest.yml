@@ -106,6 +106,8 @@ jobs:
         run: sleep 180
       - name: check pod
         run: kubectl get pod -A
+      - name: check envoyfilter
+        run: kubectl get envoyfilter -A
       - name: curl podinfo
         run: "kubectl -n development exec -i deploy/client -c client -- curl http://istio-ingressgateway.istio-system.svc.cluster.local:80/ -H 'Host: podinfo.e2e.dev' -vvv"
       - name: check operator logs
