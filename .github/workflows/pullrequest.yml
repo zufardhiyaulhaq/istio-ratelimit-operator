@@ -82,7 +82,7 @@ jobs:
         uses: nolar/setup-k3d-k3s@v1
         with:
           version: "${{ matrix.kubernetes }}"
-          k3d-args: --no-lb --k3s-arg "--disable=traefik@server:0"
+          k3d-args: --no-lb --k3s-arg "--disable=traefik"
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:

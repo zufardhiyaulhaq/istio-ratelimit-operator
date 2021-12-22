@@ -90,7 +90,7 @@ jobs:
         uses: nolar/setup-k3d-k3s@v1
         with:
           version: "${{ matrix.kubernetes }}"
-          k3d-args: --no-lb --k3s-arg "--disable=traefik@server:0"
+          k3d-args: --no-lb --k3s-arg "--disable=traefik"
       - name: deploy charts
         run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=latest
       - name: waiting istio-ratelimit-operator to start
