@@ -66,14 +66,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.19]
+        kubernetes: [v1.21]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup kubectl
         uses: azure/setup-kubectl@v1
         with:
-          version: 'v1.19.10'
+          version: 'v1.21.7'
       - name: Setup helm
         uses: azure/setup-helm@v1
         with:
@@ -83,8 +83,14 @@ jobs:
         with:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
+      - name: Setup Istioctl
+        uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
+        with:
+          version: '1.11.5'
       - name: deploy charts
         run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
+      - name: install istio
+        run: istioctl upgrade -f ./e2e/istio_mesh/cluster.yaml --force --skip-confirmation
       - name: waiting istio-ratelimit-operator to start
         run: sleep 180
       - name: check pod

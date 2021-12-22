@@ -45,6 +45,7 @@ type RateLimitServiceSpec_Backend struct {
 type RateLimitService_RedisBackend struct {
 	Type string `json:"type,omitempty"`
 	URL  string `json:"url,omitempty"`
+	Auth string `json:"auth,omitempty"`
 }
 
 type RateLimitServiceStatus struct {
