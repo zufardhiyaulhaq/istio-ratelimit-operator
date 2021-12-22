@@ -1,0 +1,7 @@
+namespace: development
+commonLabels:
+  namespace: development
+  owner: dev
+
+resources:
+- ../../../bases/namespace-scope/services/podinfo

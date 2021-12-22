@@ -10,7 +10,7 @@ def main():
 
     shell = ShellDeployer()
     kustomize = KustomizeDeployer(shell)
-    kustomize.deploy(dryrun=True)
+    kustomize.deploy()
 
 if __name__ == '__main__':
     main()

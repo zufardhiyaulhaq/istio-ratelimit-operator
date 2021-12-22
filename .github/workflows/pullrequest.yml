@@ -100,10 +100,10 @@ jobs:
         run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
       - name: install istio
         run: istioctl upgrade -f ./e2e/istio_mesh/cluster.yaml --force --skip-confirmation
-      - name: waiting
-        run: sleep 180
       - name: deploy manifests
         run: make ci.e2e
+      - name: waiting
+        run: sleep 180
       - name: check pod
         run: kubectl get pod -A
       - name: check pod log
