@@ -23,3 +23,13 @@ testbin/*
 *.swp
 *.swo
 *~
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+.DS_Store
+
+# kustomize
+rendered.yml
+rendered.yaml

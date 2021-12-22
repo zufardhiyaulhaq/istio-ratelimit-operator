@@ -70,10 +70,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+          architecture: x64
       - name: Setup kubectl
         uses: azure/setup-kubectl@v1
         with:
           version: 'v1.21.7'
+      - name: Setup kustomize
+        uses: yokawasa/action-setup-kube-tools@v0.7.1
+        with:
+          kustomize: '3.8.3'
       - name: Setup helm
         uses: azure/setup-helm@v1
         with:
@@ -82,7 +91,7 @@ jobs:
         uses: nolar/setup-k3d-k3s@v1
         with:
           version: "${{ matrix.kubernetes }}"
-          k3d-args: --no-lb --k3s-arg "--disable=traefik" --k3s-server-arg "--disable=servicelb"
+          k3d-args: --no-lb
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -91,8 +100,10 @@ jobs:
         run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
       - name: install istio
         run: istioctl upgrade -f ./e2e/istio_mesh/cluster.yaml --force --skip-confirmation
-      - name: waiting istio-ratelimit-operator to start
+      - name: waiting
         run: sleep 180
+      - name: deploy manifests
+        run: make ci.e2e
       - name: check pod
         run: kubectl get pod -A
       - name: check pod log

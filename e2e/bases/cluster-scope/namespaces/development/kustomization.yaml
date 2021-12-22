@@ -1,0 +1,5 @@
+resources:
+- development.yaml
+namespace: development
+commonLabels:
+  namespace: development
