@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: client
-        image: stefanprodan/client
+        image: stefanprodan/podinfo
         resources:
           requests:
             cpu: 50m

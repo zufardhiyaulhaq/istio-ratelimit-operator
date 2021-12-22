@@ -107,8 +107,8 @@ jobs:
       - name: check pod
         run: kubectl get pod -A
       - name: check pod
-        run: "kubectl -n development exec -it deploy/client -c client -- curl http://istio-ingressgateway.istio-system.svc.cluster.local:8080/ -H 'Host: podinfo.e2e.dev' -vvv"
+        run: "kubectl -n development exec -i deploy/client -c client -- curl http://istio-ingressgateway.istio-system.svc.cluster.local:8080/ -H 'Host: podinfo.e2e.dev' -vvv"
       - name: check pod
-        run: "kubectl -n development exec -it deploy/client -c client -- curl http://istio-ingressgateway.istio-system.svc.cluster.local:80/ -H 'Host: podinfo.e2e.dev' -vvv"
+        run: "kubectl -n development exec -i deploy/client -c client -- curl http://istio-ingressgateway.istio-system.svc.cluster.local:80/ -H 'Host: podinfo.e2e.dev' -vvv"
       - name: check pod log
         run: kubectl logs deployment/istio-ratelimit-operator-controller-manager -c manager --tail 50
