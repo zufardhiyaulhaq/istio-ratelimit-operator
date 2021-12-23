@@ -1,7 +1,7 @@
 apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: GlobalRateLimit
 metadata:
-  name: helloworld-zufardhiyaulhaq-com-foo-route
+  name: podinfo-e2e-dev-default-route
   namespace: istio-system
 spec:
   config: "ingressgateway"
