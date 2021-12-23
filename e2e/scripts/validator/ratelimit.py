@@ -19,7 +19,8 @@ class RatelimitValidator():
             validate_command = ["kubectl", "-n", "development", "exec", "-it", "deploy/client", "-c", "client",
                                  "--", "curl", "http://istio-ingressgateway.istio-system.svc:80%s" %(path), "-H", "'Host:", "%s'" %(domain), "--write-out", "'%{json}'"]
             out = self.shell.execute(validate_command)
-
+            
+            print(out[0])
             if '"http_code":429' not in out[0]:
                 raise Exception("it's not ratelimited") 
         
