@@ -6,10 +6,12 @@ class ShellDeployer():
         pass
 
     def execute(self, command):
+        output = []
+
         try:
             process = subprocess.Popen(
                 command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            print(process.stdout.read().strip().decode("utf-8"))
+            output.append(process.stdout.read().strip().decode("utf-8"))
         except subprocess.CalledProcessError as exc:
             print("[ERROR] Command \"{}\" failed with exit code {}: {}".format(
                 ' '.join(command), exc.returncode, exc.output.strip().decode("utf-8")))
@@ -17,3 +19,5 @@ class ShellDeployer():
         except Exception as exc:
             print(exc.output)
             raise exc
+        
+        return output

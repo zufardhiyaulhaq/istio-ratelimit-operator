@@ -5,3 +5,4 @@ commonLabels:
 
 resources:
 - ../../../../../bases/namespace-scope/services/podinfo
+- ../../../../../bases/namespace-scope/services/client

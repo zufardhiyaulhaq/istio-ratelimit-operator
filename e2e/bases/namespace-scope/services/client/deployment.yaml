@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: client
+  name: client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: client
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      containers:
+      - name: client
+        image: curlimages/curl:7.80.0
+        command: ["/bin/sh", "-ec", "sleep 1000"]
+        resources:
+          requests:
+            cpu: 50m
+            memory: 50Mi
+        imagePullPolicy: IfNotPresent
