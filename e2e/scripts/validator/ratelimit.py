@@ -21,7 +21,7 @@ class RatelimitValidator():
             print(' '.join(validate_command))
             out = self.shell.execute(validate_command)
             
-            if '"http_code":429' not in out[0]:
+            if '"http_code":429' not in ''.join(out):
                 raise Exception("it's not ratelimited") 
         
         else:
@@ -30,7 +30,7 @@ class RatelimitValidator():
             out = self.shell.execute(validate_command)
             
             print(out)
-            if '"http_code":429' not in out[0]:
+            if '"http_code":429' not in ''.join(out):
                 raise Exception("it's not ratelimited") 
             
         print('ratelimit is working!')
