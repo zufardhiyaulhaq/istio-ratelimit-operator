@@ -67,7 +67,7 @@ jobs:
         with:
           push: true
           tags: zufardhiyaulhaq/istio-ratelimit-operator:latest
-  e2e.global.gateway:
+  e2e-global-gateway:
     runs-on: ubuntu-latest
     needs:
       - image
