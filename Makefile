@@ -225,4 +225,14 @@ e2e.global.gateway:
 e2e.global.gateway.validate:
 	kubectl port-forward -n istio-system service/istio-ingressgateway 8080:80 &
 	sleep 10
-	python3 ./e2e/scripts/validate.py --domain podinfo.e2e.dev
+	python3 ./e2e/scripts/validate.py --domain podinfo.e2e.dev --path /api/v1/
+
+.PHONY: e2e.global.sidecar
+e2e.global.sidecar:
+	python3 ./e2e/scripts/main.py --usecases global.sidecar
+
+.PHONY: e2e.global.sidecar.validate
+e2e.global.gateway.validate:
+	kubectl port-forward -n development service/podinfo 8080:9898 &
+	sleep 10
+	python3 ./e2e/scripts/validate.py --domain podinfo --path /

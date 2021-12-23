@@ -8,9 +8,12 @@ from validator.ratelimit import RatelimitValidator
 @click.option("--domain",
               help="Domain for ratelimit testing",
               required=True)
-def main(domain):
+@click.option("--path",
+              help="Path for ratelimit testing",
+              required=True)
+def main(domain, path):
     ratelimit_validator = RatelimitValidator()
-    ratelimit_validator.validate(domain)
+    ratelimit_validator.validate(domain, path)
 
 if __name__ == "__main__":
   main()

@@ -1,22 +1,21 @@
 apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: GlobalRateLimitConfig
 metadata:
-  name: ingressgateway
-  namespace: istio-system
+  name: podinfo
+  namespace: development
 spec:
-  type: "gateway"
+  type: "sidecar"
   selector:
     labels:
-      app: istio-ingressgateway
-      istio: ingressgateway
+      app: podinfo
     istio_version:
       - "1.10"
       - "1.11"
   ratelimit:
     spec:
-      domain: "ingressgateway"
+      domain: "podinfo"
       failure_mode_deny: false
       timeout: "10s"
       service:
         type: "service"
-        name: "ingressgateway-ratelimit-service"
+        name: "podinfo-ratelimit-service"
