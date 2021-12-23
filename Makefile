@@ -220,3 +220,9 @@ lint:
 .PHONY: e2e.global.gateway
 e2e.global.gateway:
 	python3 ./e2e/scripts/main.py --usecases global.gateway
+
+.PHONY: e2e.global.gateway.validate
+e2e.global.gateway.validate:
+	kubectl port-forward service/istio-ingressgateway 8080:80 &
+	sleep 10
+	python3 ./e2e/scripts/validate.py --domain podinfo.e2e.dev

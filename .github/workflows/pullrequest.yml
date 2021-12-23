@@ -115,5 +115,7 @@ jobs:
         run: kubectl get envoyfilter -A
       - name: curl podinfo
         run: "kubectl -n development exec -i deploy/client -c client -- curl http://istio-ingressgateway.istio-system.svc.cluster.local:80/ -H 'Host: podinfo.e2e.dev' -vvv"
+      - name: validate
+        run: make e2e.global.gateway.validate
       - name: check operator logs
         run: kubectl logs deployment/istio-ratelimit-operator-controller-manager -c manager --tail 50

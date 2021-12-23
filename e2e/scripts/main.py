@@ -9,7 +9,6 @@ from deployer.manifest import ManifestDeployer
 
 DEFAULT_CLUSTER_MANIFEST_DIR = "manifests/"
 
-
 @click.command()
 @click.option("--usecases",
               help="Usecases directory name",
