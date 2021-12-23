@@ -97,6 +97,7 @@ jobs:
         with:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
+          k3d-name: "${{ matrix.kubernetes }}-${{ matrix.istio }}-k3d-k3s"
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
