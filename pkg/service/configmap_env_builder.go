@@ -59,5 +59,9 @@ func (n *EnvBuilder) buildRedisEnv() (map[string]string, error) {
 	data["REDIS_TYPE"] = n.RateLimitService.Spec.Backend.Redis.Type
 	data["REDIS_URL"] = n.RateLimitService.Spec.Backend.Redis.URL
 
+	if n.RateLimitService.Spec.Backend.Redis.Auth != "" {
+		data["REDIS_AUTH"] = n.RateLimitService.Spec.Backend.Redis.Auth
+	}
+
 	return data, nil
 }

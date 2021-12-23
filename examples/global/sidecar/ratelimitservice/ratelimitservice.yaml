@@ -22,3 +22,5 @@ spec:
     redis:
       type: "single"
       url: "172.30.0.13:6379"
+      # optional:
+      # auth: "password"

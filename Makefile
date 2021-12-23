@@ -216,3 +216,21 @@ helm.create.releases:
 lint: 
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.41.1
 	golangci-lint run --verbose
+
+.PHONY: e2e.global.gateway
+e2e.global.gateway:
+	python3 ./e2e/scripts/main.py --usecases global.gateway
+
+.PHONY: e2e.global.gateway.validate
+e2e.global.gateway.validate:
+	kubectl port-forward -n istio-system service/istio-ingressgateway 8080:80 &
+	sleep 10
+	python3 ./e2e/scripts/validate.py --domain podinfo.e2e.dev --path / --gateway
+
+.PHONY: e2e.global.sidecar
+e2e.global.sidecar:
+	python3 ./e2e/scripts/main.py --usecases global.sidecar
+
+.PHONY: e2e.global.sidecar.validate
+e2e.global.sidecar.validate:
+	python3 ./e2e/scripts/validate.py --domain podinfo.development.svc.cluster.local --path /

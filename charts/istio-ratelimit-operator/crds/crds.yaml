@@ -334,6 +334,8 @@ spec:
                 properties:
                   redis:
                     properties:
+                      auth:
+                        type: string
                       type:
                         type: string
                       url:
