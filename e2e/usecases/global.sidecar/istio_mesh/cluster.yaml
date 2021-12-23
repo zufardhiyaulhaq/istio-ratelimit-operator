@@ -16,3 +16,4 @@ spec:
         replicaCount: 1
     ingressGateways:
     - enabled: false
+      name: istio-ingressgateway
