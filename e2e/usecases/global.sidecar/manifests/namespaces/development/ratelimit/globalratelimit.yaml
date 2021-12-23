@@ -2,7 +2,7 @@ apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: GlobalRateLimit
 metadata:
   name: podinfo-http-8080
-  namespace: istio-system
+  namespace: idevelopment
 spec:
   config: "podinfo"
   selector:
