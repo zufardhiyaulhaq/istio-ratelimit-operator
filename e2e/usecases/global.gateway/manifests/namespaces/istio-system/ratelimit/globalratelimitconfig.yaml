@@ -10,7 +10,6 @@ spec:
       app: istio-ingressgateway
       istio: ingressgateway
     istio_version:
-      - "1.10"
       - "1.11"
   ratelimit:
     spec:

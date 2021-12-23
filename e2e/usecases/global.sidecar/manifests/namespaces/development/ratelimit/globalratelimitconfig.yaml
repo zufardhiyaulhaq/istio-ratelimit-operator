@@ -9,7 +9,6 @@ spec:
     labels:
       app: podinfo
     istio_version:
-      - "1.10"
       - "1.11"
   ratelimit:
     spec:
