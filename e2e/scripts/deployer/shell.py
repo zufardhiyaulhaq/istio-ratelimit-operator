@@ -1,4 +1,5 @@
 import sys
+import os
 import subprocess
 
 class ShellDeployer():
@@ -21,3 +22,6 @@ class ShellDeployer():
             raise exc
         
         return output
+
+    def os_execute(self, command):
+        return os.popen(command).read()
