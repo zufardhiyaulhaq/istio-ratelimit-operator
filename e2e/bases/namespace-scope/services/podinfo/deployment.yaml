@@ -22,3 +22,6 @@ spec:
             cpu: 50m
             memory: 50Mi
         imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9898
+          protocol: TCP
