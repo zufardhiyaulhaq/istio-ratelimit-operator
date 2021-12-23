@@ -232,7 +232,7 @@ e2e.global.sidecar:
 	python3 ./e2e/scripts/main.py --usecases global.sidecar
 
 .PHONY: e2e.global.sidecar.validate
-e2e.global.gateway.validate:
+e2e.global.sidecar.validate:
 	kubectl port-forward -n development service/podinfo 8080:9898 &
 	sleep 10
 	python3 ./e2e/scripts/validate.py --domain podinfo --path /
