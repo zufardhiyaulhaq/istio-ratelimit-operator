@@ -21,7 +21,7 @@ def main(usecases):
     shell = ShellDeployer()
 
     kustomize = KustomizeDeployer(shell)
-    kustomize.deploy(dryrun=True)
+    kustomize.deploy()
     
     manifest = ManifestDeployer(shell, DEFAULT_CLUSTER_MANIFEST_DIR)
     manifest.deploy()
