@@ -1,0 +1,24 @@
+# permissions for end users to edit localratelimitconfigs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: localratelimitconfig-editor-role
+rules:
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - localratelimitconfigs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - localratelimitconfigs/status
+  verbs:
+  - get

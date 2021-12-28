@@ -134,6 +134,38 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - localratelimitconfigs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - localratelimitconfigs/status
+  verbs:
+  - get
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - localratelimitconfigs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - localratelimitconfigs/status
+  verbs:
+  - get
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1

@@ -24,10 +24,11 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/controllers"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
+	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/controllers"
 
 	ratelimitv1alpha1 "github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 	clientnetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
@@ -98,6 +99,13 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "RateLimitService")
+		os.Exit(1)
+	}
+	if err = (&controllers.LocalRateLimitConfigReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "LocalRateLimitConfig")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
