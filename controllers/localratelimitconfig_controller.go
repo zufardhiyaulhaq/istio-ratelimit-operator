@@ -18,13 +18,22 @@ package controllers
 
 import (
 	"context"
+	"fmt"
+	"time"
 
+	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/local/config"
+	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/utils"
+	"k8s.io/apimachinery/pkg/api/equality"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	ctrl "sigs.k8s.io/controller-runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
+	funk "github.com/thoas/go-funk"
 	ratelimitv1alpha1 "github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
+	clientnetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // LocalRateLimitConfigReconciler reconciles a LocalRateLimitConfig object
@@ -36,22 +45,83 @@ type LocalRateLimitConfigReconciler struct {
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=localratelimitconfigs,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=localratelimitconfigs/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=localratelimitconfigs/finalizers,verbs=update
-
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the LocalRateLimitConfig object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.9.2/pkg/reconcile
+ 
 func (r *LocalRateLimitConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	log := log.FromContext(ctx)
+	log.Info("Start LocalRateLimitConfig Reconciler")
 
-	// your logic here
+	localRateLimitConfig := &ratelimitv1alpha1.LocalRateLimitConfig{}
+	err := r.Client.Get(ctx, req.NamespacedName, localRateLimitConfig)
+	if err != nil {
+		return ctrl.Result{}, nil
+	}
 
-	return ctrl.Result{}, nil
+	log.Info("Build localratelimitconfig envoyfilters")
+	envoyFilters, err := config.NewConfigBuilder().
+		SetConfig(*localRateLimitConfig).
+		Build()
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if len(envoyFilters) == 0 {
+		return ctrl.Result{}, fmt.Errorf("empty localratelimitconfig envoyfilter from builder")
+	}
+
+	allVersionEnvoyFilterNames := utils.BuildEnvoyFilterNamesAllVersion(localRateLimitConfig.Name)
+	EnvoyFilterNames := utils.BuildEnvoyFilterNames(localRateLimitConfig.Name, localRateLimitConfig.Spec.Selector.IstioVersion)
+
+	deleteEnvoyFilters, _ := funk.DifferenceString(allVersionEnvoyFilterNames, EnvoyFilterNames)
+	for _, deleteEnvoyFilterName := range deleteEnvoyFilters {
+		deleteEnvoyFilter := &clientnetworking.EnvoyFilter{}
+		err := r.Client.Get(ctx, types.NamespacedName{Name: deleteEnvoyFilterName, Namespace: req.Namespace}, deleteEnvoyFilter)
+		if err != nil {
+			continue
+		}
+
+		log.Info("delete unused localratelimitconfig envoyfilter")
+		err = r.Client.Delete(ctx, deleteEnvoyFilter, &client.DeleteOptions{})
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	log.Info("create localratelimitconfig envoyfilters")
+	for _, envoyFilter := range envoyFilters {
+		err := ctrl.SetControllerReference(localRateLimitConfig, envoyFilter, r.Scheme)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		log.Info("get localratelimitconfig envoyfilter")
+		createdEnvoyFilter := &clientnetworking.EnvoyFilter{}
+		err = r.Client.Get(ctx, types.NamespacedName{Name: envoyFilter.Name, Namespace: envoyFilter.Namespace}, createdEnvoyFilter)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Info("create localratelimitconfig envoyfilter")
+				err := r.Client.Create(ctx, envoyFilter, &client.CreateOptions{})
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+
+				return ctrl.Result{RequeueAfter: 60 * time.Second}, nil
+			} else {
+				return ctrl.Result{}, err
+			}
+		}
+
+		if !equality.Semantic.DeepEqual(createdEnvoyFilter.Spec, envoyFilter.Spec) {
+			createdEnvoyFilter.Spec = envoyFilter.Spec
+
+			log.Info("update localratelimitconfig envoyfilter")
+			err := r.Client.Update(ctx, createdEnvoyFilter, &client.UpdateOptions{})
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+	}
+
+	return ctrl.Result{RequeueAfter: 60 * time.Second}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

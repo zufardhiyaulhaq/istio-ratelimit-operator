@@ -234,3 +234,11 @@ e2e.global.sidecar:
 .PHONY: e2e.global.sidecar.validate
 e2e.global.sidecar.validate:
 	python3 ./e2e/scripts/validate.py --domain podinfo.development.svc.cluster.local --path /
+
+.PHONY: e2e.local.sidecar
+e2e.local.sidecar:
+	python3 ./e2e/scripts/main.py --usecases local.sidecar
+
+.PHONY: e2e.local.sidecar.validate
+e2e.local.sidecar.validate:
+	python3 ./e2e/scripts/validate.py --domain podinfo.development.svc.cluster.local --path /
