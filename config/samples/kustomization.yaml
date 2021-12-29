@@ -4,4 +4,5 @@ resources:
 - ratelimit_v1alpha1_globalratelimit.yaml
 - ratelimit_v1alpha1_ratelimitservice.yaml
 - ratelimit_v1alpha1_localratelimitconfig.yaml
+- ratelimit_v1alpha1_localratelimit.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

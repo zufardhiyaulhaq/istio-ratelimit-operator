@@ -30,11 +30,12 @@ import (
 
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/controllers"
 
-	ratelimitv1alpha1 "github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 	clientnetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+
+	ratelimitv1alpha1 "github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -106,6 +107,13 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "LocalRateLimitConfig")
+		os.Exit(1)
+	}
+	if err = (&controllers.LocalRateLimitReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "LocalRateLimit")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

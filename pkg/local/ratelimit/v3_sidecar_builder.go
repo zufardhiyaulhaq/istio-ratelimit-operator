@@ -1,4 +1,4 @@
-package config
+package ratelimit
 
 import (
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
@@ -12,14 +12,16 @@ import (
 )
 
 type V3SidecarBuilder struct {
-	Config  v1alpha1.LocalRateLimitConfig
-	Version string
+	Config    v1alpha1.LocalRateLimitConfig
+	RateLimit v1alpha1.LocalRateLimit
+	Version   string
 }
 
-func NewV3SidecarBuilder(config v1alpha1.LocalRateLimitConfig, version string) *V3SidecarBuilder {
+func NewV3SidecarBuilder(config v1alpha1.LocalRateLimitConfig, ratelimit v1alpha1.LocalRateLimit, version string) *V3SidecarBuilder {
 	return &V3SidecarBuilder{
-		Config:  config,
-		Version: version,
+		Config:    config,
+		RateLimit: ratelimit,
+		Version:   version,
 	}
 }
 
@@ -35,8 +37,8 @@ func (g *V3SidecarBuilder) Build() (*clientnetworking.EnvoyFilter, error) {
 			APIVersion: "networking.istio.io/v1alpha3",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      g.Config.Name + "-" + g.Version,
-			Namespace: g.Config.Namespace,
+			Name:      g.RateLimit.Name + "-" + g.Version,
+			Namespace: g.RateLimit.Namespace,
 			Labels: map[string]string{
 				"istio/version": g.Version,
 			},
@@ -66,7 +68,7 @@ func (g *V3SidecarBuilder) buildConfigPatches() (*networking.EnvoyFilter_EnvoyCo
 	}
 
 	configPatches := &networking.EnvoyFilter_EnvoyConfigObjectPatch{
-		ApplyTo: networking.EnvoyFilter_HTTP_FILTER,
+		ApplyTo: networking.EnvoyFilter_HTTP_ROUTE,
 		Match:   match,
 		Patch:   patch,
 	}
@@ -77,14 +79,12 @@ func (g *V3SidecarBuilder) buildConfigPatches() (*networking.EnvoyFilter_EnvoyCo
 func (g *V3SidecarBuilder) buildMatch() (*networking.EnvoyFilter_EnvoyConfigObjectMatch, error) {
 	match := &networking.EnvoyFilter_EnvoyConfigObjectMatch{
 		Context: networking.EnvoyFilter_SIDECAR_INBOUND,
-		ObjectTypes: &networking.EnvoyFilter_EnvoyConfigObjectMatch_Listener{
-			Listener: &networking.EnvoyFilter_ListenerMatch{
-				FilterChain: &networking.EnvoyFilter_ListenerMatch_FilterChainMatch{
-					Filter: &networking.EnvoyFilter_ListenerMatch_FilterMatch{
-						Name: "envoy.filters.network.http_connection_manager",
-						SubFilter: &networking.EnvoyFilter_ListenerMatch_SubFilterMatch{
-							Name: "envoy.filters.http.router",
-						},
+		ObjectTypes: &networking.EnvoyFilter_EnvoyConfigObjectMatch_RouteConfiguration{
+			RouteConfiguration: &networking.EnvoyFilter_RouteConfigurationMatch{
+				Vhost: &networking.EnvoyFilter_RouteConfigurationMatch_VirtualHostMatch{
+					Name: g.RateLimit.Spec.Selector.VHost,
+					Route: &networking.EnvoyFilter_RouteConfigurationMatch_RouteMatch{
+						Action: networking.EnvoyFilter_RouteConfigurationMatch_RouteMatch_ANY,
 					},
 				},
 			},
@@ -102,7 +102,7 @@ func (g *V3SidecarBuilder) buildPatch() (*networking.EnvoyFilter_Patch, error) {
 	}
 
 	patch := &networking.EnvoyFilter_Patch{
-		Operation: networking.EnvoyFilter_Patch_INSERT_BEFORE,
+		Operation: networking.EnvoyFilter_Patch_MERGE,
 		Value:     utils.ConvertYaml2Struct(value),
 	}
 
@@ -110,13 +110,29 @@ func (g *V3SidecarBuilder) buildPatch() (*networking.EnvoyFilter_Patch, error) {
 }
 
 func (g *V3SidecarBuilder) buildPatchValue() (string, error) {
-	values := types.LocalRateLimit_HTTPFilter{
-		Name: "envoy.filters.http.ratelimit",
-		TypedConfig: types.LocalRateLimit_TypedConfig{
-			Type:    "type.googleapis.com/udpa.type.v1.TypedStruct",
-			TypeURL: "type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit",
-			Value: types.LocalRateLimit{
-				StatPrefix: "http_local_rate_limiter",
+	values := types.LocalRateLimit_HTTPRoute{
+		TypedPerFilterConfig: types.LocalRateLimit_TypedPerFilterConfig{
+			TypedConfig: types.LocalRateLimit_TypedConfig{
+				Type:    "type.googleapis.com/udpa.type.v1.TypedStruct",
+				TypeURL: "type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit",
+				Value: types.LocalRateLimit{
+					StatPrefix:  "http_local_rate_limiter",
+					TokenBucket: g.RateLimit.Spec.Limit.ToTokenBucket(),
+					FilterEnabled: &types.LocalRateLimit_RuntimeFractionalPercent{
+						RuntimeKey: "local_rate_limit_enabled",
+						DefaultValue: &types.LocalRateLimit_FractionalPercent{
+							Numerator:   100,
+							Denominator: types.FractionalPercent_HUNDRED,
+						},
+					},
+					FilterEnforced: &types.LocalRateLimit_RuntimeFractionalPercent{
+						RuntimeKey: "local_rate_limit_enforced",
+						DefaultValue: &types.LocalRateLimit_FractionalPercent{
+							Numerator:   100,
+							Denominator: types.FractionalPercent_HUNDRED,
+						},
+					},
+				},
 			},
 		},
 	}

@@ -135,6 +135,32 @@ rules:
 - apiGroups:
   - ratelimit.zufardhiyaulhaq.com
   resources:
+  - localratelimits
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - localratelimits/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - localratelimits/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
   - ratelimitservices
   verbs:
   - create

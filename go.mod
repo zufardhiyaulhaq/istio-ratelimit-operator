@@ -11,6 +11,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/thoas/go-funk v0.9.1
 	golang.org/x/tools v0.1.3 // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	istio.io/api v0.0.0-20210910210758-d6ce87e3e159
 	istio.io/client-go v1.12.0-alpha.1
