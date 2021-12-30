@@ -26,8 +26,6 @@ class RatelimitValidator():
             
             for sequence in range(retry):
                 out = self.shell.os_execute(' '.join(validate_command))
-                print(' '.join(validate_command))
-                print(out)
                 if '"http_code":429' not in out:
                     if sequence is not retry-1:
                         continue   
@@ -39,7 +37,6 @@ class RatelimitValidator():
                               "--", "curl", "http://%s:9898%s" %(domain, path), "-H", "'Host:", "%s'" %(domain), "--write-out", "'%{json}'"]
             for sequence in range(retry):
                 out = self.shell.os_execute(' '.join(validate_command))
-                print(out)
                 if '"http_code":429' not in out:
                     if sequence is not retry-1:
                         continue
