@@ -45,7 +45,7 @@ apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: LocalRateLimitConfig
 metadata:
   name: gateway
-  namespace: development
+  namespace: istio-system
 spec:
   type: "gateway"
   selector:
@@ -63,7 +63,7 @@ apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: LocalRateLimit
 metadata:
   name: podinfo-default-route
-  namespace: development
+  namespace: istio-system
 spec:
   config: "gateway"
   selector:

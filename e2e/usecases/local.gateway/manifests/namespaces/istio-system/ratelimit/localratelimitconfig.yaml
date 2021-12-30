@@ -2,7 +2,7 @@ apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: LocalRateLimitConfig
 metadata:
   name: gateway
-  namespace: development
+  namespace: istio-system
 spec:
   type: "gateway"
   selector:
