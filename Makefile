@@ -249,4 +249,6 @@ e2e.local.gateway:
 
 .PHONY: e2e.local.gateway.validate
 e2e.local.gateway.validate:
+	kubectl port-forward -n istio-system service/istio-ingressgateway 8080:80 &
+	sleep 10
 	python3 ./e2e/scripts/validate.py --retry 2 --domain podinfo.e2e.dev --path / --gateway
