@@ -1,0 +1,13 @@
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: LocalRateLimitConfig
+metadata:
+  name: gateway
+  namespace: development
+spec:
+  type: "gateway"
+  selector:
+    labels:
+      app: istio-ingressgateway
+      istio: ingressgateway
+    istio_version:
+      - "1.11"

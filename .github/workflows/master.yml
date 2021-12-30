@@ -173,3 +173,109 @@ jobs:
         run: sleep 60
       - name: validate
         run: make e2e.global.sidecar.validate
+  e2e-local-sidecar:
+    runs-on: ubuntu-latest
+    needs:
+      - image
+    strategy:
+      fail-fast: false
+      matrix:
+        kubernetes: [v1.21]
+        istio: ["1.11.5"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+          architecture: x64
+      - name: Install Python dependencies
+        uses: py-actions/py-dependency-install@v2
+        with:
+          path: "e2e/scripts/requirements.txt"
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'v1.21.7'
+      - name: Setup kustomize
+        uses: yokawasa/action-setup-kube-tools@v0.7.1
+        with:
+          kustomize: '3.8.3'
+      - name: Setup helm
+        uses: azure/setup-helm@v1
+        with:
+          version: 'v3.3.1'
+      - name: Install kubernetes
+        uses: nolar/setup-k3d-k3s@v1
+        with:
+          version: "${{ matrix.kubernetes }}"
+          k3d-args: --no-lb
+          k3d-name: "e2e-local-sidecar-k3d-k3s"
+      - name: Setup Istioctl
+        uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
+        with:
+          version: "${{ matrix.istio }}"
+      - name: Deploy charts
+        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
+      - name: Install istio
+        run: istioctl upgrade -f ./e2e/usecases/local.sidecar/istio_mesh/cluster.yaml --force --skip-confirmation
+      - name: Deploy manifests
+        run: make e2e.local.sidecar
+      - name: Waiting every object to be created
+        run: sleep 60
+      - name: validate
+        run: make e2e.local.sidecar.validate
+  e2e-local-gateway:
+    runs-on: ubuntu-latest
+    needs:
+      - image
+    strategy:
+      fail-fast: false
+      matrix:
+        kubernetes: [v1.21]
+        istio: ["1.11.5"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+          architecture: x64
+      - name: Install Python dependencies
+        uses: py-actions/py-dependency-install@v2
+        with:
+          path: "e2e/scripts/requirements.txt"
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'v1.21.7'
+      - name: Setup kustomize
+        uses: yokawasa/action-setup-kube-tools@v0.7.1
+        with:
+          kustomize: '3.8.3'
+      - name: Setup helm
+        uses: azure/setup-helm@v1
+        with:
+          version: 'v3.3.1'
+      - name: Install kubernetes
+        uses: nolar/setup-k3d-k3s@v1
+        with:
+          version: "${{ matrix.kubernetes }}"
+          k3d-args: --no-lb
+          k3d-name: "e2e-local-gateway-k3d-k3s"
+      - name: Setup Istioctl
+        uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
+        with:
+          version: "${{ matrix.istio }}"
+      - name: Deploy charts
+        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
+      - name: Install istio
+        run: istioctl upgrade -f ./e2e/usecases/local.gateway/istio_mesh/cluster.yaml --force --skip-confirmation
+      - name: Deploy manifests
+        run: make e2e.local.gateway
+      - name: Waiting every object to be created
+        run: sleep 60
+      - name: validate
+        run: make e2e.local.gateway.validate

@@ -1,0 +1,14 @@
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: LocalRateLimit
+metadata:
+  name: podinfo-default-route
+  namespace: development
+spec:
+  config: "gateway"
+  selector:
+    vhost: "podinfo.e2e.dev:80"
+    route: "default-route"
+  limit:
+    unit: hour
+    requests_per_unit: 1
+

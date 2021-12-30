@@ -31,6 +31,7 @@ type LocalRateLimitConfigSpec struct {
 type LocalRateLimitConfigSelector struct {
 	Labels       map[string]string `json:"labels"`
 	IstioVersion []string          `json:"istio_version"`
+	SNI          *string           `json:"sni,omitempty"`
 }
 
 // LocalRateLimitConfigStatus defines the observed state of LocalRateLimitConfig
