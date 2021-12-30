@@ -1,0 +1,13 @@
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: LocalRateLimit
+metadata:
+  name: podinfo-http-9898
+  namespace: development
+spec:
+  config: "podinfo"
+  selector:
+    vhost: "inbound|http|9898"
+  limit:
+    unit: hour
+    requests_per_unit: 1
+

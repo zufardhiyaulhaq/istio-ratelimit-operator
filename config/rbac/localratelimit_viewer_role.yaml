@@ -1,0 +1,20 @@
+# permissions for end users to view localratelimits.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: localratelimit-viewer-role
+rules:
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - localratelimits
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ratelimit.zufardhiyaulhaq.com
+  resources:
+  - localratelimits/status
+  verbs:
+  - get

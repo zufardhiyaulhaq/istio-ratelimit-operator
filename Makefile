@@ -234,3 +234,21 @@ e2e.global.sidecar:
 .PHONY: e2e.global.sidecar.validate
 e2e.global.sidecar.validate:
 	python3 ./e2e/scripts/validate.py --domain podinfo.development.svc.cluster.local --path /
+
+.PHONY: e2e.local.sidecar
+e2e.local.sidecar:
+	python3 ./e2e/scripts/main.py --usecases local.sidecar
+
+.PHONY: e2e.local.sidecar.validate
+e2e.local.sidecar.validate:
+	python3 ./e2e/scripts/validate.py --retry 2 --domain podinfo.development.svc.cluster.local --path /
+
+.PHONY: e2e.local.gateawy
+e2e.local.gateway:
+	python3 ./e2e/scripts/main.py --usecases local.gateway
+
+.PHONY: e2e.local.gateway.validate
+e2e.local.gateway.validate:
+	kubectl port-forward -n istio-system service/istio-ingressgateway 8080:80 &
+	sleep 10
+	python3 ./e2e/scripts/validate.py --retry 2 --domain podinfo.e2e.dev --path / --gateway
