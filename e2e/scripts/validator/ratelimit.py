@@ -16,7 +16,7 @@ class RatelimitValidator():
             for sequence in range(retry):
                 response = requests.get('http://localhost:8080%s' % path, headers=headers)
                 if response.status_code != 429:
-                    if sequence is not retry:
+                    if sequence is not retry-1:
                         continue
                     raise Exception("response code: %d, it's not ratelimited" % response.status_code) 
             
@@ -29,7 +29,7 @@ class RatelimitValidator():
                 print(' '.join(validate_command))
                 print(out)
                 if '"http_code":429' not in out:
-                    if sequence is not retry:
+                    if sequence is not retry-1:
                         continue   
                     raise Exception("it's not ratelimited") 
         
@@ -41,7 +41,7 @@ class RatelimitValidator():
                 out = self.shell.os_execute(' '.join(validate_command))
                 print(out)
                 if '"http_code":429' not in out:
-                    if sequence is not retry:
+                    if sequence is not retry-1:
                         continue
                     raise Exception("it's not ratelimited") 
             
