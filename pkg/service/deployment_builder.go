@@ -85,8 +85,7 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      n.RateLimitService.Name + "-config",
-									MountPath: "/data/ratelimit/config/config.yaml",
-									SubPath:   "config.yaml",
+									MountPath: "/data/ratelimit/config/",
 								},
 							},
 						},
@@ -98,16 +97,6 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 								ConfigMap: &corev1.ConfigMapVolumeSource{
 									LocalObjectReference: corev1.LocalObjectReference{
 										Name: n.RateLimitService.Name + "-config",
-									},
-								},
-							},
-						},
-						{
-							Name: n.RateLimitService.Name + "-config-env",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: n.RateLimitService.Name + "-config-env",
 									},
 								},
 							},
@@ -135,11 +124,15 @@ func (n *DeploymentBuilder) BuildEnv() []corev1.EnvVar {
 	env := []corev1.EnvVar{
 		{
 			Name:  "RUNTIME_ROOT",
-			Value: "/data",
+			Value: "/data/ratelimit/",
 		},
 		{
-			Name:  "RUNTIME_SUBDIRECTORY",
-			Value: "ratelimit",
+			Name:  "RUNTIME_WATCH_ROOT",
+			Value: "false",
+		},
+		{
+			Name:  "RUNTIME_IGNOREDOTFILES",
+			Value: "true",
 		},
 	}
 
