@@ -4,5 +4,3 @@ run:
     - config$
     - e2e$
   skip-dirs-use-default: true
-
-
