@@ -17,7 +17,7 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.41.1
-          args: --timeout 300s --skip-dirs "charts$|e2e$|config$"
+          args: --timeout 300s --skip-dirs "(charts|e2e|config)"
   test:
     runs-on: ubuntu-latest
     steps:
