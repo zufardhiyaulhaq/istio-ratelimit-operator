@@ -6,7 +6,6 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/champly/lib4go v0.0.0-20210810011059-eb374f933ec2
 	github.com/gogo/protobuf v1.3.2
-	github.com/norwoodj/helm-docs v1.6.0 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.13.0
 	github.com/stretchr/testify v1.7.0
