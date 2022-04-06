@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strconv"
+
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
@@ -58,6 +60,12 @@ func (n *EnvBuilder) buildRedisEnv() (map[string]string, error) {
 	data["USE_STATSD"] = "false"
 	data["REDIS_TYPE"] = n.RateLimitService.Spec.Backend.Redis.Type
 	data["REDIS_URL"] = n.RateLimitService.Spec.Backend.Redis.URL
+
+	if n.RateLimitService.Spec.Monitoring.Statsd.Enabled {
+		data["USE_STATSD"] = "true"
+		data["STATSD_HOST"] = n.RateLimitService.Spec.Monitoring.Statsd.Spec.Host
+		data["STATSD_PORT"] = strconv.Itoa(n.RateLimitService.Spec.Monitoring.Statsd.Spec.Port)
+	}
 
 	if n.RateLimitService.Spec.Backend.Redis.Auth != "" {
 		data["REDIS_AUTH"] = n.RateLimitService.Spec.Backend.Redis.Auth

@@ -90,6 +90,21 @@ spec:
                         type: object
                     type: object
                 type: object
+              monitoring:
+                properties:
+                  statsd:
+                    properties:
+                      enabled:
+                        type: boolean
+                      spec:
+                        properties:
+                          host:
+                            type: string
+                          port:
+                            type: integer
+                        type: object
+                    type: object
+                type: object
             type: object
           status:
             type: object
