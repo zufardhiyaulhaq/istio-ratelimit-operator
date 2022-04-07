@@ -4,14 +4,13 @@ go 1.16
 
 require (
 	github.com/Masterminds/semver v1.5.0
-	github.com/Masterminds/sprig v2.20.0+incompatible // indirect
 	github.com/champly/lib4go v0.0.0-20210810011059-eb374f933ec2
 	github.com/gogo/protobuf v1.3.2
-	github.com/norwoodj/helm-docs v1.8.1 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.13.0
 	github.com/stretchr/testify v1.7.0
 	github.com/thoas/go-funk v0.9.1
+	golang.org/x/sys v0.0.0-20220330033206-e17cdc41300f // indirect
 	golang.org/x/tools v0.1.3 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0
