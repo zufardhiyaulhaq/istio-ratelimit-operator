@@ -20,3 +20,9 @@ spec:
     redis:
       type: "single"
       url: "redis.istio-system.svc.cluster.local:6379"
+  monitoring:
+    statsd:
+      enabled: true
+      spec:
+        host: localhost
+        port: 8125

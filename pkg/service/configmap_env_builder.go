@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strconv"
+
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
@@ -29,15 +31,42 @@ func (n *EnvBuilder) Build() (*corev1.ConfigMap, error) {
 		},
 	}
 
+	data := make(map[string]string)
+
+	defaultEnv, err := n.buildDefaultEnv()
+	if err != nil {
+		return configMap, err
+	}
+
+	for key, value := range defaultEnv {
+		data[key] = value
+	}
+
 	if n.RateLimitService.Spec.Backend.Redis != nil {
-		data, err := n.buildRedisEnv()
+		redisEnv, err := n.buildRedisEnv()
 		if err != nil {
 			return configMap, err
 		}
 
-		configMap.Data = data
+		for key, value := range redisEnv {
+			data[key] = value
+		}
 	}
 
+	if n.RateLimitService.Spec.Monitoring != nil {
+		if n.RateLimitService.Spec.Monitoring.Statsd != nil {
+			statsdEnv, err := n.buildStatsdEnv()
+			if err != nil {
+				return configMap, err
+			}
+
+			for key, value := range statsdEnv {
+				data[key] = value
+			}
+		}
+	}
+
+	configMap.Data = data
 	return configMap, nil
 }
 
@@ -51,16 +80,35 @@ func (n *EnvBuilder) buildLabels() map[string]string {
 	return labels
 }
 
+func (n *EnvBuilder) buildDefaultEnv() (map[string]string, error) {
+	data := make(map[string]string)
+
+	data["USE_STATSD"] = "false"
+
+	return data, nil
+}
+
 func (n *EnvBuilder) buildRedisEnv() (map[string]string, error) {
 	data := make(map[string]string)
 
 	data["REDIS_SOCKET_TYPE"] = "tcp"
-	data["USE_STATSD"] = "false"
 	data["REDIS_TYPE"] = n.RateLimitService.Spec.Backend.Redis.Type
 	data["REDIS_URL"] = n.RateLimitService.Spec.Backend.Redis.URL
 
 	if n.RateLimitService.Spec.Backend.Redis.Auth != "" {
 		data["REDIS_AUTH"] = n.RateLimitService.Spec.Backend.Redis.Auth
+	}
+
+	return data, nil
+}
+
+func (n *EnvBuilder) buildStatsdEnv() (map[string]string, error) {
+	data := make(map[string]string)
+
+	if n.RateLimitService.Spec.Monitoring.Statsd.Enabled {
+		data["USE_STATSD"] = "true"
+		data["STATSD_HOST"] = n.RateLimitService.Spec.Monitoring.Statsd.Spec.Host
+		data["STATSD_PORT"] = strconv.Itoa(n.RateLimitService.Spec.Monitoring.Statsd.Spec.Port)
 	}
 
 	return data, nil

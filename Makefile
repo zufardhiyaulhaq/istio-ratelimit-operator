@@ -243,7 +243,7 @@ e2e.local.sidecar:
 e2e.local.sidecar.validate:
 	python3 ./e2e/scripts/validate.py --retry 2 --domain podinfo.development.svc.cluster.local --path /
 
-.PHONY: e2e.local.gateawy
+.PHONY: e2e.local.gateway
 e2e.local.gateway:
 	python3 ./e2e/scripts/main.py --usecases local.gateway
 

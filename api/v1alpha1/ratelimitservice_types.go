@@ -25,6 +25,7 @@ import (
 type RateLimitServiceSpec struct {
 	Kubernetes *RateLimitServiceSpec_Kubernetes `json:"kubernetes,omitempty"`
 	Backend    *RateLimitServiceSpec_Backend    `json:"backend,omitempty"`
+	Monitoring *RateLimitServiceSpec_Monitoring `json:"monitoring,omitempty"`
 }
 
 type RateLimitServiceSpec_Kubernetes struct {
@@ -39,13 +40,27 @@ type RateLimitServiceSpec_Kubernetes_AutoScaling struct {
 }
 
 type RateLimitServiceSpec_Backend struct {
-	Redis *RateLimitService_RedisBackend `json:"redis,omitempty"`
+	Redis *RateLimitServiceSpec_Backend_Redis `json:"redis,omitempty"`
 }
 
-type RateLimitService_RedisBackend struct {
+type RateLimitServiceSpec_Backend_Redis struct {
 	Type string `json:"type,omitempty"`
 	URL  string `json:"url,omitempty"`
 	Auth string `json:"auth,omitempty"`
+}
+
+type RateLimitServiceSpec_Monitoring struct {
+	Statsd *RateLimitServiceSpec_Monitoring_Statsd `json:"statsd,omitempty"`
+}
+
+type RateLimitServiceSpec_Monitoring_Statsd struct {
+	Enabled bool                                        `json:"enabled,omitempty"`
+	Spec    RateLimitServiceSpec_Monitoring_Statsd_Spec `json:"spec,omitempty"`
+}
+
+type RateLimitServiceSpec_Monitoring_Statsd_Spec struct {
+	Host string `json:"host,omitempty"`
+	Port int    `json:"port,omitempty"`
 }
 
 type RateLimitServiceStatus struct {
