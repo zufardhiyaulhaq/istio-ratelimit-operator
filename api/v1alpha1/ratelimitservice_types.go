@@ -54,13 +54,13 @@ type RateLimitServiceSpec_Monitoring struct {
 }
 
 type RateLimitServiceSpec_Monitoring_Statsd struct {
-	Enabled bool `json:"enabled,omitempty"`
-	Spec RateLimitServiceSpec_Monitoring_Statsd_Spec `json:"spec,omitempty"`
+	Enabled bool                                        `json:"enabled,omitempty"`
+	Spec    RateLimitServiceSpec_Monitoring_Statsd_Spec `json:"spec,omitempty"`
 }
 
 type RateLimitServiceSpec_Monitoring_Statsd_Spec struct {
 	Host string `json:"host,omitempty"`
-	Port int `json:"port,omitempty"`
+	Port int    `json:"port,omitempty"`
 }
 
 type RateLimitServiceStatus struct {
