@@ -66,6 +66,7 @@ func (n *EnvBuilder) Build() (*corev1.ConfigMap, error) {
 		}
 	}
 
+	configMap.Data = data
 	return configMap, nil
 }
 

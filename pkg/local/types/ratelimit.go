@@ -30,4 +30,3 @@ const (
 	FractionalPercent_TEN_THOUSAND LocalRateLimit_FractionalPercent_DenominatorType = "TEN_THOUSAND"
 	FractionalPercent_MILLION      LocalRateLimit_FractionalPercent_DenominatorType = "MILLION"
 )
-
