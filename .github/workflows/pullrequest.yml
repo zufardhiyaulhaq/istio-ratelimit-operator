@@ -168,6 +168,8 @@ jobs:
         run: kubectl get envoyfilter --all-namespaces
       - name: Get pod
         run: kubectl get pod --all-namespaces
+      - name: Logs
+        run: kubectl logs deploy/ingressgateway-ratelimit-service -n istio-system
       - name: validate
         run: make e2e.global.sidecar.validate
   e2e-local-sidecar:
@@ -225,6 +227,8 @@ jobs:
         run: kubectl get envoyfilter --all-namespaces
       - name: Get pod
         run: kubectl get pod --all-namespaces
+      - name: Logs
+        run: kubectl logs deploy/ingressgateway-ratelimit-service -n istio-system
       - name: validate
         run: make e2e.local.sidecar.validate
   e2e-local-gateway:
