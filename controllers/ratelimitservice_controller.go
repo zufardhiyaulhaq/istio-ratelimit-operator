@@ -32,6 +32,7 @@ import (
 	ratelimitv1alpha1 "github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/service"
 	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv2beta2 "k8s.io/api/autoscaling/v2beta2"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -48,6 +49,7 @@ type RateLimitServiceReconciler struct {
 //+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=services,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="autoscaling",resources=horizontalpodautoscaler,verbs=get;list;watch;create;update;patch;delete
 
 //+kubebuilder:rbac:groups=networking.istio.io,resources=envoyfilters,verbs=get;list;watch;create;update;patch;delete
 
@@ -257,6 +259,38 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			return ctrl.Result{Requeue: true}, nil
 		} else {
 			return ctrl.Result{}, err
+		}
+	}
+
+	if rateLimitService.Spec.Kubernetes.AutoScaling != nil {
+		hpa, err := service.NewHorizontalPodAutoscalerBuilder().
+			SetRateLimitService(*rateLimitService).
+			Build()
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		log.Info("set reference hpa")
+		err = ctrl.SetControllerReference(rateLimitService, hpa, r.Scheme)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		log.Info("get hpa")
+		createdHPA := &autoscalingv2beta2.HorizontalPodAutoscaler{}
+		err = r.Client.Get(ctx, types.NamespacedName{Name: hpa.Name, Namespace: hpa.Namespace}, createdHPA)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				log.Info("create hpa")
+				err = r.Client.Create(ctx, hpa)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+
+				return ctrl.Result{Requeue: true}, nil
+			} else {
+				return ctrl.Result{}, err
+			}
 		}
 	}
 
