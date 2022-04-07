@@ -100,7 +100,7 @@ public-gateway.method.grault-route_grault-route: unit=HOUR requests_per_unit=60
 |-----|------|---------|-------------|
 | operator.image | string | `"zufardhiyaulhaq/istio-ratelimit-operator"` |  |
 | operator.replica | int | `1` |  |
-| operator.tag | string | `"v2.3.0"` |  |
+| operator.tag | string | `"v2.4.0"` |  |
 | resources.limits.cpu | string | `"512m"` |  |
 | resources.limits.memory | string | `"512Mi"` |  |
 | resources.requests.cpu | string | `"256m"` |  |
