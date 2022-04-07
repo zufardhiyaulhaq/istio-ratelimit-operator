@@ -22,5 +22,13 @@ spec:
     redis:
       type: "single"
       url: "172.30.0.13:6379"
-      # optional:
+      ### optional to enabled redis auth
       # auth: "password"
+  ### optional to enable statsd
+  # monitoring:
+  #   statsd:
+  #     enabled: true
+  #     spec:
+  #       host: localhost
+  #       port: 8125
+
