@@ -31,7 +31,7 @@ func (n *EnvBuilder) Build() (*corev1.ConfigMap, error) {
 		},
 	}
 
-	var data map[string]string
+	data := make(map[string]string)
 
 	defaultEnv, err := n.buildDefaultEnv()
 	if err != nil {
