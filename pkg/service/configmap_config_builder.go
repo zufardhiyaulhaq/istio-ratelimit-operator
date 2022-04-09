@@ -107,7 +107,7 @@ func NewRateLimitDescriptorFromGlobalRateLimit(globalRateLimit v1alpha1.GlobalRa
 	var sanitizeMatchers []*v1alpha1.GlobalRateLimit_Action
 
 	for _, matcher := range globalRateLimit.Spec.Matcher {
-		if matcher.RequestHeaders != nil || matcher.GenericKey != nil {
+		if matcher.RequestHeaders != nil || matcher.GenericKey != nil || matcher.HeaderValueMatch != nil {
 			sanitizeMatchers = append(sanitizeMatchers, matcher)
 			continue
 		}
@@ -146,8 +146,8 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 		if err != nil {
 			return descriptor, fmt.Errorf("error")
 		}
-		descriptor[0].Descriptors = nestedDescriptor
 
+		descriptor[0].Descriptors = nestedDescriptor
 		return descriptor, nil
 	}
 
@@ -159,6 +159,26 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 		}
 
 		descriptor[0].Value = matcher.GenericKey.DescriptorValue
+
+		if len(matchers) == 1 {
+			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
+			descriptor[0].RateLimit.Unit = limit.Unit
+
+			return descriptor, nil
+		}
+
+		nestedDescriptor, err := NewRateLimitDescriptorFromMatcher(matchers[1:], limit)
+		if err != nil {
+			return descriptor, fmt.Errorf("error")
+		}
+
+		descriptor[0].Descriptors = nestedDescriptor
+		return descriptor, nil
+	}
+
+	if matcher.HeaderValueMatch != nil {
+		descriptor[0].Key = "header_match"
+		descriptor[0].Value = matcher.HeaderValueMatch.DescriptorValue
 
 		if len(matchers) == 1 {
 			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
