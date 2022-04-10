@@ -34,7 +34,7 @@ func (n *ConfigBuilder) Build() (*corev1.ConfigMap, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      n.RateLimitService.Name + "-config",
 			Namespace: n.RateLimitService.Namespace,
-			Labels:    n.buildLabels(),
+			Labels:    n.BuildLabels(),
 		},
 		Data: map[string]string{
 			"config.yaml": n.Config,
@@ -44,7 +44,7 @@ func (n *ConfigBuilder) Build() (*corev1.ConfigMap, error) {
 	return configMap, nil
 }
 
-func (n *ConfigBuilder) buildLabels() map[string]string {
+func (n *ConfigBuilder) BuildLabels() map[string]string {
 	var labels = map[string]string{
 		"app.kubernetes.io/name":       n.RateLimitService.Name + "-config",
 		"app.kubernetes.io/managed-by": "istio-rateltimit-operator",

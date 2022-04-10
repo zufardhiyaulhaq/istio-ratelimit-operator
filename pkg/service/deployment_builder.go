@@ -32,15 +32,15 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      n.RateLimitService.Name,
 			Namespace: n.RateLimitService.Namespace,
-			Labels:    n.buildLabels(),
+			Labels:    n.BuildLabels(),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
-				MatchLabels: n.buildLabels(),
+				MatchLabels: n.BuildLabels(),
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: n.buildLabels(),
+					Labels: n.BuildLabels(),
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
@@ -139,7 +139,7 @@ func (n *DeploymentBuilder) BuildEnv() []corev1.EnvVar {
 	return env
 }
 
-func (n *DeploymentBuilder) buildLabels() map[string]string {
+func (n *DeploymentBuilder) BuildLabels() map[string]string {
 	var labels = map[string]string{
 		"app.kubernetes.io/name":       n.RateLimitService.Name,
 		"app.kubernetes.io/managed-by": "istio-rateltimit-operator",

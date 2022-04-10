@@ -33,3 +33,6 @@ __pycache__/
 # kustomize
 rendered.yml
 rendered.yaml
+
+# test
+output
