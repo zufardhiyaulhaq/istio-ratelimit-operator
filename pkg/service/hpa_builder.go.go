@@ -26,7 +26,7 @@ func (n *HorizontalPodAutoscalerBuilder) Build() (*autoscalingv2beta2.Horizontal
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      n.RateLimitService.Name,
 			Namespace: n.RateLimitService.Namespace,
-			Labels:    n.buildLabels(),
+			Labels:    n.BuildLabels(),
 		},
 		Spec: autoscalingv2beta2.HorizontalPodAutoscalerSpec{
 			MinReplicas: n.RateLimitService.Spec.Kubernetes.AutoScaling.MinReplica,
@@ -54,7 +54,7 @@ func (n *HorizontalPodAutoscalerBuilder) Build() (*autoscalingv2beta2.Horizontal
 	return HorizontalPodAutoscaler, nil
 }
 
-func (n *HorizontalPodAutoscalerBuilder) buildLabels() map[string]string {
+func (n *HorizontalPodAutoscalerBuilder) BuildLabels() map[string]string {
 	var labels = map[string]string{
 		"app.kubernetes.io/name":       n.RateLimitService.Name,
 		"app.kubernetes.io/managed-by": "istio-rateltimit-operator",

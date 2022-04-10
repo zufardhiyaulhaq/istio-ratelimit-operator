@@ -27,13 +27,13 @@ func (n *EnvBuilder) Build() (*corev1.ConfigMap, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      n.RateLimitService.Name + "-config-env",
 			Namespace: n.RateLimitService.Namespace,
-			Labels:    n.buildLabels(),
+			Labels:    n.BuildLabels(),
 		},
 	}
 
 	data := make(map[string]string)
 
-	defaultEnv, err := n.buildDefaultEnv()
+	defaultEnv, err := n.BuildDefaultEnv()
 	if err != nil {
 		return configMap, err
 	}
@@ -43,7 +43,7 @@ func (n *EnvBuilder) Build() (*corev1.ConfigMap, error) {
 	}
 
 	if n.RateLimitService.Spec.Backend.Redis != nil {
-		redisEnv, err := n.buildRedisEnv()
+		redisEnv, err := n.BuildRedisEnv()
 		if err != nil {
 			return configMap, err
 		}
@@ -55,7 +55,7 @@ func (n *EnvBuilder) Build() (*corev1.ConfigMap, error) {
 
 	if n.RateLimitService.Spec.Monitoring != nil {
 		if n.RateLimitService.Spec.Monitoring.Statsd != nil {
-			statsdEnv, err := n.buildStatsdEnv()
+			statsdEnv, err := n.BuildStatsdEnv()
 			if err != nil {
 				return configMap, err
 			}
@@ -70,7 +70,7 @@ func (n *EnvBuilder) Build() (*corev1.ConfigMap, error) {
 	return configMap, nil
 }
 
-func (n *EnvBuilder) buildLabels() map[string]string {
+func (n *EnvBuilder) BuildLabels() map[string]string {
 	var labels = map[string]string{
 		"app.kubernetes.io/name":       n.RateLimitService.Name + "-config-env",
 		"app.kubernetes.io/managed-by": "istio-rateltimit-operator",
@@ -80,7 +80,7 @@ func (n *EnvBuilder) buildLabels() map[string]string {
 	return labels
 }
 
-func (n *EnvBuilder) buildDefaultEnv() (map[string]string, error) {
+func (n *EnvBuilder) BuildDefaultEnv() (map[string]string, error) {
 	data := make(map[string]string)
 
 	data["USE_STATSD"] = "false"
@@ -88,7 +88,7 @@ func (n *EnvBuilder) buildDefaultEnv() (map[string]string, error) {
 	return data, nil
 }
 
-func (n *EnvBuilder) buildRedisEnv() (map[string]string, error) {
+func (n *EnvBuilder) BuildRedisEnv() (map[string]string, error) {
 	data := make(map[string]string)
 
 	data["REDIS_SOCKET_TYPE"] = "tcp"
@@ -102,7 +102,7 @@ func (n *EnvBuilder) buildRedisEnv() (map[string]string, error) {
 	return data, nil
 }
 
-func (n *EnvBuilder) buildStatsdEnv() (map[string]string, error) {
+func (n *EnvBuilder) BuildStatsdEnv() (map[string]string, error) {
 	data := make(map[string]string)
 
 	if n.RateLimitService.Spec.Monitoring.Statsd.Enabled {

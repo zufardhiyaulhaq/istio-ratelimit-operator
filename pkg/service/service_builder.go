@@ -26,10 +26,10 @@ func (n *ServiceBuilder) Build() (*corev1.Service, error) {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      n.RateLimitService.Name,
 			Namespace: n.RateLimitService.Namespace,
-			Labels:    n.buildLabels(),
+			Labels:    n.BuildLabels(),
 		},
 		Spec: corev1.ServiceSpec{
-			Selector: n.buildLabels(),
+			Selector: n.BuildLabels(),
 			Ports: []corev1.ServicePort{
 				{
 					Name:       "http",
@@ -53,7 +53,7 @@ func (n *ServiceBuilder) Build() (*corev1.Service, error) {
 	return Service, nil
 }
 
-func (n *ServiceBuilder) buildLabels() map[string]string {
+func (n *ServiceBuilder) BuildLabels() map[string]string {
 	var labels = map[string]string{
 		"app.kubernetes.io/name":       n.RateLimitService.Name,
 		"app.kubernetes.io/managed-by": "istio-rateltimit-operator",
