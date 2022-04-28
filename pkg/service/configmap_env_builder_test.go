@@ -78,6 +78,9 @@ func TestEnvBuilder_BuildStatsdEnv(t *testing.T) {
 }
 
 func TestEnvBuilder_BuildRedisEnv(t *testing.T) {
+	mockPipelineLimit := 1
+	mockPipelineWindow := "1s"
+
 	type fields struct {
 		RateLimitService v1alpha1.RateLimitService
 	}
@@ -128,6 +131,60 @@ func TestEnvBuilder_BuildRedisEnv(t *testing.T) {
 				"REDIS_TYPE":        "single",
 				"REDIS_URL":         "127.0.0.1:6379",
 				"REDIS_AUTH":        "password",
+			},
+			wantErr: false,
+		},
+		{
+			name: "redis pipeline limit",
+			fields: fields{
+				RateLimitService: v1alpha1.RateLimitService{
+					Spec: v1alpha1.RateLimitServiceSpec{
+						Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+							Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+								Type: "single",
+								URL:  "127.0.0.1:6379",
+								Auth: "password",
+								Config: &v1alpha1.RateLimitServiceSpec_Backend_Redis_Config{
+									PipelineLimit: &mockPipelineLimit,
+								},
+							},
+						},
+					},
+				},
+			},
+			want: map[string]string{
+				"REDIS_SOCKET_TYPE":    "tcp",
+				"REDIS_TYPE":           "single",
+				"REDIS_URL":            "127.0.0.1:6379",
+				"REDIS_AUTH":           "password",
+				"REDIS_PIPELINE_LIMIT": "1",
+			},
+			wantErr: false,
+		},
+		{
+			name: "redis pipeline window",
+			fields: fields{
+				RateLimitService: v1alpha1.RateLimitService{
+					Spec: v1alpha1.RateLimitServiceSpec{
+						Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+							Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+								Type: "single",
+								URL:  "127.0.0.1:6379",
+								Auth: "password",
+								Config: &v1alpha1.RateLimitServiceSpec_Backend_Redis_Config{
+									PipelineWindow: &mockPipelineWindow,
+								},
+							},
+						},
+					},
+				},
+			},
+			want: map[string]string{
+				"REDIS_SOCKET_TYPE":     "tcp",
+				"REDIS_TYPE":            "single",
+				"REDIS_URL":             "127.0.0.1:6379",
+				"REDIS_AUTH":            "password",
+				"REDIS_PIPELINE_WINDOW": "1s",
 			},
 			wantErr: false,
 		},

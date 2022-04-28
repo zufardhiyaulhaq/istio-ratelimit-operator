@@ -24,6 +24,10 @@ spec:
       url: "172.30.0.13:6379"
       ### optional to enabled redis auth
       # auth: "password"
+      ### optional to enabled redis config
+      # config:
+      #   pipeline_window: "1s"
+      #   pipeline_limit: 10
   ### optional to enable statsd
   # monitoring:
   #   statsd:

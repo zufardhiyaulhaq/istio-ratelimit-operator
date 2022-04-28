@@ -336,6 +336,13 @@ spec:
                     properties:
                       auth:
                         type: string
+                      config:
+                        properties:
+                          pipeline_limit:
+                            type: integer
+                          pipeline_window:
+                            type: string
+                        type: object
                       type:
                         type: string
                       url:
