@@ -44,9 +44,15 @@ type RateLimitServiceSpec_Backend struct {
 }
 
 type RateLimitServiceSpec_Backend_Redis struct {
-	Type string `json:"type,omitempty"`
-	URL  string `json:"url,omitempty"`
-	Auth string `json:"auth,omitempty"`
+	Type   string                                     `json:"type,omitempty"`
+	URL    string                                     `json:"url,omitempty"`
+	Auth   string                                     `json:"auth,omitempty"`
+	Config *RateLimitServiceSpec_Backend_Redis_Config `json:"config,omitempty"`
+}
+
+type RateLimitServiceSpec_Backend_Redis_Config struct {
+	PipelineWindow *string `json:"pipeline_window,omitempty"`
+	PipelineLimit  *int    `json:"pipeline_limit,omitempty"`
 }
 
 type RateLimitServiceSpec_Monitoring struct {

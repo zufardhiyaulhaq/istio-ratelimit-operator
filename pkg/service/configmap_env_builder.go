@@ -99,6 +99,16 @@ func (n *EnvBuilder) BuildRedisEnv() (map[string]string, error) {
 		data["REDIS_AUTH"] = n.RateLimitService.Spec.Backend.Redis.Auth
 	}
 
+	if n.RateLimitService.Spec.Backend.Redis.Config != nil {
+		if n.RateLimitService.Spec.Backend.Redis.Config.PipelineLimit != nil {
+			data["REDIS_PIPELINE_LIMIT"] = strconv.Itoa(*n.RateLimitService.Spec.Backend.Redis.Config.PipelineLimit)
+		}
+
+		if n.RateLimitService.Spec.Backend.Redis.Config.PipelineWindow != nil {
+			data["REDIS_PIPELINE_WINDOW"] = *n.RateLimitService.Spec.Backend.Redis.Config.PipelineWindow
+		}
+	}
+
 	return data, nil
 }
 
