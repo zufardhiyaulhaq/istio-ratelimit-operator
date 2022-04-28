@@ -20,6 +20,9 @@ spec:
     redis:
       type: "single"
       url: "redis.istio-system.svc.cluster.local:6379"
+      config:
+        pipeline_window: "1s"
+        pipeline_limit: 10
   monitoring:
     statsd:
       enabled: true
