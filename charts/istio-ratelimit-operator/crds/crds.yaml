@@ -245,6 +245,9 @@ spec:
                       type: object
                     request_headers:
                       properties:
+                        descriptor_value:
+                          description: The value to use in the descriptor entry.
+                          type: string
                         descriptor_key:
                           description: The key to use in the descriptor entry.
                           type: string
