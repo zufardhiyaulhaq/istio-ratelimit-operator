@@ -58,6 +58,7 @@ var V3SidecarBuilderTestGrid = []V3SidecarBuilderTestCase{
 						RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
 							HeaderName:    ":method",
 							DescriptorKey: "hello-zufardhiyaulhaq-dev-header-method",
+							DescriptorValue: "GET",
 						},
 					},
 				},

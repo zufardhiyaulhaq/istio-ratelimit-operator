@@ -58,6 +58,7 @@ var V3GatewayBuilderTestGrid = []V3GatewayBuilderTestCase{
 						RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
 							HeaderName:    ":method",
 							DescriptorKey: "hello-zufardhiyaulhaq-dev-header-method",
+							DescriptorValue: "GET",
 						},
 					},
 				},
