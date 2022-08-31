@@ -30,6 +30,8 @@ type RateLimitServiceSpec struct {
 
 type RateLimitServiceSpec_Kubernetes struct {
 	ReplicaCount *int32                                       `json:"replica_count,omitempty"`
+	Image        string                                       `json:"image"`
+	ImageTag     string                                       `json:"imageTag"`
 	Resources    *corev1.ResourceRequirements                 `json:"resources,omitempty"`
 	AutoScaling  *RateLimitServiceSpec_Kubernetes_AutoScaling `json:"auto_scaling,omitempty"`
 }
