@@ -23,8 +23,9 @@ func TestRateLimit_Service_Config_String(t *testing.T) {
 				Domain: "foo",
 				Descriptors: []RateLimit_Service_Descriptor{
 					{
-						Key:   "bar",
-						Value: "baz",
+						Key:        "bar",
+						Value:      "baz",
+						ShadowMode: false,
 						RateLimit: v1alpha1.GlobalRateLimit_Limit{
 							Unit:            "hour",
 							RequestsPerUnit: 1,
@@ -39,6 +40,7 @@ descriptors:
   rate_limit:
     unit: hour
     requests_per_unit: 1
+  shadow_mode: false
 `,
 			wantErr: false,
 		},
