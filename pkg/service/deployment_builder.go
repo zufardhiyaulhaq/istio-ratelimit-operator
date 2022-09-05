@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strconv"
+
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -133,6 +135,10 @@ func (n *DeploymentBuilder) BuildEnv() []corev1.EnvVar {
 		{
 			Name:  "RUNTIME_IGNOREDOTFILES",
 			Value: "true",
+		},
+		{
+			Name:  "SHADOW_MODE",
+			Value: strconv.FormatBool(n.RateLimitService.Spec.Kubernetes.ShadowMode),
 		},
 	}
 

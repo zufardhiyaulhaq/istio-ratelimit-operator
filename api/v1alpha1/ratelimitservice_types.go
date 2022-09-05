@@ -32,6 +32,7 @@ type RateLimitServiceSpec_Kubernetes struct {
 	ReplicaCount *int32                                       `json:"replica_count,omitempty"`
 	Resources    *corev1.ResourceRequirements                 `json:"resources,omitempty"`
 	AutoScaling  *RateLimitServiceSpec_Kubernetes_AutoScaling `json:"auto_scaling,omitempty"`
+	ShadowMode   bool                                         `json:"shadow_mode"`
 }
 
 type RateLimitServiceSpec_Kubernetes_AutoScaling struct {

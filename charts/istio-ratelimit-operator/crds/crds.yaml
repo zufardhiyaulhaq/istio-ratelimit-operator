@@ -362,6 +362,8 @@ spec:
                         format: int32
                         type: integer
                     type: object
+                  shadow_mode:
+                    type: boolean
                   replica_count:
                     format: int32
                     type: integer
