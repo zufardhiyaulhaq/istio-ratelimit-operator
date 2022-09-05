@@ -159,6 +159,8 @@ spec:
                   unit:
                     type: string
                 type: object
+              shadow_mode:
+                type: boolean
               matcher:
                 items:
                   properties:

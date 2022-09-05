@@ -15,6 +15,7 @@ type RateLimit_Service_Descriptor struct {
 	Value       string                         `json:"value,omitempty" yaml:"value,omitempty"`
 	RateLimit   v1alpha1.GlobalRateLimit_Limit `json:"rate_limit,omitempty" yaml:"rate_limit,omitempty"`
 	Descriptors []RateLimit_Service_Descriptor `json:"descriptors,omitempty" yaml:"descriptors,omitempty"`
+	ShadowMode  bool                           `json:"shadow_mode" yaml:"shadow_mode"`
 }
 
 func (n *RateLimit_Service_Config) String() (string, error) {
