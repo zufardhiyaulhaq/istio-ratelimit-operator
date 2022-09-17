@@ -363,6 +363,10 @@ spec:
                   replica_count:
                     format: int32
                     type: integer
+                  image:
+                    type: string
+                  imageTag:
+                    type: string
                   resources:
                     description: ResourceRequirements describes the compute resource
                       requirements.

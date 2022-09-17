@@ -24,8 +24,9 @@ func (n *DeploymentBuilder) SetRateLimitService(rateLimitService v1alpha1.RateLi
 
 func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 
-	image := "zufardhiyaulhaq/ratelimit"
-	imageTag := "v1.0.0"
+	serviceImage := n.BuildRLSImageInfo()
+	image := serviceImage["image"]
+	imageTag := serviceImage["imageTag"]
 	env := n.BuildEnv()
 
 	deployment := &appsv1.Deployment{
@@ -147,4 +148,18 @@ func (n *DeploymentBuilder) BuildLabels() map[string]string {
 	}
 
 	return labels
+}
+
+func (n *DeploymentBuilder) BuildRLSImageInfo() map[string]string {
+	var containerImage = make(map[string]string)
+
+	if len(n.RateLimitService.Spec.Kubernetes.Image) != 0 && len(n.RateLimitService.Spec.Kubernetes.ImageTag) != 0 {
+		containerImage["image"] = n.RateLimitService.Spec.Kubernetes.Image
+		containerImage["imageTag"] = n.RateLimitService.Spec.Kubernetes.ImageTag
+	} else {
+		containerImage["image"] = "zufardhiyaulhaq/ratelimit"
+		containerImage["imageTag"] = "v1.0.0"
+	}
+
+	return containerImage
 }
