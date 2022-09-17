@@ -44,11 +44,12 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-      - name: Perform SonarQube Scan
-        uses: kitabisa/sonarqube-action@v1.1.0
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
         with:
-          host: ${{ secrets.SONARQUBE_HOST }}
-          login: ${{ secrets.SONARQUBE_TOKEN }}
+          languages: go
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
   image:
     runs-on: ubuntu-latest
     steps:
