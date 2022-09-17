@@ -31,6 +31,7 @@ import (
 
 	ratelimitv1alpha1 "github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/service"
+	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/settings"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv2beta2 "k8s.io/api/autoscaling/v2beta2"
 	corev1 "k8s.io/api/core/v1"
@@ -38,8 +39,9 @@ import (
 
 // RateLimitServiceReconciler reconciles a RateLimitService object
 type RateLimitServiceReconciler struct {
-	Client client.Client
-	Scheme *runtime.Scheme
+	Client   client.Client
+	Scheme   *runtime.Scheme
+	Settings settings.Settings
 }
 
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=ratelimitservices,verbs=get;list;watch;create;update;patch;delete
@@ -163,7 +165,7 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, err
 	}
 
-	deployment, err := service.NewDeploymentBuilder().
+	deployment, err := service.NewDeploymentBuilder(r.Settings).
 		SetRateLimitService(*rateLimitService).
 		Build()
 	if err != nil {

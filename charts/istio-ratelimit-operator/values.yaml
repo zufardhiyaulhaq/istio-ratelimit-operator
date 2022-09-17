@@ -13,3 +13,7 @@ resources:
   requests:
     cpu: 256m
     memory: 256Mi
+
+settings:
+  ratelimitservice:
+    image: zufardhiyaulhaq/ratelimit:v1.0.0

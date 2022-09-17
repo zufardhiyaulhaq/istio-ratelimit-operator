@@ -30,6 +30,9 @@ func TestBuildEnvoyFilterNamesAllVersion(t *testing.T) {
 				"foo-1.10",
 				"foo-1.11",
 				"foo-1.12",
+				"foo-1.13",
+				"foo-1.14",
+				"foo-1.15",
 			},
 		},
 	}

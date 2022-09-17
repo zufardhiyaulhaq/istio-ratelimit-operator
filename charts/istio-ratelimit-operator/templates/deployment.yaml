@@ -41,6 +41,9 @@ spec:
         - /manager
         image: "{{ .Values.operator.image }}:{{ .Values.operator.tag }}"
         imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: {{ .Release.Name }}-settings
         livenessProbe:
           httpGet:
             path: /healthz
