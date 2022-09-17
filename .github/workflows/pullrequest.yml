@@ -63,8 +63,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.21]
-        istio: ["1.11.5"]
+        kubernetes: [v1.23]
+        istio: ["1.12.9","1.13.8","1.14.4","1.15.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -118,8 +118,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.21]
-        istio: ["1.11.5"]
+        kubernetes: [v1.23]
+        istio: ["1.12.9","1.13.8","1.14.4","1.15.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -157,7 +157,7 @@ jobs:
       - name: Deploy charts
         run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
       - name: Install istio
-        run: istioctl upgrade -f ./e2e/usecases/global.gateway/istio_mesh/cluster.yaml --force --skip-confirmation
+        run: istioctl upgrade -f ./e2e/usecases/global.gateway.headervaluematch/istio_mesh/cluster.yaml --force --skip-confirmation
       - name: Deploy manifests
         run: make e2e.global.gateway.headervaluematch
       - name: Waiting every object to be created
@@ -173,8 +173,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.21]
-        istio: ["1.11.5"]
+        kubernetes: [v1.23]
+        istio: ["1.12.9","1.13.8","1.14.4","1.15.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -221,15 +221,15 @@ jobs:
         run: kubectl get envoyfilter --all-namespaces
       - name: validate
         run: make e2e.global.sidecar.validate
-  e2e-global-sideca-headervaluematch:
+  e2e-global-sidecar-headervaluematch:
     runs-on: ubuntu-latest
     needs:
       - image
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.21]
-        istio: ["1.11.5"]
+        kubernetes: [v1.23]
+        istio: ["1.12.9","1.13.8","1.14.4","1.15.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -267,7 +267,7 @@ jobs:
       - name: Deploy charts
         run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
       - name: Install istio
-        run: istioctl upgrade -f ./e2e/usecases/global.sidecar/istio_mesh/cluster.yaml --force --skip-confirmation
+        run: istioctl upgrade -f ./e2e/usecases/global.sidecar.headervaluematch/istio_mesh/cluster.yaml --force --skip-confirmation
       - name: Deploy manifests
         run: make e2e.global.sidecar.headervaluematch
       - name: Waiting every object to be created
@@ -283,8 +283,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.21]
-        istio: ["1.11.5"]
+        kubernetes: [v1.23]
+        istio: ["1.12.9","1.13.8","1.14.4","1.15.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -338,8 +338,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.21]
-        istio: ["1.11.5"]
+        kubernetes: [v1.23]
+        istio: ["1.12.9","1.13.8","1.14.4","1.15.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2

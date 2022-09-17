@@ -24,5 +24,3 @@ make install run
 
 ### Submit a pull request
 As you are ready with your code contribution, push your branch to your `istio-ratelimit-operator` fork and open a pull request against the **master** branch.
-
-Please also update the [CHANGELOG.md](https://github.com/zufardhiyaulhaq/istio-ratelimit-operator/blob/master/CHANGELOG.md) to note what you've added or fixed.

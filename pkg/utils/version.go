@@ -10,6 +10,9 @@ var WellKnownVersions = map[string]string{
 	"1.10": `^1\.10.*`,
 	"1.11": `^1\.11.*`,
 	"1.12": `^1\.12.*`,
+	"1.13": `^1\.13.*`,
+	"1.14": `^1\.14.*`,
+	"1.15": `^1\.15.*`,
 }
 
 func BuildEnvoyFilterNamesAllVersion(base string) []string {

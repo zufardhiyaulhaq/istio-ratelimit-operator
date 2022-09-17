@@ -961,6 +961,11 @@ func (in *RateLimitServiceSpec_Kubernetes) DeepCopyInto(out *RateLimitServiceSpe
 		*out = new(int32)
 		**out = **in
 	}
+	if in.Image != nil {
+		in, out := &in.Image, &out.Image
+		*out = new(string)
+		**out = **in
+	}
 	if in.Resources != nil {
 		in, out := &in.Resources, &out.Resources
 		*out = new(v1.ResourceRequirements)

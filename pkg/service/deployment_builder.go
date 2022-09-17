@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
+	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/settings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -11,10 +12,13 @@ import (
 
 type DeploymentBuilder struct {
 	RateLimitService v1alpha1.RateLimitService
+	Settings         settings.Settings
 }
 
-func NewDeploymentBuilder() *DeploymentBuilder {
-	return &DeploymentBuilder{}
+func NewDeploymentBuilder(settings settings.Settings) *DeploymentBuilder {
+	return &DeploymentBuilder{
+		Settings: settings,
+	}
 }
 
 func (n *DeploymentBuilder) SetRateLimitService(rateLimitService v1alpha1.RateLimitService) *DeploymentBuilder {
@@ -24,9 +28,7 @@ func (n *DeploymentBuilder) SetRateLimitService(rateLimitService v1alpha1.RateLi
 
 func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 
-	serviceImage := n.BuildRLSImageInfo()
-	image := serviceImage["image"]
-	imageTag := serviceImage["imageTag"]
+	image := n.BuildImageInfo()
 	env := n.BuildEnv()
 
 	deployment := &appsv1.Deployment{
@@ -47,7 +49,7 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 					Containers: []corev1.Container{
 						{
 							Name:    n.RateLimitService.Name,
-							Image:   image + ":" + imageTag,
+							Image:   image,
 							Command: []string{"/bin/ratelimit"},
 							Ports: []corev1.ContainerPort{
 								{
@@ -150,16 +152,10 @@ func (n *DeploymentBuilder) BuildLabels() map[string]string {
 	return labels
 }
 
-func (n *DeploymentBuilder) BuildRLSImageInfo() map[string]string {
-	var containerImage = make(map[string]string)
-
-	if len(n.RateLimitService.Spec.Kubernetes.Image) != 0 && len(n.RateLimitService.Spec.Kubernetes.ImageTag) != 0 {
-		containerImage["image"] = n.RateLimitService.Spec.Kubernetes.Image
-		containerImage["imageTag"] = n.RateLimitService.Spec.Kubernetes.ImageTag
-	} else {
-		containerImage["image"] = "zufardhiyaulhaq/ratelimit"
-		containerImage["imageTag"] = "v1.0.0"
+func (n *DeploymentBuilder) BuildImageInfo() string {
+	if n.RateLimitService.Spec.Kubernetes.Image != nil {
+		return *n.RateLimitService.Spec.Kubernetes.Image
 	}
 
-	return containerImage
+	return n.Settings.RateLimitServiceImage
 }

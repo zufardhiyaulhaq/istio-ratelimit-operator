@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-settings
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    helm.sh/chart: {{ template "istio-ratelimit-operator.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    manager: {{ .Release.Service }}
+data:
+  WEEKLY_COMMUNITY: {{ .Values.settings.ratelimitservice.image }}

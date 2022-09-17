@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/controllers"
+	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/settings"
 
 	clientnetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -68,6 +69,12 @@ func main() {
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
+	settings, err := settings.NewSettings()
+	if err != nil {
+		setupLog.Error(err, "unable to get settings")
+		os.Exit(1)
+	}
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
@@ -96,8 +103,9 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.RateLimitServiceReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Scheme:   mgr.GetScheme(),
+		Settings: settings,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "RateLimitService")
 		os.Exit(1)
