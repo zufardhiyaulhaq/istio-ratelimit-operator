@@ -5,7 +5,7 @@ import (
 )
 
 type Settings struct {
-	RateLimitServiceImage string `required:"true" envconfig:"RATE_LIMIT_SERVICE_IMAGE" default:"zufardhiyaulhaq/ratelimit:v1.0.0"`
+	RateLimitServiceImage string `required:"true" envconfig:"RATE_LIMIT_SERVICE_IMAGE" default:"envoyproxy/ratelimit:ea444b15"`
 }
 
 func NewSettings() (Settings, error) {

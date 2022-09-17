@@ -3,7 +3,7 @@
 
 {{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}[![made with Go](https://img.shields.io/badge/made%20with-Go-brightgreen)](http://golang.org) [![Github master branch build](https://img.shields.io/github/workflow/status/zufardhiyaulhaq/istio-ratelimit-operator/Master)](https://github.com/zufardhiyaulhaq/istio-ratelimit-operator/actions/workflows/master.yml) [![GitHub issues](https://img.shields.io/github/issues/zufardhiyaulhaq/istio-ratelimit-operator)](https://github.com/zufardhiyaulhaq/istio-ratelimit-operator/issues) [![GitHub pull requests](https://img.shields.io/github/issues-pr/zufardhiyaulhaq/istio-ratelimit-operator)](https://github.com/zufardhiyaulhaq/istio-ratelimit-operator/pulls)[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/istio-ratelimit-operator)](https://artifacthub.io/packages/search?repo=istio-ratelimit-operator)
 
-## Installing
+## Installation
 
 To install the chart with the release name `my-istio-ratelimit-operator`:
 
@@ -98,3 +98,10 @@ public-gateway.method.grault-route_grault-route: unit=HOUR requests_per_unit=60
 {{ template "chart.valuesSection" . }}
 
 {{ template "helm-docs.versionFooter" . }}
+
+## Supported Releases
+
+| Operator Version | Istio Version |
+|-----|------|
+| 2.6.0 | <= 1.15.x |
+| 2.5.1 | <= 1.13.x |
