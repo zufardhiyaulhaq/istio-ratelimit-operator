@@ -119,7 +119,7 @@ jobs:
       - name: Deploy manifests
         run: make e2e.global.gateway
       - name: Waiting every object to be created
-        run: sleep 240
+        run: sleep 300
       - name: validate
         run: make e2e.global.gateway.validate
   e2e-global-gateway-headervaluematch:
@@ -172,7 +172,7 @@ jobs:
       - name: Deploy manifests
         run: make e2e.global.gateway.headervaluematch
       - name: Waiting every object to be created
-        run: sleep 240
+        run: sleep 300
       - name: Get envoyfilter
         run: kubectl get envoyfilter --all-namespaces
       - name: validate
@@ -227,7 +227,7 @@ jobs:
       - name: Deploy manifests
         run: make e2e.global.sidecar.headervaluematch
       - name: Waiting every object to be created
-        run: sleep 240
+        run: sleep 300
       - name: Get envoyfilter
         run: kubectl get envoyfilter --all-namespaces
       - name: validate
@@ -282,7 +282,7 @@ jobs:
       - name: Deploy manifests
         run: make e2e.global.sidecar
       - name: Waiting every object to be created
-        run: sleep 240
+        run: sleep 300
       - name: validate
         run: make e2e.global.sidecar.validate
   e2e-local-sidecar:
@@ -335,7 +335,7 @@ jobs:
       - name: Deploy manifests
         run: make e2e.local.sidecar
       - name: Waiting every object to be created
-        run: sleep 240
+        run: sleep 300
       - name: validate
         run: make e2e.local.sidecar.validate
   e2e-local-gateway:
@@ -388,6 +388,6 @@ jobs:
       - name: Deploy manifests
         run: make e2e.local.gateway
       - name: Waiting every object to be created
-        run: sleep 240
+        run: sleep 300
       - name: validate
         run: make e2e.local.gateway.validate

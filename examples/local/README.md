@@ -15,7 +15,6 @@ spec:
     labels:
       app: podinfo
     istio_version:
-      - "1.11"
       - "1.12"
       - "1.13"
       - "1.14"
@@ -57,7 +56,6 @@ spec:
       app: istio-ingressgateway
       istio: ingressgateway
     istio_version:
-      - "1.11"
       - "1.12"
       - "1.13"
       - "1.14"
