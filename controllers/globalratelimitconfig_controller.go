@@ -78,7 +78,7 @@ func (r *GlobalRateLimitConfigReconciler) Reconcile(ctx context.Context, req ctr
 			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 		}
 
-		globalRateLimitConfig.Spec.Ratelimit.Spec.Service.Address = rateLimitServiceObject.Name + "." + rateLimitServiceObject.Namespace + ".svc"
+		globalRateLimitConfig.Spec.Ratelimit.Spec.Service.Address = rateLimitServiceObject.Name + "." + rateLimitServiceObject.Namespace + ".svc.cluster.local"
 		globalRateLimitConfig.Spec.Ratelimit.Spec.Service.Port = 8081
 	}
 
