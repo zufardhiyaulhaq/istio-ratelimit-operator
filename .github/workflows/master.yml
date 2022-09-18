@@ -114,7 +114,7 @@ jobs:
         with:
           version: "${{ matrix.istio }}"
       - name: Deploy charts
-        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
+        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=master
       - name: Install istio
         run: istioctl upgrade -f ./e2e/usecases/global.gateway/istio_mesh/cluster.yaml --force --skip-confirmation
       - name: Deploy manifests
@@ -167,7 +167,7 @@ jobs:
         with:
           version: "${{ matrix.istio }}"
       - name: Deploy charts
-        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
+        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=master
       - name: Install istio
         run: istioctl upgrade -f ./e2e/usecases/global.gateway.headervaluematch/istio_mesh/cluster.yaml --force --skip-confirmation
       - name: Deploy manifests
@@ -222,7 +222,7 @@ jobs:
         with:
           version: "${{ matrix.istio }}"
       - name: Deploy charts
-        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
+        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=master
       - name: Install istio
         run: istioctl upgrade -f ./e2e/usecases/global.sidecar.headervaluematch/istio_mesh/cluster.yaml --force --skip-confirmation
       - name: Deploy manifests
@@ -277,7 +277,7 @@ jobs:
         with:
           version: "${{ matrix.istio }}"
       - name: Deploy charts
-        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
+        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=master
       - name: Install istio
         run: istioctl upgrade -f ./e2e/usecases/global.sidecar/istio_mesh/cluster.yaml --force --skip-confirmation
       - name: Deploy manifests
@@ -330,7 +330,7 @@ jobs:
         with:
           version: "${{ matrix.istio }}"
       - name: Deploy charts
-        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
+        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=master
       - name: Install istio
         run: istioctl upgrade -f ./e2e/usecases/local.sidecar/istio_mesh/cluster.yaml --force --skip-confirmation
       - name: Deploy manifests
@@ -383,7 +383,7 @@ jobs:
         with:
           version: "${{ matrix.istio }}"
       - name: Deploy charts
-        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=dev-ci
+        run: helm install istio-ratelimit-operator ./charts/istio-ratelimit-operator --values ./charts/istio-ratelimit-operator/values.yaml --set operator.tag=master
       - name: Install istio
         run: istioctl upgrade -f ./e2e/usecases/local.gateway/istio_mesh/cluster.yaml --force --skip-confirmation
       - name: Deploy manifests
