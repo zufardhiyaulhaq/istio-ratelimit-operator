@@ -1,0 +1,17 @@
+
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: podinfo
+  namespace: istio-system
+spec:
+  selector:
+    app: istio-ingressgateway
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - "podinfo.e2e.dev"
+    port:
+      name: http
+      number: 80
+      protocol: HTTP

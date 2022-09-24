@@ -1,0 +1,33 @@
+apiVersion: install.istio.io/v1alpha3
+kind: IstioOperator
+spec:
+  hub: gcr.io/istio-release
+  components:
+    pilot:
+      enabled: true
+      k8s:
+        resources:
+          limits:
+            cpu: 256m
+            memory: 256Mi
+          requests:
+            cpu: 128m
+            memory: 128Mi
+        replicaCount: 1
+    ingressGateways:
+    - enabled: true
+      name: istio-ingressgateway
+      label:
+        app: istio-ingressgateway
+        istio: ingressgateway
+      k8s:
+        resources:
+          limits:
+            cpu: 256m
+            memory: 256Mi
+          requests:
+            cpu: 128m
+            memory: 128Mi
+        replicaCount: 1
+        service:
+          type: ClusterIP

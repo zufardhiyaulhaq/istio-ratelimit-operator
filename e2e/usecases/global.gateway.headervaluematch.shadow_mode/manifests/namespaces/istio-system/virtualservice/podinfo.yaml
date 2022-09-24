@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: podinfo
+  namespace: istio-system
+spec:
+  hosts:
+  - "podinfo.e2e.dev"
+  gateways:
+  - istio-system/podinfo
+  http:
+  - name: "default-route"
+    match:
+    - uri:
+        prefix: /
+    route:
+      - destination:
+          port:
+            number: 9898
+          host: podinfo.development.svc.cluster.local

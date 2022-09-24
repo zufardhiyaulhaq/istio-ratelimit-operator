@@ -15,8 +15,9 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 	fakeExpectedMatch := true
 
 	type args struct {
-		matchers []*v1alpha1.GlobalRateLimit_Action
-		limit    *v1alpha1.GlobalRateLimit_Limit
+		matchers   []*v1alpha1.GlobalRateLimit_Action
+		limit      *v1alpha1.GlobalRateLimit_Limit
+		shadowMode bool
 	}
 	tests := []struct {
 		name    string
@@ -39,6 +40,7 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 					Unit:            "hour",
 					RequestsPerUnit: 1,
 				},
+				shadowMode: false,
 			},
 			want: []types.RateLimit_Service_Descriptor{
 				{
@@ -47,6 +49,7 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 						Unit:            "hour",
 						RequestsPerUnit: 1,
 					},
+					ShadowMode: false,
 				},
 			},
 			wantErr: false,
@@ -72,6 +75,7 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 					Unit:            "hour",
 					RequestsPerUnit: 1,
 				},
+				shadowMode: false,
 			},
 			want: []types.RateLimit_Service_Descriptor{
 				{
@@ -83,6 +87,7 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 								Unit:            "hour",
 								RequestsPerUnit: 1,
 							},
+							ShadowMode: false,
 						},
 					},
 				},
@@ -104,6 +109,7 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 					Unit:            "hour",
 					RequestsPerUnit: 1,
 				},
+				shadowMode: false,
 			},
 			want: []types.RateLimit_Service_Descriptor{
 				{
@@ -113,6 +119,7 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 						Unit:            "hour",
 						RequestsPerUnit: 1,
 					},
+					ShadowMode: false,
 				},
 			},
 			wantErr: false,
@@ -138,6 +145,7 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 					Unit:            "hour",
 					RequestsPerUnit: 1,
 				},
+				shadowMode: false,
 			},
 			want: []types.RateLimit_Service_Descriptor{
 				{
@@ -151,6 +159,7 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 								Unit:            "hour",
 								RequestsPerUnit: 1,
 							},
+							ShadowMode: false,
 						},
 					},
 				},
@@ -178,6 +187,7 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 					Unit:            "hour",
 					RequestsPerUnit: 1,
 				},
+				shadowMode: false,
 			},
 			want: []types.RateLimit_Service_Descriptor{
 				{
@@ -187,6 +197,7 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 						Unit:            "hour",
 						RequestsPerUnit: 1,
 					},
+					ShadowMode: false,
 				},
 			},
 			wantErr: false,
@@ -224,6 +235,7 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 					Unit:            "hour",
 					RequestsPerUnit: 1,
 				},
+				shadowMode: false,
 			},
 			want: []types.RateLimit_Service_Descriptor{
 				{
@@ -237,6 +249,76 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 								Unit:            "hour",
 								RequestsPerUnit: 1,
 							},
+							ShadowMode: false,
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "simple Request Header with shadow mode true",
+			args: args{
+				matchers: []*v1alpha1.GlobalRateLimit_Action{
+					{
+						RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
+							HeaderName:    "foo",
+							DescriptorKey: "foo",
+						},
+					},
+				},
+				limit: &v1alpha1.GlobalRateLimit_Limit{
+					Unit:            "hour",
+					RequestsPerUnit: 1,
+				},
+				shadowMode: true,
+			},
+			want: []types.RateLimit_Service_Descriptor{
+				{
+					Key: "foo",
+					RateLimit: v1alpha1.GlobalRateLimit_Limit{
+						Unit:            "hour",
+						RequestsPerUnit: 1,
+					},
+					ShadowMode: true,
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "nested Request Header with shadow mode true",
+			args: args{
+				matchers: []*v1alpha1.GlobalRateLimit_Action{
+					{
+						RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
+							HeaderName:    "foo",
+							DescriptorKey: "foo",
+						},
+					},
+					{
+						RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
+							HeaderName:    "bar",
+							DescriptorKey: "bar",
+						},
+					},
+				},
+				limit: &v1alpha1.GlobalRateLimit_Limit{
+					Unit:            "hour",
+					RequestsPerUnit: 1,
+				},
+				shadowMode: true,
+			},
+			want: []types.RateLimit_Service_Descriptor{
+				{
+					Key: "foo",
+					Descriptors: []types.RateLimit_Service_Descriptor{
+						{
+							Key: "bar",
+							RateLimit: v1alpha1.GlobalRateLimit_Limit{
+								Unit:            "hour",
+								RequestsPerUnit: 1,
+							},
+							ShadowMode: true,
 						},
 					},
 				},
@@ -246,7 +328,7 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := service.NewRateLimitDescriptorFromMatcher(tt.args.matchers, tt.args.limit)
+			got, err := service.NewRateLimitDescriptorFromMatcher(tt.args.matchers, tt.args.limit, tt.args.shadowMode)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewRateLimitDescriptorFromMatcher() error = %v, wantErr %v", err, tt.wantErr)
 				return

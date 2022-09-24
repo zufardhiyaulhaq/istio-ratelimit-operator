@@ -274,6 +274,8 @@ spec:
                 required:
                 - vhost
                 type: object
+              shadow_mode:
+                type: boolean
             required:
             - config
             - matcher

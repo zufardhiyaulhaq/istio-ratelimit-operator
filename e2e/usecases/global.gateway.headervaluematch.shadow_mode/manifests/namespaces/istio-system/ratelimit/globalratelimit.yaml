@@ -1,0 +1,28 @@
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimit
+metadata:
+  name: podinfo-e2e-dev-default-route
+  namespace: istio-system
+spec:
+  config: "ingressgateway"
+  selector:
+    vhost: "podinfo.e2e.dev:80"
+    route: "default-route"
+  matcher:
+  - header_value_match:
+      descriptor_value: method
+      expect_match: true
+      headers:
+      - exact_match: GET
+        name: :method
+  - request_headers:
+      header_name: ":path"
+      descriptor_key: "path"
+  - generic_key:
+      descriptor_value: "default-route"
+      descriptor_key: "route"
+  limit:
+    unit: hour
+    requests_per_unit: 0
+  shadow_mode: true
+
