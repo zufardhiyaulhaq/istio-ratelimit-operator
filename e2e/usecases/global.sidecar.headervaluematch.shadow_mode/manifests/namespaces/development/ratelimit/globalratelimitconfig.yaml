@@ -1,0 +1,23 @@
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimitConfig
+metadata:
+  name: podinfo
+  namespace: development
+spec:
+  type: "sidecar"
+  selector:
+    labels:
+      app: podinfo
+    istio_version:
+      - "1.12"
+      - "1.13"
+      - "1.14"
+      - "1.15"
+  ratelimit:
+    spec:
+      domain: "podinfo"
+      failure_mode_deny: false
+      timeout: "10s"
+      service:
+        type: "service"
+        name: "podinfo-ratelimit-service"

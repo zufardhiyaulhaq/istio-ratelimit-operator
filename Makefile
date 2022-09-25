@@ -271,12 +271,28 @@ e2e.global.sidecar:
 e2e.global.sidecar.validate:
 	python3 ./e2e/scripts/validate.py --ratelimited --domain podinfo.development.svc.cluster.local --path /
 
+.PHONY: e2e.global.sidecar.shadow_mode
+e2e.global.sidecar.shadow_mode:
+	python3 ./e2e/scripts/main.py --usecases global.sidecar.shadow_mode
+
+.PHONY: e2e.global.sidecar.shadow_mode.validate
+e2e.global.sidecar.shadow_mode.validate:
+	python3 ./e2e/scripts/validate.py --ratelimited --domain podinfo.development.svc.cluster.local --path /
+
 .PHONY: e2e.global.sidecar.headervaluematch
 e2e.global.sidecar.headervaluematch:
 	python3 ./e2e/scripts/main.py --usecases global.sidecar.headervaluematch
 
 .PHONY: e2e.global.sidecar.headervaluematch.validate
 e2e.global.sidecar.headervaluematch.validate:
+	python3 ./e2e/scripts/validate.py --ratelimited --domain podinfo.development.svc.cluster.local --path /
+
+.PHONY: e2e.global.sidecar.headervaluematch.shadow_mode
+e2e.global.sidecar.headervaluematch.shadow_mode:
+	python3 ./e2e/scripts/main.py --usecases global.sidecar.headervaluematch.shadow_mode
+
+.PHONY: e2e.global.sidecar.headervaluematch.shadow_mode.validate
+e2e.global.sidecar.headervaluematch.shadow_mode.validate:
 	python3 ./e2e/scripts/validate.py --ratelimited --domain podinfo.development.svc.cluster.local --path /
 
 .PHONY: e2e.local.sidecar
