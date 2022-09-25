@@ -209,7 +209,6 @@ catalog-push: ## Push a catalog image.
 
 .PHONY: readme
 readme:
-	GO111MODULE=on go get github.com/norwoodj/helm-docs/cmd/helm-docs
 	helm-docs -c ./charts/istio-ratelimit-operator -d > README.md
 	helm-docs -c ./charts/istio-ratelimit-operator
 
@@ -231,14 +230,34 @@ e2e.global.gateway:
 e2e.global.gateway.validate:
 	kubectl port-forward -n istio-system service/istio-ingressgateway 8080:80 &
 	sleep 10
+	python3 ./e2e/scripts/validate.py --ratelimited --domain podinfo.e2e.dev --path / --gateway
+
+.PHONY: e2e.global.gateway.shadow_mode
+e2e.global.gateway.shadow_mode:
+	python3 ./e2e/scripts/main.py --usecases global.gateway.shadow_mode
+
+.PHONY: e2e.global.gateway.shadow_mode.validate
+e2e.global.gateway.shadow_mode.validate:
+	kubectl port-forward -n istio-system service/istio-ingressgateway 8080:80 &
+	sleep 10
 	python3 ./e2e/scripts/validate.py --domain podinfo.e2e.dev --path / --gateway
 
 .PHONY: e2e.global.gateway.headervaluematch
-e2e.global.gateway:
+e2e.global.gateway.headervaluematch:
 	python3 ./e2e/scripts/main.py --usecases global.gateway.headervaluematch
 
 .PHONY: e2e.global.gateway.headervaluematch.validate
-e2e.global.gateway.validate:
+e2e.global.gateway.headervaluematch.validate:
+	kubectl port-forward -n istio-system service/istio-ingressgateway 8080:80 &
+	sleep 10
+	python3 ./e2e/scripts/validate.py --ratelimited --domain podinfo.e2e.dev --path / --gateway
+
+.PHONY: e2e.global.gateway.headervaluematch.shadow_mode
+e2e.global.gateway.headervaluematch.shadow_mode:
+	python3 ./e2e/scripts/main.py --usecases global.gateway.headervaluematch.shadow_mode
+
+.PHONY: e2e.global.gateway.headervaluematch.shadow_mode.validate
+e2e.global.gateway.headervaluematch.shadow_mode.validate:
 	kubectl port-forward -n istio-system service/istio-ingressgateway 8080:80 &
 	sleep 10
 	python3 ./e2e/scripts/validate.py --domain podinfo.e2e.dev --path / --gateway
@@ -249,14 +268,30 @@ e2e.global.sidecar:
 
 .PHONY: e2e.global.sidecar.validate
 e2e.global.sidecar.validate:
+	python3 ./e2e/scripts/validate.py --ratelimited --domain podinfo.development.svc.cluster.local --path /
+
+.PHONY: e2e.global.sidecar.shadow_mode
+e2e.global.sidecar.shadow_mode:
+	python3 ./e2e/scripts/main.py --usecases global.sidecar.shadow_mode
+
+.PHONY: e2e.global.sidecar.shadow_mode.validate
+e2e.global.sidecar.shadow_mode.validate:
 	python3 ./e2e/scripts/validate.py --domain podinfo.development.svc.cluster.local --path /
 
 .PHONY: e2e.global.sidecar.headervaluematch
-e2e.global.sidecar:
+e2e.global.sidecar.headervaluematch:
 	python3 ./e2e/scripts/main.py --usecases global.sidecar.headervaluematch
 
 .PHONY: e2e.global.sidecar.headervaluematch.validate
-e2e.global.sidecar.validate:
+e2e.global.sidecar.headervaluematch.validate:
+	python3 ./e2e/scripts/validate.py --ratelimited --domain podinfo.development.svc.cluster.local --path /
+
+.PHONY: e2e.global.sidecar.headervaluematch.shadow_mode
+e2e.global.sidecar.headervaluematch.shadow_mode:
+	python3 ./e2e/scripts/main.py --usecases global.sidecar.headervaluematch.shadow_mode
+
+.PHONY: e2e.global.sidecar.headervaluematch.shadow_mode.validate
+e2e.global.sidecar.headervaluematch.shadow_mode.validate:
 	python3 ./e2e/scripts/validate.py --domain podinfo.development.svc.cluster.local --path /
 
 .PHONY: e2e.local.sidecar
@@ -265,7 +300,7 @@ e2e.local.sidecar:
 
 .PHONY: e2e.local.sidecar.validate
 e2e.local.sidecar.validate:
-	python3 ./e2e/scripts/validate.py --retry 2 --domain podinfo.development.svc.cluster.local --path /
+	python3 ./e2e/scripts/validate.py --ratelimited --retry 2 --domain podinfo.development.svc.cluster.local --path /
 
 .PHONY: e2e.local.gateway
 e2e.local.gateway:
@@ -275,4 +310,4 @@ e2e.local.gateway:
 e2e.local.gateway.validate:
 	kubectl port-forward -n istio-system service/istio-ingressgateway 8080:80 &
 	sleep 10
-	python3 ./e2e/scripts/validate.py --retry 2 --domain podinfo.e2e.dev --path / --gateway
+	python3 ./e2e/scripts/validate.py --ratelimited --retry 2 --domain podinfo.e2e.dev --path / --gateway

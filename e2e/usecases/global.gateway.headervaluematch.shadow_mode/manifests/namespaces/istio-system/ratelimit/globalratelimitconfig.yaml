@@ -1,0 +1,24 @@
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimitConfig
+metadata:
+  name: ingressgateway
+  namespace: istio-system
+spec:
+  type: "gateway"
+  selector:
+    labels:
+      app: istio-ingressgateway
+      istio: ingressgateway
+    istio_version:
+      - "1.12"
+      - "1.13"
+      - "1.14"
+      - "1.15"
+  ratelimit:
+    spec:
+      domain: "ingressgateway"
+      failure_mode_deny: false
+      timeout: "10s"
+      service:
+        type: "service"
+        name: "ingressgateway-ratelimit-service"

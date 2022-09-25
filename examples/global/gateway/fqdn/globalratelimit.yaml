@@ -24,3 +24,4 @@ spec:
   limit:
     unit: hour
     requests_per_unit: 60
+  shadow_mode: false

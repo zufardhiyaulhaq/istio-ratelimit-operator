@@ -1,0 +1,31 @@
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: RateLimitService
+metadata:
+  name: ingressgateway-ratelimit-service
+  namespace: istio-system
+spec:
+  kubernetes:
+    replica_count: 1
+    auto_scaling:
+      max_replicas: 2
+      min_replicas: 1
+    resources:
+      limits:
+        cpu: "256m"
+        memory: "256Mi"
+      requests:
+        cpu: "128m"
+        memory: "128Mi"     
+  backend:
+    redis:
+      type: "single"
+      url: "redis.istio-system.svc.cluster.local:6379"
+      config:
+        pipeline_window: "1s"
+        pipeline_limit: 10
+  monitoring:
+    statsd:
+      enabled: true
+      spec:
+        host: localhost
+        port: 8125

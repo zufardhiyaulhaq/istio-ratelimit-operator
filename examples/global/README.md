@@ -121,6 +121,7 @@ spec:
   limit:
     unit: hour
     requests_per_unit: 60
+  shadow_mode: false
 ---
 apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: GlobalRateLimit
@@ -145,6 +146,7 @@ spec:
   limit:
     unit: hour
     requests_per_unit: 120
+  shadow_mode: false
 ```
 
 You must define the `GlobalRateLimitConfig` in the `spec.config`. Also you must define the selector, which is contain two things:
@@ -227,6 +229,7 @@ spec:
   limit:
     unit: hour
     requests_per_unit: 60
+  shadow_mode: false
 ```
 
 We only support vhost selector in sidecar, with combination of `inbound|<port-name>|<port-number>`.

@@ -1,0 +1,30 @@
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimit
+metadata:
+  name: podinfo-http-9898
+  namespace: development
+spec:
+  config: "podinfo"
+  selector:
+    vhost: "inbound|http|9898"
+  matcher:
+  - header_value_match:
+      descriptor_value: method
+      expect_match: true
+      headers:
+      - exact_match: GET
+        name: :method
+  - request_headers:
+      header_name: ":path"
+      descriptor_key: "path"
+  - generic_key:
+      descriptor_value: "podinfo"
+      descriptor_key: "app"
+  - generic_key:
+      descriptor_value: "9898"
+      descriptor_key: "port"
+  limit:
+    unit: hour
+    requests_per_unit: 0
+  shadow_mode: true
+

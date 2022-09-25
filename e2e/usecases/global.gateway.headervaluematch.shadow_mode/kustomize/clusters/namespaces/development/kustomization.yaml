@@ -1,0 +1,5 @@
+commonLabels:
+  istio-injection: enabled
+
+resources:
+- ../../../../../../bases/cluster-scope/namespaces/development

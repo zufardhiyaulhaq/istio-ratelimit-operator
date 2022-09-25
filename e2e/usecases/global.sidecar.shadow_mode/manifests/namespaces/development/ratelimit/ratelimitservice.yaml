@@ -1,0 +1,28 @@
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: RateLimitService
+metadata:
+  name: podinfo-ratelimit-service
+  namespace: development
+spec:
+  kubernetes:
+    replica_count: 1
+    auto_scaling:
+      max_replicas: 2
+      min_replicas: 1
+    resources:
+      limits:
+        cpu: "256m"
+        memory: "256Mi"
+      requests:
+        cpu: "128m"
+        memory: "128Mi"     
+  backend:
+    redis:
+      type: "single"
+      url: "redis.istio-system.svc.cluster.local:6379"
+  monitoring:
+    statsd:
+      enabled: true
+      spec:
+        host: localhost
+        port: 8125
