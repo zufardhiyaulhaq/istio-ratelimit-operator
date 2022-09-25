@@ -33,6 +33,7 @@ type RateLimitServiceSpec_Kubernetes struct {
 	Image        *string                                      `json:"image,omitempty"`
 	Resources    *corev1.ResourceRequirements                 `json:"resources,omitempty"`
 	AutoScaling  *RateLimitServiceSpec_Kubernetes_AutoScaling `json:"auto_scaling,omitempty"`
+	Environment  *map[string]string                           `json:"environment,omitempty"`
 }
 
 type RateLimitServiceSpec_Kubernetes_AutoScaling struct {

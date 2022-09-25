@@ -66,6 +66,10 @@ spec:
                         format: int32
                         type: integer
                     type: object
+                  environment:
+                    additionalProperties:
+                      type: string
+                    type: object
                   image:
                     type: string
                   replica_count:
