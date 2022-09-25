@@ -209,7 +209,6 @@ catalog-push: ## Push a catalog image.
 
 .PHONY: readme
 readme:
-	GO111MODULE=on go get github.com/norwoodj/helm-docs/cmd/helm-docs
 	helm-docs -c ./charts/istio-ratelimit-operator -d > README.md
 	helm-docs -c ./charts/istio-ratelimit-operator
 
@@ -277,7 +276,7 @@ e2e.global.sidecar.shadow_mode:
 
 .PHONY: e2e.global.sidecar.shadow_mode.validate
 e2e.global.sidecar.shadow_mode.validate:
-	python3 ./e2e/scripts/validate.py --ratelimited --domain podinfo.development.svc.cluster.local --path /
+	python3 ./e2e/scripts/validate.py --domain podinfo.development.svc.cluster.local --path /
 
 .PHONY: e2e.global.sidecar.headervaluematch
 e2e.global.sidecar.headervaluematch:
@@ -293,7 +292,7 @@ e2e.global.sidecar.headervaluematch.shadow_mode:
 
 .PHONY: e2e.global.sidecar.headervaluematch.shadow_mode.validate
 e2e.global.sidecar.headervaluematch.shadow_mode.validate:
-	python3 ./e2e/scripts/validate.py --ratelimited --domain podinfo.development.svc.cluster.local --path /
+	python3 ./e2e/scripts/validate.py --domain podinfo.development.svc.cluster.local --path /
 
 .PHONY: e2e.local.sidecar
 e2e.local.sidecar:
