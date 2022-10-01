@@ -42,9 +42,11 @@ func (n *EnvBuilder) Build() (*corev1.ConfigMap, error) {
 		data[key] = value
 	}
 
-	if n.RateLimitService.Spec.Kubernetes.Environment != nil {
-		for key, value := range *n.RateLimitService.Spec.Kubernetes.Environment {
-			data[key] = value
+	if n.RateLimitService.Spec.Kubernetes != nil {
+		if n.RateLimitService.Spec.Kubernetes.Environment != nil {
+			for key, value := range *n.RateLimitService.Spec.Kubernetes.Environment {
+				data[key] = value
+			}
 		}
 	}
 

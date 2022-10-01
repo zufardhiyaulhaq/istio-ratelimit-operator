@@ -4,8 +4,10 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/service"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -274,6 +276,78 @@ func TestEnvBuilder_BuildLabels(t *testing.T) {
 			}
 			if got := n.BuildLabels(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("EnvBuilder.BuildLabels() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestEnvBuilder_Build(t *testing.T) {
+	type fields struct {
+		RateLimitService v1alpha1.RateLimitService
+	}
+	type expectations struct {
+		wantError bool
+		config    corev1.ConfigMap
+	}
+	tests := []struct {
+		name         string
+		fields       fields
+		expectations expectations
+	}{
+		{
+			name: "generate the simplest configmap",
+			fields: fields{
+				RateLimitService: v1alpha1.RateLimitService{
+					ObjectMeta: v1.ObjectMeta{
+						Name:      "foo",
+						Namespace: "bar",
+					},
+					Spec: v1alpha1.RateLimitServiceSpec{
+						Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+							Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+								Type: "single",
+								URL:  "127.0.0.1:6379",
+							},
+						},
+					},
+				},
+			},
+			expectations: expectations{
+				wantError: false,
+				config: corev1.ConfigMap{
+					ObjectMeta: v1.ObjectMeta{
+						Name:      "foo-config-env",
+						Namespace: "bar",
+						Labels: map[string]string{
+							"app.kubernetes.io/created-by": "foo",
+							"app.kubernetes.io/managed-by": "istio-rateltimit-operator",
+							"app.kubernetes.io/name":       "foo-config-env",
+						},
+					},
+					Data: map[string]string{
+						"REDIS_SOCKET_TYPE": "tcp",
+						"REDIS_TYPE":        "single",
+						"REDIS_URL":         "127.0.0.1:6379",
+						"USE_STATSD":        "false",
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			n := &service.EnvBuilder{
+				RateLimitService: tt.fields.RateLimitService,
+			}
+
+			got, err := n.Build()
+			if tt.expectations.wantError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				if !reflect.DeepEqual(*got, tt.expectations.config) {
+					t.Errorf("EnvBuilder.BuildLabels() = %v, want %v", *got, tt.expectations.config)
+				}
 			}
 		})
 	}
