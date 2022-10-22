@@ -24,6 +24,10 @@ spec:
       url: "172.30.0.13:6379"
       ### optional to enabled redis auth
       # auth: "password"
+      ### optional to enabled redis config
+      # config:
+      #   pipeline_window: "1s"
+      #   pipeline_limit: 10
   ### optional to enable statsd
   # monitoring:
   #   statsd:
@@ -31,4 +35,7 @@ spec:
   #     spec:
   #       host: localhost
   #       port: 8125
-
+  # ## Optional to use custom environment variable based on
+  # ## https://github.com/envoyproxy/ratelimit/blob/main/src/settings/settings.go
+  # environment:
+  #   CACHE_KEY_PREFIX: "podinfo"

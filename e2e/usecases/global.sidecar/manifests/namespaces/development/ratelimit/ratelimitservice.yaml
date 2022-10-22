@@ -26,3 +26,5 @@ spec:
       spec:
         host: localhost
         port: 8125
+  environment:
+    CACHE_KEY_PREFIX: "podinfo"

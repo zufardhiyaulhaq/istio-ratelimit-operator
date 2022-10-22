@@ -23,9 +23,10 @@ import (
 
 // RateLimitServiceSpec defines the desired state of RateLimitService
 type RateLimitServiceSpec struct {
-	Kubernetes *RateLimitServiceSpec_Kubernetes `json:"kubernetes,omitempty"`
-	Backend    *RateLimitServiceSpec_Backend    `json:"backend,omitempty"`
-	Monitoring *RateLimitServiceSpec_Monitoring `json:"monitoring,omitempty"`
+	Kubernetes  *RateLimitServiceSpec_Kubernetes `json:"kubernetes,omitempty"`
+	Backend     *RateLimitServiceSpec_Backend    `json:"backend,omitempty"`
+	Monitoring  *RateLimitServiceSpec_Monitoring `json:"monitoring,omitempty"`
+	Environment *map[string]string               `json:"environment,omitempty"`
 }
 
 type RateLimitServiceSpec_Kubernetes struct {

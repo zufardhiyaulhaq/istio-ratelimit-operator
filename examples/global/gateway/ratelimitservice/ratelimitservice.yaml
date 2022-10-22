@@ -35,4 +35,8 @@ spec:
   #     spec:
   #       host: localhost
   #       port: 8125
+  ### Optional to use custom environment variable based on
+  ### https://github.com/envoyproxy/ratelimit/blob/main/src/settings/settings.go
+  # environment:
+  #   CACHE_KEY_PREFIX: "podinfo"
 
