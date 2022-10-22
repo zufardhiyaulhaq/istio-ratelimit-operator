@@ -10,7 +10,7 @@ To install the chart with the release name `my-istio-ratelimit-operator`:
 
 ```console
 helm repo add istio-ratelimit-operator https://zufardhiyaulhaq.com/istio-ratelimit-operator/charts/releases/
-helm install my-istio-ratelimit-operator istio-ratelimit-operator/istio-ratelimit-operator --values values.yaml
+helm install my-istio-ratelimit-operator istio-ratelimit-operator/istio-ratelimit-operator --version 2.7.0 --values values.yaml
 ```
 
 ## Usage
@@ -111,5 +111,5 @@ public-gateway.method.grault-route_grault-route: unit=HOUR requests_per_unit=60
 
 | Operator Version | Istio Version |
 |-----|------|
-| 2.6.0 | <= 1.15.x |
+| 2.7.0 | <= 1.15.x |
 | 2.5.1 | <= 1.13.x |

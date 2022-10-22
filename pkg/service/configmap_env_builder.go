@@ -31,47 +31,9 @@ func (n *EnvBuilder) Build() (*corev1.ConfigMap, error) {
 		},
 	}
 
-	data := make(map[string]string)
-
-	defaultEnv, err := n.BuildDefaultEnv()
+	data, err := n.BuildEnv()
 	if err != nil {
-		return configMap, err
-	}
-
-	for key, value := range defaultEnv {
-		data[key] = value
-	}
-
-	if n.RateLimitService.Spec.Kubernetes != nil {
-		if n.RateLimitService.Spec.Kubernetes.Environment != nil {
-			for key, value := range *n.RateLimitService.Spec.Kubernetes.Environment {
-				data[key] = value
-			}
-		}
-	}
-
-	if n.RateLimitService.Spec.Backend.Redis != nil {
-		redisEnv, err := n.BuildRedisEnv()
-		if err != nil {
-			return configMap, err
-		}
-
-		for key, value := range redisEnv {
-			data[key] = value
-		}
-	}
-
-	if n.RateLimitService.Spec.Monitoring != nil {
-		if n.RateLimitService.Spec.Monitoring.Statsd != nil {
-			statsdEnv, err := n.BuildStatsdEnv()
-			if err != nil {
-				return configMap, err
-			}
-
-			for key, value := range statsdEnv {
-				data[key] = value
-			}
-		}
+		return configMap, nil
 	}
 
 	configMap.Data = data
@@ -86,6 +48,51 @@ func (n *EnvBuilder) BuildLabels() map[string]string {
 	}
 
 	return labels
+}
+
+func (n *EnvBuilder) BuildEnv() (map[string]string, error) {
+	env := make(map[string]string)
+
+	defaultEnv, err := n.BuildDefaultEnv()
+	if err != nil {
+		return env, err
+	}
+
+	for key, value := range defaultEnv {
+		env[key] = value
+	}
+
+	if n.RateLimitService.Spec.Environment != nil {
+		for key, value := range *n.RateLimitService.Spec.Environment {
+			env[key] = value
+		}
+	}
+
+	if n.RateLimitService.Spec.Backend.Redis != nil {
+		redisEnv, err := n.BuildRedisEnv()
+		if err != nil {
+			return env, err
+		}
+
+		for key, value := range redisEnv {
+			env[key] = value
+		}
+	}
+
+	if n.RateLimitService.Spec.Monitoring != nil {
+		if n.RateLimitService.Spec.Monitoring.Statsd != nil {
+			statsdEnv, err := n.BuildStatsdEnv()
+			if err != nil {
+				return env, err
+			}
+
+			for key, value := range statsdEnv {
+				env[key] = value
+			}
+		}
+	}
+
+	return env, nil
 }
 
 func (n *EnvBuilder) BuildDefaultEnv() (map[string]string, error) {

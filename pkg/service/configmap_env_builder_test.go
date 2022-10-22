@@ -333,6 +333,183 @@ func TestEnvBuilder_Build(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "custom environment variable",
+			fields: fields{
+				RateLimitService: v1alpha1.RateLimitService{
+					ObjectMeta: v1.ObjectMeta{
+						Name:      "foo",
+						Namespace: "bar",
+					},
+					Spec: v1alpha1.RateLimitServiceSpec{
+						Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+							Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+								Type: "single",
+								URL:  "127.0.0.1:6379",
+							},
+						},
+						Environment: &map[string]string{
+							"CACHE_KEY_PREFIX": "foo",
+						},
+					},
+				},
+			},
+			expectations: expectations{
+				wantError: false,
+				config: corev1.ConfigMap{
+					ObjectMeta: v1.ObjectMeta{
+						Name:      "foo-config-env",
+						Namespace: "bar",
+						Labels: map[string]string{
+							"app.kubernetes.io/created-by": "foo",
+							"app.kubernetes.io/managed-by": "istio-rateltimit-operator",
+							"app.kubernetes.io/name":       "foo-config-env",
+						},
+					},
+					Data: map[string]string{
+						"REDIS_SOCKET_TYPE": "tcp",
+						"REDIS_TYPE":        "single",
+						"REDIS_URL":         "127.0.0.1:6379",
+						"USE_STATSD":        "false",
+						"CACHE_KEY_PREFIX":  "foo",
+					},
+				},
+			},
+		},
+		{
+			name: "custom environment variable should replace default environment variable",
+			fields: fields{
+				RateLimitService: v1alpha1.RateLimitService{
+					ObjectMeta: v1.ObjectMeta{
+						Name:      "foo",
+						Namespace: "bar",
+					},
+					Spec: v1alpha1.RateLimitServiceSpec{
+						Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+							Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+								Type: "single",
+								URL:  "127.0.0.1:6379",
+							},
+						},
+						Environment: &map[string]string{
+							"USE_STATSD": "true",
+						},
+					},
+				},
+			},
+			expectations: expectations{
+				wantError: false,
+				config: corev1.ConfigMap{
+					ObjectMeta: v1.ObjectMeta{
+						Name:      "foo-config-env",
+						Namespace: "bar",
+						Labels: map[string]string{
+							"app.kubernetes.io/created-by": "foo",
+							"app.kubernetes.io/managed-by": "istio-rateltimit-operator",
+							"app.kubernetes.io/name":       "foo-config-env",
+						},
+					},
+					Data: map[string]string{
+						"REDIS_SOCKET_TYPE": "tcp",
+						"REDIS_TYPE":        "single",
+						"REDIS_URL":         "127.0.0.1:6379",
+						"USE_STATSD":        "true",
+					},
+				},
+			},
+		},
+		{
+			name: "defined API should replace custom environment variable",
+			fields: fields{
+				RateLimitService: v1alpha1.RateLimitService{
+					ObjectMeta: v1.ObjectMeta{
+						Name:      "foo",
+						Namespace: "bar",
+					},
+					Spec: v1alpha1.RateLimitServiceSpec{
+						Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+							Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+								Type: "single",
+								URL:  "127.0.0.1:6379",
+							},
+						},
+						Environment: &map[string]string{
+							"REDIS_TYPE": "sentinel",
+						},
+					},
+				},
+			},
+			expectations: expectations{
+				wantError: false,
+				config: corev1.ConfigMap{
+					ObjectMeta: v1.ObjectMeta{
+						Name:      "foo-config-env",
+						Namespace: "bar",
+						Labels: map[string]string{
+							"app.kubernetes.io/created-by": "foo",
+							"app.kubernetes.io/managed-by": "istio-rateltimit-operator",
+							"app.kubernetes.io/name":       "foo-config-env",
+						},
+					},
+					Data: map[string]string{
+						"REDIS_SOCKET_TYPE": "tcp",
+						"REDIS_TYPE":        "single",
+						"REDIS_URL":         "127.0.0.1:6379",
+						"USE_STATSD":        "false",
+					},
+				},
+			},
+		},
+		{
+			name: "full environment",
+			fields: fields{
+				RateLimitService: v1alpha1.RateLimitService{
+					ObjectMeta: v1.ObjectMeta{
+						Name:      "foo",
+						Namespace: "bar",
+					},
+					Spec: v1alpha1.RateLimitServiceSpec{
+						Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+							Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+								Type: "single",
+								URL:  "127.0.0.1:6379",
+							},
+						},
+						Monitoring: &v1alpha1.RateLimitServiceSpec_Monitoring{
+							Statsd: &v1alpha1.RateLimitServiceSpec_Monitoring_Statsd{
+								Enabled: true,
+								Spec: v1alpha1.RateLimitServiceSpec_Monitoring_Statsd_Spec{
+									Host: "statsd",
+									Port: 8125,
+								},
+							},
+						},
+					},
+				},
+			},
+			expectations: expectations{
+				wantError: false,
+				config: corev1.ConfigMap{
+					ObjectMeta: v1.ObjectMeta{
+						Name:      "foo-config-env",
+						Namespace: "bar",
+						Labels: map[string]string{
+							"app.kubernetes.io/created-by": "foo",
+							"app.kubernetes.io/managed-by": "istio-rateltimit-operator",
+							"app.kubernetes.io/name":       "foo-config-env",
+						},
+					},
+					Data: map[string]string{
+						"REDIS_SOCKET_TYPE": "tcp",
+						"REDIS_TYPE":        "single",
+						"REDIS_URL":         "127.0.0.1:6379",
+						"USE_STATSD":        "true",
+						"STATSD_HOST":       "statsd",
+						"STATSD_PORT":       "8125",
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

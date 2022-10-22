@@ -55,6 +55,10 @@ spec:
                         type: string
                     type: object
                 type: object
+              environment:
+                additionalProperties:
+                  type: string
+                type: object
               kubernetes:
                 properties:
                   auto_scaling:
@@ -65,10 +69,6 @@ spec:
                       min_replicas:
                         format: int32
                         type: integer
-                    type: object
-                  environment:
-                    additionalProperties:
-                      type: string
                     type: object
                   image:
                     type: string
