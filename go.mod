@@ -6,7 +6,6 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/champly/lib4go v0.0.0-20210810011059-eb374f933ec2
 	github.com/gogo/protobuf v1.3.2
-	github.com/golangci/golangci-lint v1.41.1 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.7.0
 	github.com/thoas/go-funk v0.9.1
