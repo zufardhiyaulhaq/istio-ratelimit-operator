@@ -8,4 +8,4 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     manager: {{ .Release.Service }}
 data:
-  WEEKLY_COMMUNITY: {{ .Values.settings.ratelimitservice.image }}
+  RATE_LIMIT_SERVICE_IMAGE: {{ .Values.settings.ratelimitservice.image }}
