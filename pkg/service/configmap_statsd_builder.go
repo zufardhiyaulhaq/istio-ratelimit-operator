@@ -210,5 +210,9 @@ func NewDefaultMetricMapping() []types.MetricMapping {
 			Name:  "ratelimit_service_config_load_error",
 			Match: "ratelimit.service.config_load_error",
 		},
+		{
+			Name:  "ratelimit_service_global_shadow_mode",
+			Match: "ratelimit.service.global_shadow_mode",
+		},
 	}
 }

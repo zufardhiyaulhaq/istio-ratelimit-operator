@@ -152,6 +152,8 @@ spec:
             properties:
               config:
                 type: string
+              identifier:
+                type: string
               limit:
                 properties:
                   requests_per_unit:

@@ -25,6 +25,8 @@ spec:
     unit: hour
     requests_per_unit: 60
   shadow_mode: false
+  # optional, for statsd metrics labeling
+  identifier: "foo-route"
 ---
 apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: GlobalRateLimit
@@ -50,6 +52,8 @@ spec:
     unit: hour
     requests_per_unit: 120
   shadow_mode: false
+  # optional, for statsd metrics labeling
+  identifier: "bar-route"
 ---
 apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
 kind: GlobalRateLimit
