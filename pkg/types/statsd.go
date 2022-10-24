@@ -9,7 +9,7 @@ type MetricMapper struct {
 type MetricMapping struct {
 	Match           string            `yaml:"match"`
 	Name            string            `yaml:"name"`
-	Labels          map[string]string `yaml:"labels"`
+	Labels          map[string]string `yaml:"labels,omitempty"`
 	ObserverType    ObserverType      `yaml:"observer_type,omitempty"`
 	TimerType       ObserverType      `yaml:"timer_type,omitempty"`
 	MatchMetricType MetricType        `yaml:"match_metric_type,omitempty"`
