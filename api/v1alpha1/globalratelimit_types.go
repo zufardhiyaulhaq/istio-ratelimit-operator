@@ -27,6 +27,7 @@ type GlobalRateLimitSpec struct {
 	Matcher    []*GlobalRateLimit_Action `json:"matcher"`
 	ShadowMode bool                      `json:"shadow_mode,omitempty"`
 	Limit      *GlobalRateLimit_Limit    `json:"limit,omitempty"`
+	Identifier *string                   `json:"identifier,omitempty"`
 }
 
 type GlobalRateLimitSelector struct {

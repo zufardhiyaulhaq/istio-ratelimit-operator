@@ -165,6 +165,24 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, err
 	}
 
+	statsdConfig, err := service.NewStatsdConfig(rateLimitService.Name, ownGlobalRateLimitConfigList[0].Spec.Ratelimit.Spec.Domain, ownGlobalRateLimitList)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	statsdConfigString, err := statsdConfig.String()
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	configMapStatsd, err := service.NewStatsdConfigBuilder().
+		SetRateLimitService(*rateLimitService).
+		SetConfig(statsdConfigString).
+		Build()
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	deployment, err := service.NewDeploymentBuilder(r.Settings).
 		SetRateLimitService(*rateLimitService).
 		Build()
@@ -186,6 +204,12 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 	log.Info("set reference configmap env")
 	err = ctrl.SetControllerReference(rateLimitService, configMapEnv, r.Scheme)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	log.Info("set reference configmap statsd")
+	err = ctrl.SetControllerReference(rateLimitService, configMapStatsd, r.Scheme)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -237,6 +261,23 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		if errors.IsNotFound(err) {
 			log.Info("create configmap env")
 			err = r.Client.Create(ctx, configMapEnv)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+
+			return ctrl.Result{Requeue: true}, nil
+		} else {
+			return ctrl.Result{}, err
+		}
+	}
+
+	log.Info("get configmap statsd")
+	createdConfigMapStatsd := &corev1.ConfigMap{}
+	err = r.Client.Get(ctx, types.NamespacedName{Name: configMapStatsd.Name, Namespace: configMapStatsd.Namespace}, createdConfigMapStatsd)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			log.Info("create configmap statsd")
+			err = r.Client.Create(ctx, configMapStatsd)
 			if err != nil {
 				return ctrl.Result{}, err
 			}
@@ -311,6 +352,16 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 
 		log.Info("update configmap env")
 		err := r.Client.Update(ctx, createdConfigMapEnv, &client.UpdateOptions{})
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	if !equality.Semantic.DeepEqual(createdConfigMapStatsd.Data, configMapStatsd.Data) {
+		createdConfigMapStatsd.Data = configMapStatsd.Data
+
+		log.Info("update configmap statsd")
+		err := r.Client.Update(ctx, createdConfigMapStatsd, &client.UpdateOptions{})
 		if err != nil {
 			return ctrl.Result{}, err
 		}
