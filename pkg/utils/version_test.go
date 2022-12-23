@@ -33,6 +33,7 @@ func TestBuildEnvoyFilterNamesAllVersion(t *testing.T) {
 				"foo-1.13",
 				"foo-1.14",
 				"foo-1.15",
+				"foo-1.16",
 			},
 		},
 	}
@@ -72,6 +73,30 @@ func TestBuildEnvoyFilterNames(t *testing.T) {
 			want: []string{
 				"foo-1.4",
 				"foo-1.5",
+			},
+		},
+		{
+			name: "build envoy filter 1.15",
+			args: args{
+				base: "foo",
+				versions: []string{
+					"1.15",
+				},
+			},
+			want: []string{
+				"foo-1.15",
+			},
+		},
+		{
+			name: "build envoy filter 1.16",
+			args: args{
+				base: "foo",
+				versions: []string{
+					"1.16",
+				},
+			},
+			want: []string{
+				"foo-1.16",
 			},
 		},
 	}
