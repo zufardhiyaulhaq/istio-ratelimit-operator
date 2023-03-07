@@ -92,7 +92,7 @@ jobs:
           with:
             path: "e2e/scripts/requirements.txt"
         - name: Setup kubectl
-          uses: azure/setup-kubectl@v1
+          uses: azure/setup-kubectl@v3
           with:
             version: 'v1.21.7'
         - name: Setup kustomize
@@ -147,7 +147,7 @@ jobs:
         with:
           path: "e2e/scripts/requirements.txt"
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v1
+        uses: azure/setup-kubectl@v3
         with:
           version: 'v1.21.7'
       - name: Setup kustomize
@@ -202,7 +202,7 @@ jobs:
         with:
           path: "e2e/scripts/requirements.txt"
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v1
+        uses: azure/setup-kubectl@v3
         with:
           version: 'v1.21.7'
       - name: Setup kustomize
@@ -257,7 +257,7 @@ jobs:
         with:
           path: "e2e/scripts/requirements.txt"
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v1
+        uses: azure/setup-kubectl@v3
         with:
           version: 'v1.21.7'
       - name: Setup kustomize
@@ -312,7 +312,7 @@ jobs:
         with:
           path: "e2e/scripts/requirements.txt"
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v1
+        uses: azure/setup-kubectl@v3
         with:
           version: 'v1.21.7'
       - name: Setup kustomize
@@ -367,7 +367,7 @@ jobs:
         with:
           path: "e2e/scripts/requirements.txt"
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v1
+        uses: azure/setup-kubectl@v3
         with:
           version: 'v1.21.7'
       - name: Setup kustomize
@@ -422,7 +422,7 @@ jobs:
         with:
           path: "e2e/scripts/requirements.txt"
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v1
+        uses: azure/setup-kubectl@v3
         with:
           version: 'v1.21.7'
       - name: Setup kustomize
@@ -477,7 +477,7 @@ jobs:
         with:
           path: "e2e/scripts/requirements.txt"
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v1
+        uses: azure/setup-kubectl@v3
         with:
           version: 'v1.21.7'
       - name: Setup kustomize
@@ -532,7 +532,7 @@ jobs:
         with:
           path: "e2e/scripts/requirements.txt"
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v1
+        uses: azure/setup-kubectl@v3
         with:
           version: 'v1.21.7'
       - name: Setup kustomize
@@ -587,7 +587,7 @@ jobs:
         with:
           path: "e2e/scripts/requirements.txt"
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v1
+        uses: azure/setup-kubectl@v3
         with:
           version: 'v1.21.7'
       - name: Setup kustomize
