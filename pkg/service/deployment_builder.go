@@ -128,7 +128,7 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 		if n.RateLimitService.Spec.Monitoring.Enabled {
 			deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, corev1.Container{
 				Name:    n.RateLimitService.Name + "-statsd-exporter",
-				Image:   image,
+				Image:   n.Settings.StatsdExporterImage,
 				Command: []string{"/bin/statsd_exporter"},
 				Args: []string{
 					"--web.enable-lifecycle",
