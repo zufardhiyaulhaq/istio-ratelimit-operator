@@ -6,8 +6,7 @@ import (
 
 type Settings struct {
 	RateLimitServiceImage string `required:"true" envconfig:"RATE_LIMIT_SERVICE_IMAGE" default:"envoyproxy/ratelimit:4c088856"`
-	StatsdExporterImage string `required:"true" envconfig:"STATSD_EXPORTER_IMAGE" default:"prom/statsd-exporter:v0.23.1"`
-
+	StatsdExporterImage   string `required:"true" envconfig:"STATSD_EXPORTER_IMAGE" default:"prom/statsd-exporter:v0.23.1"`
 }
 
 func NewSettings() (Settings, error) {
