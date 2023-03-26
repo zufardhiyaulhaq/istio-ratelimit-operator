@@ -15,10 +15,10 @@ spec:
     labels:
       app: podinfo
     istio_version:
-      - "1.13"
       - "1.14"
       - "1.15"
       - "1.16"
+      - "1.17"
 ```
 
 You must add your pod label in the `.spec.selector`. The next step is to define the rate limit configuration using `LocalRateLimit` object, for example:
@@ -56,10 +56,10 @@ spec:
       app: istio-ingressgateway
       istio: ingressgateway
     istio_version:
-      - "1.13"
       - "1.14"
       - "1.15"
       - "1.16"
+      - "1.17"
 ```
 
 You can also add SNI matching in this `LocalRateLimitConfig` by configuring `.spec.selector.sni`. The next step is to define the rate limit configuration using `LocalRateLimit` object, for example:
