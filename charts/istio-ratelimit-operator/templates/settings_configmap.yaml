@@ -9,3 +9,4 @@ metadata:
     manager: {{ .Release.Service }}
 data:
   RATE_LIMIT_SERVICE_IMAGE: {{ .Values.settings.ratelimitservice.image }}
+  STATSD_EXPORTER_IMAGE: {{ .Values.settings.statsdExporter.image }}

@@ -106,6 +106,7 @@ public-gateway.method.grault-route_grault-route: unit=HOUR requests_per_unit=60
 | resources.requests.cpu | string | `"256m"` |  |
 | resources.requests.memory | string | `"256Mi"` |  |
 | settings.ratelimitservice.image | string | `"envoyproxy/ratelimit:4c088856"` |  |
+| settings.statsdExporter.image | string | `"prom/statsd-exporter:v0.23.1"` |  |
 
 ## Supported Releases
 

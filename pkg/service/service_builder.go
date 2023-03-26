@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 
+	"github.com/go-openapi/swag"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -32,19 +33,46 @@ func (n *ServiceBuilder) Build() (*corev1.Service, error) {
 			Selector: n.BuildLabels(),
 			Ports: []corev1.ServicePort{
 				{
-					Name:       "http",
-					Port:       int32(8080),
-					TargetPort: intstr.FromInt(8080),
+					Name:        "http",
+					Port:        int32(8080),
+					TargetPort:  intstr.FromInt(8080),
+					Protocol:    corev1.ProtocolTCP,
+					AppProtocol: swag.String("http"),
 				},
 				{
-					Name:       "grpc",
-					Port:       int32(8081),
-					TargetPort: intstr.FromInt(8081),
+					Name:        "grpc",
+					Port:        int32(8081),
+					TargetPort:  intstr.FromInt(8081),
+					Protocol:    corev1.ProtocolTCP,
+					AppProtocol: swag.String("grpc"),
 				},
 				{
-					Name:       "http-admin",
-					Port:       int32(6070),
-					TargetPort: intstr.FromInt(6070),
+					Name:        "http-admin",
+					Port:        int32(6070),
+					TargetPort:  intstr.FromInt(6070),
+					Protocol:    corev1.ProtocolTCP,
+					AppProtocol: swag.String("http"),
+				},
+				{
+					Name:        "http-statsd-exporter",
+					Port:        int32(9102),
+					TargetPort:  intstr.FromInt(9102),
+					Protocol:    corev1.ProtocolTCP,
+					AppProtocol: swag.String("http"),
+				},
+				{
+					Name:        "tcp-statsd-exporter",
+					Port:        int32(9125),
+					TargetPort:  intstr.FromInt(9125),
+					Protocol:    corev1.ProtocolTCP,
+					AppProtocol: swag.String("tcp"),
+				},
+				{
+					Name:        "udp-statsd-exporter",
+					Port:        int32(9125),
+					TargetPort:  intstr.FromInt(9125),
+					Protocol:    corev1.ProtocolUDP,
+					AppProtocol: swag.String("udp"),
 				},
 			},
 		},

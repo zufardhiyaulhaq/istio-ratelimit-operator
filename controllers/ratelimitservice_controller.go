@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -42,6 +43,51 @@ type RateLimitServiceReconciler struct {
 	Client   client.Client
 	Scheme   *runtime.Scheme
 	Settings settings.Settings
+}
+
+func reloadStatsdExporter(domain string) error {
+	client := http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	response, err := client.Post(domain, "", nil)
+	if err != nil {
+		return err
+	}
+
+	defer response.Body.Close()
+
+	if response.StatusCode == http.StatusOK {
+		return nil
+	}
+
+	return nil
+}
+
+func checkDeploymentSpecDiff(existing, new appsv1.DeploymentSpec) bool {
+	if len(existing.Template.Spec.Containers) != len(new.Template.Spec.Containers) {
+		return true
+	}
+
+	if len(existing.Template.Spec.Volumes) != len(new.Template.Spec.Volumes) {
+		return true
+	}
+
+	for existingIndex, existingContainer := range existing.Template.Spec.Containers {
+		for newIndex, newContainer := range new.Template.Spec.Containers {
+			if existingIndex == newIndex && existing.Template.Spec.Containers[existingIndex].Name != new.Template.Spec.Containers[newIndex].Name {
+				return true
+			}
+
+			if existingContainer.Name == newContainer.Name {
+				if existingContainer.Image != newContainer.Image {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
 }
 
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=ratelimitservices,verbs=get;list;watch;create;update;patch;delete
@@ -337,6 +383,9 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		}
 	}
 
+	restartDeployment := false
+
+	// check diff & update config configmap
 	if !equality.Semantic.DeepEqual(createdConfigMapConfig.Data, configMapConfig.Data) {
 		createdConfigMapConfig.Data = configMapConfig.Data
 
@@ -347,6 +396,7 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		}
 	}
 
+	// check diff & update env configmap
 	if !equality.Semantic.DeepEqual(createdConfigMapEnv.Data, configMapEnv.Data) {
 		createdConfigMapEnv.Data = configMapEnv.Data
 
@@ -355,13 +405,65 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		if err != nil {
 			return ctrl.Result{}, err
 		}
+
+		restartDeployment = true
 	}
 
 	if !equality.Semantic.DeepEqual(createdConfigMapStatsd.Data, configMapStatsd.Data) {
 		createdConfigMapStatsd.Data = configMapStatsd.Data
 
+		if rateLimitService.Spec.Monitoring != nil {
+			if rateLimitService.Spec.Monitoring.Enabled {
+				rateLimitService.Status.TriggerStatsdExporterReload = true
+				err = r.Client.Status().Update(context.TODO(), rateLimitService)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+			}
+		}
+
 		log.Info("update configmap statsd")
 		err := r.Client.Update(ctx, createdConfigMapStatsd, &client.UpdateOptions{})
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		log.Info("reload statsd exporter")
+		err = reloadStatsdExporter(fmt.Sprintf("%s.%s.svc.cluster.local", svc.Name, svc.Namespace))
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	// check diff & update deployment
+	if checkDeploymentSpecDiff(createdDeployment.Spec, deployment.Spec) {
+		createdDeployment.Spec = deployment.Spec
+
+		log.Info("update deployment")
+		err := r.Client.Update(ctx, createdDeployment, &client.UpdateOptions{})
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		restartDeployment = false
+	}
+
+	// check diff & update service
+	if !equality.Semantic.DeepEqual(createdSvc.Spec.Ports, svc.Spec.Ports) {
+		createdSvc.Spec.Ports = svc.Spec.Ports
+
+		log.Info("update service")
+		err := r.Client.Update(ctx, createdSvc, &client.UpdateOptions{})
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	if restartDeployment {
+		log.Info("restart ratelimitservice deployment")
+
+		createdDeployment.Spec.Template.Annotations["RateLimitService.zufardhiyaulhaq.com/restartedAt"] = time.Now().String()
+		err := r.Client.Update(ctx, createdDeployment, &client.UpdateOptions{})
 		if err != nil {
 			return ctrl.Result{}, err
 		}

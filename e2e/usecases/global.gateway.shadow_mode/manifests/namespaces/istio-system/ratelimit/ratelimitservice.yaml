@@ -24,8 +24,4 @@ spec:
         pipeline_window: "1s"
         pipeline_limit: 10
   monitoring:
-    statsd:
-      enabled: true
-      spec:
-        host: localhost
-        port: 8125
+    enabled: true

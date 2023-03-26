@@ -11,74 +11,6 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestEnvBuilder_BuildStatsdEnv(t *testing.T) {
-	type fields struct {
-		RateLimitService v1alpha1.RateLimitService
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		want    map[string]string
-		wantErr bool
-	}{
-		{
-			name: "statsd not enabled",
-			fields: fields{
-				RateLimitService: v1alpha1.RateLimitService{
-					Spec: v1alpha1.RateLimitServiceSpec{
-						Monitoring: &v1alpha1.RateLimitServiceSpec_Monitoring{
-							Statsd: &v1alpha1.RateLimitServiceSpec_Monitoring_Statsd{
-								Enabled: false,
-							},
-						},
-					},
-				},
-			},
-			want:    make(map[string]string),
-			wantErr: false,
-		},
-		{
-			name: "statsd enabled",
-			fields: fields{
-				RateLimitService: v1alpha1.RateLimitService{
-					Spec: v1alpha1.RateLimitServiceSpec{
-						Monitoring: &v1alpha1.RateLimitServiceSpec_Monitoring{
-							Statsd: &v1alpha1.RateLimitServiceSpec_Monitoring_Statsd{
-								Enabled: true,
-								Spec: v1alpha1.RateLimitServiceSpec_Monitoring_Statsd_Spec{
-									Host: "foo",
-									Port: 8125,
-								},
-							},
-						},
-					},
-				},
-			},
-			want: map[string]string{
-				"USE_STATSD":  "true",
-				"STATSD_HOST": "foo",
-				"STATSD_PORT": "8125",
-			},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			n := &service.EnvBuilder{
-				RateLimitService: tt.fields.RateLimitService,
-			}
-			got, err := n.BuildStatsdEnv()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("EnvBuilder.buildStatsdEnv() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("EnvBuilder.buildStatsdEnv() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestEnvBuilder_BuildRedisEnv(t *testing.T) {
 	mockPipelineLimit := 1
 	mockPipelineWindow := "1s"
@@ -476,13 +408,7 @@ func TestEnvBuilder_Build(t *testing.T) {
 							},
 						},
 						Monitoring: &v1alpha1.RateLimitServiceSpec_Monitoring{
-							Statsd: &v1alpha1.RateLimitServiceSpec_Monitoring_Statsd{
-								Enabled: true,
-								Spec: v1alpha1.RateLimitServiceSpec_Monitoring_Statsd_Spec{
-									Host: "statsd",
-									Port: 8125,
-								},
-							},
+							Enabled: true,
 						},
 					},
 				},
@@ -504,8 +430,8 @@ func TestEnvBuilder_Build(t *testing.T) {
 						"REDIS_TYPE":        "single",
 						"REDIS_URL":         "127.0.0.1:6379",
 						"USE_STATSD":        "true",
-						"STATSD_HOST":       "statsd",
-						"STATSD_PORT":       "8125",
+						"STATSD_HOST":       "localhost",
+						"STATSD_PORT":       "9125",
 					},
 				},
 			},

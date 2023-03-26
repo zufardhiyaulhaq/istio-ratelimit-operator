@@ -58,9 +58,14 @@ type RateLimitServiceSpec_Backend_Redis_Config struct {
 }
 
 type RateLimitServiceSpec_Monitoring struct {
+	// +optional
+	Enabled bool `json:"enabled,omitempty"`
+
+	// This API is deprecated
 	Statsd *RateLimitServiceSpec_Monitoring_Statsd `json:"statsd,omitempty"`
 }
 
+// This API is deprecated
 type RateLimitServiceSpec_Monitoring_Statsd struct {
 	Enabled bool                                        `json:"enabled,omitempty"`
 	Spec    RateLimitServiceSpec_Monitoring_Statsd_Spec `json:"spec,omitempty"`
@@ -72,6 +77,7 @@ type RateLimitServiceSpec_Monitoring_Statsd_Spec struct {
 }
 
 type RateLimitServiceStatus struct {
+	TriggerStatsdExporterReload bool `json:"trigger_statsd_exporter_reload,omitempty"`
 }
 
 //+kubebuilder:object:root=true

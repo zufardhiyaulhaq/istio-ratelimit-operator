@@ -80,7 +80,7 @@ func (n *EnvBuilder) BuildEnv() (map[string]string, error) {
 	}
 
 	if n.RateLimitService.Spec.Monitoring != nil {
-		if n.RateLimitService.Spec.Monitoring.Statsd != nil {
+		if n.RateLimitService.Spec.Monitoring.Enabled {
 			statsdEnv, err := n.BuildStatsdEnv()
 			if err != nil {
 				return env, err
@@ -129,12 +129,9 @@ func (n *EnvBuilder) BuildRedisEnv() (map[string]string, error) {
 
 func (n *EnvBuilder) BuildStatsdEnv() (map[string]string, error) {
 	data := make(map[string]string)
-
-	if n.RateLimitService.Spec.Monitoring.Statsd.Enabled {
-		data["USE_STATSD"] = "true"
-		data["STATSD_HOST"] = n.RateLimitService.Spec.Monitoring.Statsd.Spec.Host
-		data["STATSD_PORT"] = strconv.Itoa(n.RateLimitService.Spec.Monitoring.Statsd.Spec.Port)
-	}
+	data["USE_STATSD"] = "true"
+	data["STATSD_HOST"] = "localhost"
+	data["STATSD_PORT"] = "9125"
 
 	return data, nil
 }
