@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -42,6 +43,25 @@ type RateLimitServiceReconciler struct {
 	Client   client.Client
 	Scheme   *runtime.Scheme
 	Settings settings.Settings
+}
+
+func reloadStatsdExporter(domain string) error {
+	client := http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	response, err := client.Post(domain, "", nil)
+	if err != nil {
+		return err
+	}
+
+	defer response.Body.Close()
+
+	if response.StatusCode == http.StatusOK {
+		return nil
+	}
+
+	return nil
 }
 
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=ratelimitservices,verbs=get;list;watch;create;update;patch;delete
@@ -337,6 +357,9 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		}
 	}
 
+	restartDeployment := false
+
+	// check diff & update config configmap
 	if !equality.Semantic.DeepEqual(createdConfigMapConfig.Data, configMapConfig.Data) {
 		createdConfigMapConfig.Data = configMapConfig.Data
 
@@ -345,8 +368,11 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		if err != nil {
 			return ctrl.Result{}, err
 		}
+
+		restartDeployment = true
 	}
 
+	// check diff & update env configmap
 	if !equality.Semantic.DeepEqual(createdConfigMapEnv.Data, configMapEnv.Data) {
 		createdConfigMapEnv.Data = configMapEnv.Data
 
@@ -355,13 +381,71 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		if err != nil {
 			return ctrl.Result{}, err
 		}
+
+		restartDeployment = true
 	}
 
 	if !equality.Semantic.DeepEqual(createdConfigMapStatsd.Data, configMapStatsd.Data) {
 		createdConfigMapStatsd.Data = configMapStatsd.Data
 
+		if rateLimitService.Spec.Monitoring != nil {
+			if rateLimitService.Spec.Monitoring.Enabled {
+				rateLimitService.Status.TriggerStatsdExporterReload = true
+				err = r.Client.Status().Update(context.TODO(), rateLimitService)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+			}
+		}
+
 		log.Info("update configmap statsd")
 		err := r.Client.Update(ctx, createdConfigMapStatsd, &client.UpdateOptions{})
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	// check diff & update deployment
+	if !equality.Semantic.DeepEqual(createdDeployment.Spec.Template.Spec, deployment.Spec.Template.Spec) {
+		createdDeployment.Spec.Template.Spec = deployment.Spec.Template.Spec
+
+		log.Info("update deployment")
+		err := r.Client.Update(ctx, createdDeployment, &client.UpdateOptions{})
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		if rateLimitService.Spec.Monitoring != nil {
+			if rateLimitService.Spec.Monitoring.Enabled {
+				rateLimitService.Status.TriggerStatsdExporterReload = false
+				err = r.Client.Status().Update(context.TODO(), rateLimitService)
+				if err != nil {
+					return ctrl.Result{}, err
+				}
+			}
+		}
+
+		restartDeployment = false
+	}
+
+	if rateLimitService.Status.TriggerStatsdExporterReload {
+		err := reloadStatsdExporter(fmt.Sprintf("%s.%s.svc.cluster.local", svc.Name, svc.Namespace))
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
+		rateLimitService.Status.TriggerStatsdExporterReload = false
+		err = r.Client.Status().Update(context.TODO(), rateLimitService)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	if restartDeployment {
+		log.Info("restart ratelimitservice deployment")
+
+		createdDeployment.Spec.Template.Annotations["RateLimitService/ratelimit.zufardhiyaulhaq.com/restartedAt"] = time.Now().String()
+		err := r.Client.Update(ctx, createdDeployment, &client.UpdateOptions{})
 		if err != nil {
 			return ctrl.Result{}, err
 		}

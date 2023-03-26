@@ -55,14 +55,17 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 								{
 									Name:          "http",
 									ContainerPort: int32(8080),
+									Protocol:      corev1.ProtocolTCP,
 								},
 								{
 									Name:          "grpc",
 									ContainerPort: int32(8081),
+									Protocol:      corev1.ProtocolTCP,
 								},
 								{
 									Name:          "http-admin",
 									ContainerPort: int32(6070),
+									Protocol:      corev1.ProtocolTCP,
 								},
 							},
 							Env: env,
@@ -117,6 +120,65 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 
 		if n.RateLimitService.Spec.Kubernetes.Resources != nil {
 			deployment.Spec.Template.Spec.Containers[0].Resources = *n.RateLimitService.Spec.Kubernetes.Resources
+			deployment.Spec.Template.Spec.Containers[1].Resources = *n.RateLimitService.Spec.Kubernetes.Resources
+		}
+	}
+
+	if n.RateLimitService.Spec.Monitoring != nil {
+		if n.RateLimitService.Spec.Monitoring.Enabled {
+			deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers, corev1.Container{
+				Name:    n.RateLimitService.Name + "-statsd-exporter",
+				Image:   image,
+				Command: []string{"/bin/statsd_exporter"},
+				Args: []string{
+					"--web.enable-lifecycle",
+					"--statsd.mapping-config=/etc/prometheus-statsd-exporter/statsd.mappingConf",
+				},
+				Ports: []corev1.ContainerPort{
+					{
+						Name:          "http",
+						ContainerPort: int32(9102),
+						Protocol:      corev1.ProtocolTCP,
+					},
+					{
+						Name:          "tcp-statsd-exporter",
+						ContainerPort: int32(9125),
+						Protocol:      corev1.ProtocolTCP,
+					},
+					{
+						Name:          "udp-statsd-exporter",
+						ContainerPort: int32(9125),
+						Protocol:      corev1.ProtocolUDP,
+					},
+				},
+				ReadinessProbe: &corev1.Probe{
+					ProbeHandler: corev1.ProbeHandler{
+						HTTPGet: &corev1.HTTPGetAction{
+							Path: "/ready",
+							Port: intstr.FromInt(9102),
+						},
+					},
+					InitialDelaySeconds: int32(5),
+					PeriodSeconds:       int32(10),
+				},
+				VolumeMounts: []corev1.VolumeMount{
+					{
+						Name:      n.RateLimitService.Name + "-statsd-config",
+						MountPath: "/data/ratelimit/config/",
+					},
+				},
+			})
+
+			deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
+				Name: n.RateLimitService.Name + "-statsd-config",
+				VolumeSource: corev1.VolumeSource{
+					ConfigMap: &corev1.ConfigMapVolumeSource{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: n.RateLimitService.Name + "-statsd-config",
+						},
+					},
+				},
+			})
 		}
 	}
 

@@ -104,7 +104,10 @@ spec:
                 type: object
               monitoring:
                 properties:
+                  enabled:
+                    type: boolean
                   statsd:
+                    description: This API is deprecated
                     properties:
                       enabled:
                         type: boolean
@@ -119,6 +122,9 @@ spec:
                 type: object
             type: object
           status:
+            properties:
+              trigger_statsd_exporter_reload:
+                type: boolean
             type: object
         type: object
     served: true
