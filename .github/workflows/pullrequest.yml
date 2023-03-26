@@ -63,8 +63,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.25]
-        istio: ["1.14.6","1.15.6", "1.16.3", , "1.17.1"]
+        kubernetes: ["v1.25"]
+        istio: ["1.14.6","1.15.6", "1.16.3", "1.17.1"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -118,8 +118,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.25]
-        istio: ["1.14.6","1.15.6", "1.16.3", , "1.17.1"]
+        kubernetes: ["v1.25"]
+        istio: ["1.14.6","1.15.6", "1.16.3", "1.17.1"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -173,8 +173,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.25]
-        istio: ["1.14.6","1.15.6", "1.16.3", , "1.17.1"]
+        kubernetes: ["v1.25"]
+        istio: ["1.14.6","1.15.6", "1.16.3", "1.17.1"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -228,8 +228,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.25]
-        istio: ["1.14.6","1.15.6", "1.16.3", , "1.17.1"]
+        kubernetes: ["v1.25"]
+        istio: ["1.14.6","1.15.6", "1.16.3", "1.17.1"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -283,8 +283,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.25]
-        istio: ["1.14.6","1.15.6", "1.16.3", , "1.17.1"]
+        kubernetes: ["v1.25"]
+        istio: ["1.14.6","1.15.6", "1.16.3", "1.17.1"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -338,8 +338,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.25]
-        istio: ["1.14.6","1.15.6", "1.16.3", , "1.17.1"]
+        kubernetes: ["v1.25"]
+        istio: ["1.14.6","1.15.6", "1.16.3", "1.17.1"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -393,8 +393,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.25]
-        istio: ["1.14.6","1.15.6", "1.16.3", , "1.17.1"]
+        kubernetes: ["v1.25"]
+        istio: ["1.14.6","1.15.6", "1.16.3", "1.17.1"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -448,8 +448,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.25]
-        istio: ["1.14.6","1.15.6", "1.16.3", , "1.17.1"]
+        kubernetes: ["v1.25"]
+        istio: ["1.14.6","1.15.6", "1.16.3", "1.17.1"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -503,8 +503,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.25]
-        istio: ["1.14.6","1.15.6", "1.16.3", , "1.17.1"]
+        kubernetes: ["v1.25"]
+        istio: ["1.14.6","1.15.6", "1.16.3", "1.17.1"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -558,8 +558,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes: [v1.25]
-        istio: ["1.14.6","1.15.6", "1.16.3", , "1.17.1"]
+        kubernetes: ["v1.25"]
+        istio: ["1.14.6","1.15.6", "1.16.3", "1.17.1"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
