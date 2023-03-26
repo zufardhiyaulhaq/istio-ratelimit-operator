@@ -9,10 +9,10 @@ spec:
     labels:
       app: podinfo
     istio_version:
-      - "1.13"
       - "1.14"
       - "1.15"
       - "1.16"
+      - "1.17"
   ratelimit:
     spec:
       domain: "podinfo"
