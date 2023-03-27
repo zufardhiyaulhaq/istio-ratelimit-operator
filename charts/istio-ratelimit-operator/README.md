@@ -2,7 +2,7 @@
 
 Istio ratelimit operator provide an easy way to configure Global or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter versioning!
 
-![Version: 2.10.0](https://img.shields.io/badge/Version-2.10.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.10.0](https://img.shields.io/badge/AppVersion-2.10.0-informational?style=flat-square) [![made with Go](https://img.shields.io/badge/made%20with-Go-brightgreen)](http://golang.org) [![Github master branch build](https://img.shields.io/github/workflow/status/zufardhiyaulhaq/istio-ratelimit-operator/Master)](https://github.com/zufardhiyaulhaq/istio-ratelimit-operator/actions/workflows/master.yml) [![GitHub issues](https://img.shields.io/github/issues/zufardhiyaulhaq/istio-ratelimit-operator)](https://github.com/zufardhiyaulhaq/istio-ratelimit-operator/issues) [![GitHub pull requests](https://img.shields.io/github/issues-pr/zufardhiyaulhaq/istio-ratelimit-operator)](https://github.com/zufardhiyaulhaq/istio-ratelimit-operator/pulls)[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/istio-ratelimit-operator)](https://artifacthub.io/packages/search?repo=istio-ratelimit-operator)
+![Version: 2.10.0-rc.0](https://img.shields.io/badge/Version-2.10.0--rc.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 2.10.0-rc.0](https://img.shields.io/badge/AppVersion-2.10.0--rc.0-informational?style=flat-square) [![made with Go](https://img.shields.io/badge/made%20with-Go-brightgreen)](http://golang.org) [![Github master branch build](https://img.shields.io/github/workflow/status/zufardhiyaulhaq/istio-ratelimit-operator/Master)](https://github.com/zufardhiyaulhaq/istio-ratelimit-operator/actions/workflows/master.yml) [![GitHub issues](https://img.shields.io/github/issues/zufardhiyaulhaq/istio-ratelimit-operator)](https://github.com/zufardhiyaulhaq/istio-ratelimit-operator/issues) [![GitHub pull requests](https://img.shields.io/github/issues-pr/zufardhiyaulhaq/istio-ratelimit-operator)](https://github.com/zufardhiyaulhaq/istio-ratelimit-operator/pulls)[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/istio-ratelimit-operator)](https://artifacthub.io/packages/search?repo=istio-ratelimit-operator)
 
 ## Installation
 
@@ -10,7 +10,7 @@ To install the chart with the release name `my-istio-ratelimit-operator`:
 
 ```console
 helm repo add istio-ratelimit-operator https://zufardhiyaulhaq.com/istio-ratelimit-operator/charts/releases/
-helm install my-istio-ratelimit-operator istio-ratelimit-operator/istio-ratelimit-operator --version 2.10.0 --values values.yaml
+helm install my-istio-ratelimit-operator istio-ratelimit-operator/istio-ratelimit-operator --version 2.10.0-rc.0 --values values.yaml
 ```
 
 ## Usage

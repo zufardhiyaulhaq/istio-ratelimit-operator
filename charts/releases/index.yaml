@@ -2,12 +2,12 @@ apiVersion: v1
 entries:
   istio-ratelimit-operator:
   - apiVersion: v2
-    appVersion: 2.10.0
-    created: "2023-03-26T18:30:34.698166+07:00"
+    appVersion: 2.10.0-rc.0
+    created: "2023-03-27T12:34:12.789129+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
-    digest: b9b2f5a8f7f3730168d8f097f8d41f7e111738bd36577279fb2a899839cf837c
+    digest: 96029760ac85bb61ba8bc672b6557df0e6106aca0df7e722e52fb234e140280a
     home: https://github.com/zufardhiyaulhaq/istio-ratelimit-operator
     maintainers:
     - email: zufardhiyaulhaq@gmail.com
@@ -16,11 +16,11 @@ entries:
     name: istio-ratelimit-operator
     type: application
     urls:
-    - istio-ratelimit-operator-2.10.0.tgz
-    version: 2.10.0
+    - istio-ratelimit-operator-2.10.0-rc.0.tgz
+    version: 2.10.0-rc.0
   - apiVersion: v2
     appVersion: 2.9.0
-    created: "2023-03-26T18:30:34.716229+07:00"
+    created: "2023-03-27T12:34:12.805077+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
@@ -37,7 +37,7 @@ entries:
     version: 2.9.0
   - apiVersion: v2
     appVersion: 2.8.0
-    created: "2023-03-26T18:30:34.714796+07:00"
+    created: "2023-03-27T12:34:12.803771+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
@@ -54,7 +54,7 @@ entries:
     version: 2.8.0
   - apiVersion: v2
     appVersion: 2.7.0
-    created: "2023-03-26T18:30:34.713328+07:00"
+    created: "2023-03-27T12:34:12.802539+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
@@ -71,7 +71,7 @@ entries:
     version: 2.7.0
   - apiVersion: v2
     appVersion: 2.6.1
-    created: "2023-03-26T18:30:34.711813+07:00"
+    created: "2023-03-27T12:34:12.801276+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
@@ -88,7 +88,7 @@ entries:
     version: 2.6.1
   - apiVersion: v2
     appVersion: 2.6.0
-    created: "2023-03-26T18:30:34.710248+07:00"
+    created: "2023-03-27T12:34:12.800074+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
@@ -105,7 +105,7 @@ entries:
     version: 2.6.0
   - apiVersion: v2
     appVersion: 2.5.1
-    created: "2023-03-26T18:30:34.707539+07:00"
+    created: "2023-03-27T12:34:12.798828+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
@@ -122,7 +122,7 @@ entries:
     version: 2.5.1
   - apiVersion: v2
     appVersion: 2.5.0
-    created: "2023-03-26T18:30:34.705937+07:00"
+    created: "2023-03-27T12:34:12.797644+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
@@ -139,7 +139,7 @@ entries:
     version: 2.5.0
   - apiVersion: v2
     appVersion: 2.4.0
-    created: "2023-03-26T18:30:34.704184+07:00"
+    created: "2023-03-27T12:34:12.795812+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
@@ -156,7 +156,7 @@ entries:
     version: 2.4.0
   - apiVersion: v2
     appVersion: 2.3.0
-    created: "2023-03-26T18:30:34.701729+07:00"
+    created: "2023-03-27T12:34:12.794245+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
@@ -173,7 +173,7 @@ entries:
     version: 2.3.0
   - apiVersion: v2
     appVersion: 2.2.0
-    created: "2023-03-26T18:30:34.6999+07:00"
+    created: "2023-03-27T12:34:12.790652+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
@@ -190,7 +190,7 @@ entries:
     version: 2.2.0
   - apiVersion: v2
     appVersion: 2.1.0
-    created: "2023-03-26T18:30:34.697235+07:00"
+    created: "2023-03-27T12:34:12.788251+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
@@ -207,7 +207,7 @@ entries:
     version: 2.1.0
   - apiVersion: v2
     appVersion: 2.0.0
-    created: "2023-03-26T18:30:34.695814+07:00"
+    created: "2023-03-27T12:34:12.786825+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
@@ -224,7 +224,7 @@ entries:
     version: 2.0.0
   - apiVersion: v2
     appVersion: 1.0.0
-    created: "2023-03-26T18:30:34.694334+07:00"
+    created: "2023-03-27T12:34:12.785472+07:00"
     description: Istio ratelimit operator provide an easy way to configure Global
       or Local Ratelimit in Istio mesh. Istio ratelimit operator also support EnvoyFilter
       versioning!
@@ -239,4 +239,4 @@ entries:
     urls:
     - istio-ratelimit-operator-1.0.0.tgz
     version: 1.0.0
-generated: "2023-03-26T18:30:34.6923+07:00"
+generated: "2023-03-27T12:34:12.783866+07:00"
