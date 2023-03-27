@@ -2,7 +2,7 @@ operator:
   # image of istio-ratelimit-operator
   image: "zufardhiyaulhaq/istio-ratelimit-operator"
   # tag of istio-ratelimit-operator image
-  tag: "v2.10.0"
+  tag: "v2.10.0-rc.0"
   # number of replica for deployment
   replica: 1
 
