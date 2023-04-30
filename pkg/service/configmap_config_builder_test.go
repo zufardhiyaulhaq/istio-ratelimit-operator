@@ -95,6 +95,32 @@ func TestNewRateLimitDescriptorFromMatcher(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "simple remote address",
+			args: args{
+				matchers: []*v1alpha1.GlobalRateLimit_Action{
+					{
+						RemoteAddress: &v1alpha1.GlobalRateLimit_Action_RemoteAddress{},
+					},
+				},
+				limit: &v1alpha1.GlobalRateLimit_Limit{
+					Unit:            "hour",
+					RequestsPerUnit: 1,
+				},
+				shadowMode: false,
+			},
+			want: []types.RateLimit_Service_Descriptor{
+				{
+					Key: "remote_address",
+					RateLimit: v1alpha1.GlobalRateLimit_Limit{
+						Unit:            "hour",
+						RequestsPerUnit: 1,
+					},
+					ShadowMode: false,
+				},
+			},
+			wantErr: false,
+		},
+		{
 			name: "simple Generic key",
 			args: args{
 				matchers: []*v1alpha1.GlobalRateLimit_Action{
