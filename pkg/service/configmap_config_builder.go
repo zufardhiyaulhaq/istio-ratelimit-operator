@@ -107,7 +107,7 @@ func NewRateLimitDescriptorFromGlobalRateLimit(globalRateLimit v1alpha1.GlobalRa
 	var sanitizeMatchers []*v1alpha1.GlobalRateLimit_Action
 
 	for _, matcher := range globalRateLimit.Spec.Matcher {
-		if matcher.RequestHeaders != nil || matcher.GenericKey != nil || matcher.HeaderValueMatch != nil {
+		if matcher.RequestHeaders != nil || matcher.GenericKey != nil || matcher.HeaderValueMatch != nil || matcher.RemoteAddress != nil {
 			sanitizeMatchers = append(sanitizeMatchers, matcher)
 			continue
 		}
@@ -132,6 +132,25 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 
 	matcher := matchers[0]
 
+	if matcher.RemoteAddress != nil {
+		descriptor[0].Key = "remote_address"
+
+		if len(matchers) == 1 {
+			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
+			descriptor[0].RateLimit.Unit = limit.Unit
+			descriptor[0].ShadowMode = shadowMode
+
+			return descriptor, nil
+		}
+
+		nestedDescriptor, err := NewRateLimitDescriptorFromMatcher(matchers[1:], limit, shadowMode)
+		if err != nil {
+			return descriptor, fmt.Errorf("error")
+		}
+
+		descriptor[0].Descriptors = nestedDescriptor
+		return descriptor, nil
+	}
 	if matcher.RequestHeaders != nil {
 		descriptor[0].Key = matcher.RequestHeaders.DescriptorKey
 
