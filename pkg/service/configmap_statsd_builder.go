@@ -156,6 +156,11 @@ func NewStatsdRegexMatcherFromGlobalRateLimitMatcher(matchers []*v1alpha1.Global
 		if matcher.RequestHeaders != nil {
 			regex = regex + matcher.RequestHeaders.DescriptorKey
 		}
+
+		if matcher.RemoteAddress != nil {
+			regex = regex + "remote_address"
+		}
+
 		if matcher.GenericKey != nil {
 			if matcher.GenericKey.DescriptorKey != nil {
 				regex = regex + *matcher.GenericKey.DescriptorKey + "_" + matcher.GenericKey.DescriptorValue
@@ -164,6 +169,7 @@ func NewStatsdRegexMatcherFromGlobalRateLimitMatcher(matchers []*v1alpha1.Global
 			}
 
 		}
+
 		if matcher.HeaderValueMatch != nil {
 			regex = regex + "header_match" + "_" + matcher.HeaderValueMatch.DescriptorValue
 		}
