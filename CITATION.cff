@@ -4,6 +4,6 @@ authors:
 - family-names: "Dhiyaulhaq"
   given-names: "Zufar"
 title: "Istio Ratelimit Operator"
-version: 2.8.0
+version: 2.10.0
 date-released: 2022-07-27
 url: "https://github.com/zufardhiyaulhaq/istio-ratelimit-operator"
