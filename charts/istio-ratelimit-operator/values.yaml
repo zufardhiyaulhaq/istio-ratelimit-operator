@@ -19,3 +19,6 @@ settings:
     image: envoyproxy/ratelimit:4c088856
   statsdExporter:
     image: prom/statsd-exporter:v0.23.1
+
+serviceAccount:
+  imagePullSecrets: []
