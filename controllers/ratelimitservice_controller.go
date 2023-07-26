@@ -50,7 +50,7 @@ func reloadStatsdExporter(domain string) error {
 		Timeout: 5 * time.Second,
 	}
 
-	response, err := client.Post(domain, "", nil)
+	response, err := client.Post(domain+"/-/reload", "", nil)
 	if err != nil {
 		return err
 	}
