@@ -9,6 +9,9 @@ spec:
     auto_scaling:
       max_replicas: 2
       min_replicas: 1
+    extra_labels:
+      team: foo
+      environment: staging
     resources:
       limits:
         cpu: "256m"
