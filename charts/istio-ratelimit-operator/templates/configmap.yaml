@@ -20,3 +20,4 @@ metadata:
     helm.sh/chart: {{ template "istio-ratelimit-operator.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     manager: {{ .Release.Service }}
+    {{- include "istioratelimitoperator.labels" . | nindent 4 }}
