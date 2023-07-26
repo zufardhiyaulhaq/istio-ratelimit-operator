@@ -27,7 +27,6 @@ func (n *DeploymentBuilder) SetRateLimitService(rateLimitService v1alpha1.RateLi
 }
 
 func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
-
 	image := n.BuildImageInfo()
 	env := n.BuildEnv()
 
@@ -39,7 +38,7 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 		},
 		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
-				MatchLabels: n.BuildLabels(),
+				MatchLabels: n.BuildLabelsSelector(),
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
@@ -209,11 +208,28 @@ func (n *DeploymentBuilder) BuildEnv() []corev1.EnvVar {
 	return env
 }
 
-func (n *DeploymentBuilder) BuildLabels() map[string]string {
+func (n *DeploymentBuilder) BuildLabelsSelector() map[string]string {
 	var labels = map[string]string{
 		"app.kubernetes.io/name":       n.RateLimitService.Name,
 		"app.kubernetes.io/managed-by": "istio-rateltimit-operator",
 		"app.kubernetes.io/created-by": n.RateLimitService.Name,
+	}
+
+	return labels
+}
+
+func (n *DeploymentBuilder) BuildLabels() map[string]string {
+	labelSelector := n.BuildLabelsSelector()
+
+	var labels = map[string]string{}
+	for key, value := range labelSelector {
+		labels[key] = value
+	}
+
+	if n.RateLimitService.Spec.Kubernetes.ExtraLabels != nil {
+		for key, value := range *n.RateLimitService.Spec.Kubernetes.ExtraLabels {
+			labels[key] = value
+		}
 	}
 
 	return labels

@@ -8,6 +8,7 @@ metadata:
     helm.sh/chart: {{ template "istio-ratelimit-operator.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     manager: {{ .Release.Service }}
+    {{- include "istioratelimitoperator.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role

@@ -7,6 +7,7 @@ metadata:
     helm.sh/chart: {{ template "istio-ratelimit-operator.chart" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     manager: {{ .Release.Service }}
+    {{- include "istioratelimitoperator.labels" . | nindent 4 }}
 data:
   RATE_LIMIT_SERVICE_IMAGE: {{ .Values.settings.ratelimitservice.image }}
   STATSD_EXPORTER_IMAGE: {{ .Values.settings.statsdExporter.image }}
