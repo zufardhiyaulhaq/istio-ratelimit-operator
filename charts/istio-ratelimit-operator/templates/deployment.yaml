@@ -21,6 +21,7 @@ spec:
       labels:
         control-plane: controller-manager
         app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- include "istioratelimitoperator.labels" . | nindent 8 }}
     spec:
       containers:
       - args:
