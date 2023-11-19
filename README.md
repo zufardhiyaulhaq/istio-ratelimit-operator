@@ -101,20 +101,21 @@ public-gateway.method.grault-route_grault-route: unit=HOUR requests_per_unit=60
 | extraLabels | object | `{}` |  |
 | operator.image | string | `"zufardhiyaulhaq/istio-ratelimit-operator"` |  |
 | operator.replica | int | `1` |  |
-| operator.tag | string | `"v2.11.1"` |  |
+| operator.tag | string | `"v2.12.0"` |  |
 | resources.limits.cpu | string | `"512m"` |  |
 | resources.limits.memory | string | `"512Mi"` |  |
 | resources.requests.cpu | string | `"256m"` |  |
 | resources.requests.memory | string | `"256Mi"` |  |
 | serviceAccount.imagePullSecrets | list | `[]` |  |
-| settings.ratelimitservice.image | string | `"envoyproxy/ratelimit:4c088856"` |  |
-| settings.statsdExporter.image | string | `"prom/statsd-exporter:v0.23.1"` |  |
+| settings.ratelimitservice.image | string | `"envoyproxy/ratelimit:5e1be594"` |  |
+| settings.statsdExporter.image | string | `"prom/statsd-exporter:v0.25.0"` |  |
 
 ## Supported Releases
 
 | Operator Version | Istio Version |
 |-----|------|
-| 2.10.0 | <= 1.17.x |
+| 2.12.0 | <= 1.20.x |
+| 2.11.2 | <= 1.17.x |
 | 2.9.0 | <= 1.16.x |
 | 2.8.0 | <= 1.15.x |
 | 2.5.1 | <= 1.13.x |

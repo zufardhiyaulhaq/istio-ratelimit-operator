@@ -5,7 +5,7 @@ import (
 )
 
 type Settings struct {
-	RateLimitServiceImage string `required:"true" envconfig:"RATE_LIMIT_SERVICE_IMAGE" default:"envoyproxy/ratelimit:4c088856"`
+	RateLimitServiceImage string `required:"true" envconfig:"RATE_LIMIT_SERVICE_IMAGE" default:"envoyproxy/ratelimit:5e1be594"`
 	StatsdExporterImage   string `required:"true" envconfig:"STATSD_EXPORTER_IMAGE" default:"prom/statsd-exporter:v0.23.1"`
 }
 

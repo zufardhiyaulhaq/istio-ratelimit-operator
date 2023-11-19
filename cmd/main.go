@@ -28,7 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/controllers"
+	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/internal/controller"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/settings"
 
 	clientnetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
@@ -88,21 +88,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.GlobalRateLimitConfigReconciler{
+	if err = (&controller.GlobalRateLimitConfigReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "GlobalRateLimitConfig")
 		os.Exit(1)
 	}
-	if err = (&controllers.GlobalRateLimitReconciler{
+	if err = (&controller.GlobalRateLimitReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "GlobalRateLimit")
 		os.Exit(1)
 	}
-	if err = (&controllers.RateLimitServiceReconciler{
+	if err = (&controller.RateLimitServiceReconciler{
 		Client:   mgr.GetClient(),
 		Scheme:   mgr.GetScheme(),
 		Settings: settings,
@@ -110,14 +110,14 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "RateLimitService")
 		os.Exit(1)
 	}
-	if err = (&controllers.LocalRateLimitConfigReconciler{
+	if err = (&controller.LocalRateLimitConfigReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "LocalRateLimitConfig")
 		os.Exit(1)
 	}
-	if err = (&controllers.LocalRateLimitReconciler{
+	if err = (&controller.LocalRateLimitReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {

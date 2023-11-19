@@ -14,75 +14,74 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controllers
+package controller
 
 import (
 	"context"
 	"fmt"
 	"time"
 
-	clientnetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
+	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/local/ratelimit"
+	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/utils"
 	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	funk "github.com/thoas/go-funk"
 	ratelimitv1alpha1 "github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
-
-	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/global/ratelimit"
-	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/utils"
+	clientnetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-// GlobalRateLimitReconciler reconciles a GlobalRateLimit object
-type GlobalRateLimitReconciler struct {
-	Client client.Client
+// LocalRateLimitReconciler reconciles a LocalRateLimit object
+type LocalRateLimitReconciler struct {
+	client.Client
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimits,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimits/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=globalratelimits/finalizers,verbs=update
+//+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=localratelimits,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=localratelimits/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=localratelimits/finalizers,verbs=update
 
-func (r *GlobalRateLimitReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *LocalRateLimitReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
-	log.Info("Start GlobalRateLimit Reconciler")
+	log.Info("Start LocalRateLimit Reconciler")
 
-	globalRateLimit := &ratelimitv1alpha1.GlobalRateLimit{}
-	err := r.Client.Get(ctx, req.NamespacedName, globalRateLimit)
+	localRateLimit := &ratelimitv1alpha1.LocalRateLimit{}
+	err := r.Client.Get(ctx, req.NamespacedName, localRateLimit)
 	if err != nil {
 		return ctrl.Result{}, nil
 	}
 
-	globalRateLimitConfig := &ratelimitv1alpha1.GlobalRateLimitConfig{}
+	localRateLimitConfig := &ratelimitv1alpha1.LocalRateLimitConfig{}
 	err = r.Client.Get(ctx, types.NamespacedName{
-		Name:      globalRateLimit.Spec.Config,
-		Namespace: globalRateLimit.Namespace,
-	}, globalRateLimitConfig)
+		Name:      localRateLimit.Spec.Config,
+		Namespace: localRateLimit.Namespace,
+	}, localRateLimitConfig)
 	if err != nil {
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
-	log.Info("Build globalratelimit envoyfilters")
+	log.Info("Build localratelimit envoyfilters")
 	envoyFilters, err := ratelimit.NewConfigBuilder().
-		SetRateLimit(*globalRateLimit).
-		SetConfig(*globalRateLimitConfig).
+		SetRateLimit(*localRateLimit).
+		SetConfig(*localRateLimitConfig).
 		Build()
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if len(envoyFilters) == 0 {
-		return ctrl.Result{}, fmt.Errorf("empty globalratelimit envoyfilter from builder")
+		return ctrl.Result{}, fmt.Errorf("empty localratelimit envoyfilter from builder")
 	}
 
 	// reconcile to delete unused envoyfilters
 	// when version is change
-	allVersionEnvoyFilterNames := utils.BuildEnvoyFilterNamesAllVersion(globalRateLimit.Name)
-	EnvoyFilterNames := utils.BuildEnvoyFilterNames(globalRateLimit.Name, globalRateLimitConfig.Spec.Selector.IstioVersion)
+	allVersionEnvoyFilterNames := utils.BuildEnvoyFilterNamesAllVersion(localRateLimit.Name)
+	EnvoyFilterNames := utils.BuildEnvoyFilterNames(localRateLimit.Name, localRateLimitConfig.Spec.Selector.IstioVersion)
 	deleteEnvoyFilters, _ := funk.DifferenceString(allVersionEnvoyFilterNames, EnvoyFilterNames)
 
 	for _, deleteEnvoyFilterName := range deleteEnvoyFilters {
@@ -92,7 +91,7 @@ func (r *GlobalRateLimitReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			continue
 		}
 
-		log.Info("delete unused globalratelimit envoyfilter")
+		log.Info("delete unused localratelimit envoyfilter")
 		err = r.Client.Delete(ctx, deleteEnvoyFilter, &client.DeleteOptions{})
 		if err != nil {
 			return ctrl.Result{}, err
@@ -101,18 +100,18 @@ func (r *GlobalRateLimitReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	// create & update envoyfilters
 	for _, envoyFilter := range envoyFilters {
-		log.Info("set reference globalratelimit envoyfilter")
-		err := ctrl.SetControllerReference(globalRateLimit, envoyFilter, r.Scheme)
+		log.Info("set reference localratelimit envoyfilter")
+		err := ctrl.SetControllerReference(localRateLimit, envoyFilter, r.Scheme)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 
-		log.Info("get globalratelimit envoyfilter")
+		log.Info("get localratelimit envoyfilter")
 		createdEnvoyFilter := &clientnetworking.EnvoyFilter{}
 		err = r.Client.Get(ctx, types.NamespacedName{Name: envoyFilter.Name, Namespace: envoyFilter.Namespace}, createdEnvoyFilter)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				log.Info("create globalratelimit envoyfilter")
+				log.Info("create localratelimit envoyfilter")
 				err := r.Client.Create(ctx, envoyFilter, &client.CreateOptions{})
 				if err != nil {
 					return ctrl.Result{}, err
@@ -127,7 +126,7 @@ func (r *GlobalRateLimitReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		if !equality.Semantic.DeepEqual(createdEnvoyFilter.Spec, envoyFilter.Spec) {
 			createdEnvoyFilter.Spec = envoyFilter.Spec
 
-			log.Info("update globalratelimit envoyfilter")
+			log.Info("update localratelimit envoyfilter")
 			err := r.Client.Update(ctx, createdEnvoyFilter, &client.UpdateOptions{})
 			if err != nil {
 				return ctrl.Result{}, err
@@ -139,8 +138,8 @@ func (r *GlobalRateLimitReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *GlobalRateLimitReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *LocalRateLimitReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&ratelimitv1alpha1.GlobalRateLimit{}).
+		For(&ratelimitv1alpha1.LocalRateLimit{}).
 		Complete(r)
 }
