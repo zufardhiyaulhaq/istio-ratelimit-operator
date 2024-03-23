@@ -11,7 +11,7 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/stretchr/testify v1.8.0
 	github.com/thoas/go-funk v0.9.1
-	google.golang.org/protobuf v1.28.1
+	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v2 v2.4.0
 	istio.io/api v0.0.0-20220817194812-9ed7a41198c8
 	istio.io/client-go v1.13.9
