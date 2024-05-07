@@ -114,6 +114,7 @@ public-gateway.method.grault-route_grault-route: unit=HOUR requests_per_unit=60
 
 | Operator Version | Istio Version |
 |-----|------|
+| 2.13.0 | <= 1.21.x |
 | 2.12.0 | <= 1.20.x |
 | 2.11.2 | <= 1.17.x |
 | 2.9.0 | <= 1.16.x |

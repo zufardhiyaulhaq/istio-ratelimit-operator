@@ -11,10 +11,10 @@ spec:
     labels:
       "app": "istio-public-gateway"
     istio_version:
-      - "1.8"
-      - "1.9"
-      - "1.10"
-      - "1.11"
+      - "1.18"
+      - "1.19"
+      - "1.20"
+      - "1.21"
     sni: "helloworld.zufardhiyaulhaq.com"
   ratelimit:
     spec:

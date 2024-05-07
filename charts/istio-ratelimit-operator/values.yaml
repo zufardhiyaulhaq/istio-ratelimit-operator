@@ -2,7 +2,7 @@ operator:
   # image of istio-ratelimit-operator
   image: "zufardhiyaulhaq/istio-ratelimit-operator"
   # tag of istio-ratelimit-operator image
-  tag: "v2.12.0"
+  tag: "v2.13.0"
   # number of replica for deployment
   replica: 1
 
@@ -18,7 +18,7 @@ settings:
   ratelimitservice:
     image: envoyproxy/ratelimit:5e1be594
   statsdExporter:
-    image: prom/statsd-exporter:v0.25.0
+    image: prom/statsd-exporter:v0.26.1
 
 serviceAccount:
   imagePullSecrets: []
