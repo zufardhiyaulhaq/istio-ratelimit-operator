@@ -34,7 +34,7 @@ import (
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/service"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/settings"
 	appsv1 "k8s.io/api/apps/v1"
-	autoscalingv2beta2 "k8s.io/api/autoscaling/v2beta2"
+	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -366,7 +366,7 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		}
 
 		log.Info("get hpa")
-		createdHPA := &autoscalingv2beta2.HorizontalPodAutoscaler{}
+		createdHPA := &autoscalingv2.HorizontalPodAutoscaler{}
 		err = r.Client.Get(ctx, types.NamespacedName{Name: hpa.Name, Namespace: hpa.Namespace}, createdHPA)
 		if err != nil {
 			if errors.IsNotFound(err) {

@@ -117,7 +117,7 @@ func (g *V3GatewayBuilder) buildPatch() (*networking.EnvoyFilter_Patch, error) {
 
 func (g *V3GatewayBuilder) buildPatchValue() (string, error) {
 	values := types.LocalRateLimit_HTTPFilter{
-		Name: "envoy.filters.http.ratelimit",
+		Name: "envoy.filters.http.local_ratelimit",
 		TypedConfig: types.LocalRateLimit_TypedConfig{
 			Type:    "type.googleapis.com/udpa.type.v1.TypedStruct",
 			TypeURL: "type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit",

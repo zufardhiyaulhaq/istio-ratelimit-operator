@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 
-	autoscalingv2beta2 "k8s.io/api/autoscaling/v2beta2"
+	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -21,28 +21,28 @@ func (n *HorizontalPodAutoscalerBuilder) SetRateLimitService(rateLimitService v1
 	n.RateLimitService = rateLimitService
 	return n
 }
-func (n *HorizontalPodAutoscalerBuilder) Build() (*autoscalingv2beta2.HorizontalPodAutoscaler, error) {
-	HorizontalPodAutoscaler := &autoscalingv2beta2.HorizontalPodAutoscaler{
+func (n *HorizontalPodAutoscalerBuilder) Build() (*autoscalingv2.HorizontalPodAutoscaler, error) {
+	HorizontalPodAutoscaler := &autoscalingv2.HorizontalPodAutoscaler{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      n.RateLimitService.Name,
 			Namespace: n.RateLimitService.Namespace,
 			Labels:    n.BuildLabels(),
 		},
-		Spec: autoscalingv2beta2.HorizontalPodAutoscalerSpec{
+		Spec: autoscalingv2.HorizontalPodAutoscalerSpec{
 			MinReplicas: n.RateLimitService.Spec.Kubernetes.AutoScaling.MinReplica,
 			MaxReplicas: *n.RateLimitService.Spec.Kubernetes.AutoScaling.MaxReplica,
-			ScaleTargetRef: autoscalingv2beta2.CrossVersionObjectReference{
+			ScaleTargetRef: autoscalingv2.CrossVersionObjectReference{
 				APIVersion: "apps/v1",
 				Kind:       "Deployment",
 				Name:       n.RateLimitService.Name,
 			},
-			Metrics: []autoscalingv2beta2.MetricSpec{
+			Metrics: []autoscalingv2.MetricSpec{
 				{
-					Type: autoscalingv2beta2.ResourceMetricSourceType,
-					Resource: &autoscalingv2beta2.ResourceMetricSource{
+					Type: autoscalingv2.ResourceMetricSourceType,
+					Resource: &autoscalingv2.ResourceMetricSource{
 						Name: "cpu",
-						Target: autoscalingv2beta2.MetricTarget{
-							Type:               autoscalingv2beta2.UtilizationMetricType,
+						Target: autoscalingv2.MetricTarget{
+							Type:               autoscalingv2.UtilizationMetricType,
 							AverageUtilization: &DEFAULT_CPU_AVERAGE_UTILIZATION,
 						},
 					},
