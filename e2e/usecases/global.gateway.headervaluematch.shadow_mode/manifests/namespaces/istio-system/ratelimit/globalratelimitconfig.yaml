@@ -10,9 +10,9 @@ spec:
       app: istio-ingressgateway
       istio: ingressgateway
     istio_version:
-      - "1.19"
-      - "1.20"
-      - "1.21"
+      - "1.22"
+      - "1.23"
+      - "1.24"
   ratelimit:
     spec:
       domain: "ingressgateway"
