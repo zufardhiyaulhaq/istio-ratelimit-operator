@@ -22,6 +22,8 @@ var WellKnownVersions = map[string]string{
 	"1.22": `^1\.22.*`,
 	"1.23": `^1\.23.*`,
 	"1.24": `^1\.24.*`,
+	"1.25": `^1\.25.*`,
+	"1.26": `^1\.26.*`,
 }
 
 func BuildEnvoyFilterNamesAllVersion(base string) []string {
