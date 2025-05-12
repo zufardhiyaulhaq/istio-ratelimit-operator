@@ -114,7 +114,7 @@ func NewRateLimitDescriptorFromGlobalRateLimit(globalRateLimit v1alpha1.GlobalRa
 	}
 
 	if len(sanitizeMatchers) == 0 {
-		return descriptor, nil
+		return descriptor, fmt.Errorf("Error")
 	}
 
 	descriptor, err := NewRateLimitDescriptorFromMatcher(sanitizeMatchers, globalRateLimit.Spec.Limit, globalRateLimit.Spec.ShadowMode)
