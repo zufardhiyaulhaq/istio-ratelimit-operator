@@ -11,6 +11,51 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func TestNewEnvBuilder(t *testing.T) {
+	builder := service.NewEnvBuilder()
+	assert.NotNil(t, builder)
+	assert.Equal(t, v1alpha1.RateLimitService{}, builder.RateLimitService)
+}
+
+func TestEnvBuilder_SetRateLimitService(t *testing.T) {
+	rateLimitService := v1alpha1.RateLimitService{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      "test-env",
+			Namespace: "test-namespace",
+		},
+	}
+
+	builder := service.NewEnvBuilder().SetRateLimitService(rateLimitService)
+
+	assert.Equal(t, rateLimitService, builder.RateLimitService)
+}
+
+func TestEnvBuilder_SetRateLimitService_Chaining(t *testing.T) {
+	rateLimitService := v1alpha1.RateLimitService{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      "test-env",
+			Namespace: "test-namespace",
+		},
+	}
+
+	builder := service.NewEnvBuilder()
+	returnedBuilder := builder.SetRateLimitService(rateLimitService)
+
+	// Verify method chaining returns the same builder
+	assert.Same(t, builder, returnedBuilder)
+}
+
+func TestEnvBuilder_BuildStatsdEnv(t *testing.T) {
+	builder := &service.EnvBuilder{}
+
+	env, err := builder.BuildStatsdEnv()
+
+	assert.NoError(t, err)
+	assert.Equal(t, "true", env["USE_STATSD"])
+	assert.Equal(t, "localhost", env["STATSD_HOST"])
+	assert.Equal(t, "9125", env["STATSD_PORT"])
+}
+
 func TestEnvBuilder_BuildRedisEnv(t *testing.T) {
 	mockPipelineLimit := 1
 	mockPipelineWindow := "1s"
