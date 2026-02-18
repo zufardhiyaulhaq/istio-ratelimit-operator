@@ -145,7 +145,8 @@ var V3SidecarBuilderTestGrid = []V3SidecarBuilderTestCase{
 }
 
 func TestNewV3SidecarBuilder(t *testing.T) {
-	for _, test := range V3SidecarBuilderTestGrid {
+	for i := range V3SidecarBuilderTestGrid {
+		test := &V3SidecarBuilderTestGrid[i]
 		t.Run(test.name, func(t *testing.T) {
 			envoyfilter, err := ratelimit.NewV3SidecarBuilder(test.config, test.ratelimit, "1.9").
 				Build()

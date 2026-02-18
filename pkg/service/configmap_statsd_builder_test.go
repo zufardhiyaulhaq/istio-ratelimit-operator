@@ -7,9 +7,9 @@ import (
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/service"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/types"
+	"google.golang.org/protobuf/proto"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"google.golang.org/protobuf/proto"
 )
 
 func TestNewStatsdRegexMatcherFromGlobalRateLimitMatcher(t *testing.T) {
@@ -250,12 +250,12 @@ func TestNewStatsdConfig(t *testing.T) {
 	identifier := "test-identifier"
 
 	testCases := []struct {
-		name                    string
-		rateLimitServiceName    string
-		globalRateLimitDomain   string
-		globalRateLimitList     []v1alpha1.GlobalRateLimit
-		expectedMappingsCount   int
-		expectError             bool
+		name                  string
+		rateLimitServiceName  string
+		globalRateLimitDomain string
+		globalRateLimitList   []v1alpha1.GlobalRateLimit
+		expectedMappingsCount int
+		expectError           bool
 	}{
 		{
 			name:                  "rate limit with identifier",

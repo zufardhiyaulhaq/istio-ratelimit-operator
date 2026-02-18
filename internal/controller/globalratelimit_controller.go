@@ -21,8 +21,9 @@ import (
 	"fmt"
 	"time"
 
+	"google.golang.org/protobuf/proto"
+
 	clientnetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
-	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -124,8 +125,9 @@ func (r *GlobalRateLimitReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			}
 		}
 
-		if !equality.Semantic.DeepEqual(createdEnvoyFilter.Spec, envoyFilter.Spec) {
-			createdEnvoyFilter.Spec = envoyFilter.Spec
+		if !proto.Equal(&createdEnvoyFilter.Spec, &envoyFilter.Spec) {
+			createdEnvoyFilter.Spec.Reset()
+			proto.Merge(&createdEnvoyFilter.Spec, &envoyFilter.Spec)
 
 			log.Info("update globalratelimit envoyfilter")
 			err := r.Client.Update(ctx, createdEnvoyFilter, &client.UpdateOptions{})

@@ -521,7 +521,8 @@ var V3GatewayBuilderTestGrid = []V3GatewayBuilderTestCase{
 }
 
 func TestNewV3GatewayBuilder(t *testing.T) {
-	for _, test := range V3GatewayBuilderTestGrid {
+	for i := range V3GatewayBuilderTestGrid {
+		test := &V3GatewayBuilderTestGrid[i]
 		t.Run(test.name, func(t *testing.T) {
 			envoyfilter, err := ratelimit.NewV3GatewayBuilder(test.config, test.ratelimit, "1.9").
 				Build()

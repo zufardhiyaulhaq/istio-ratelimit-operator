@@ -21,9 +21,10 @@ import (
 	"fmt"
 	"time"
 
+	"google.golang.org/protobuf/proto"
+
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/global/config"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/utils"
-	"k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -136,8 +137,9 @@ func (r *GlobalRateLimitConfigReconciler) Reconcile(ctx context.Context, req ctr
 			}
 		}
 
-		if !equality.Semantic.DeepEqual(createdEnvoyFilter.Spec, envoyFilter.Spec) {
-			createdEnvoyFilter.Spec = envoyFilter.Spec
+		if !proto.Equal(&createdEnvoyFilter.Spec, &envoyFilter.Spec) {
+			createdEnvoyFilter.Spec.Reset()
+			proto.Merge(&createdEnvoyFilter.Spec, &envoyFilter.Spec)
 
 			log.Info("update globalratelimitconfig envoyfilter")
 			err := r.Client.Update(ctx, createdEnvoyFilter, &client.UpdateOptions{})

@@ -141,12 +141,12 @@ func TestConfigBuilder_FluentInterface(t *testing.T) {
 
 func TestConfigBuilder_Build(t *testing.T) {
 	tests := []struct {
-		name           string
-		config         v1alpha1.GlobalRateLimitConfig
-		ratelimit      v1alpha1.GlobalRateLimit
-		expectedError  bool
-		expectedCount  int
-		expectedNames  []string
+		name          string
+		config        v1alpha1.GlobalRateLimitConfig
+		ratelimit     v1alpha1.GlobalRateLimit
+		expectedError bool
+		expectedCount int
+		expectedNames []string
 	}{
 		{
 			name: "build single gateway envoy filter",

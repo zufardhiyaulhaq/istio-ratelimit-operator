@@ -162,7 +162,7 @@ descriptors:
 			wantErr: false,
 		},
 		{
-			name: "empty config",
+			name:   "empty config",
 			config: &RateLimit_Service_Config{},
 			want: `{}
 `,
