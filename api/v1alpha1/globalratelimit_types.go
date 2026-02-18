@@ -68,7 +68,8 @@ type GlobalRateLimit_Action_RequestHeaders struct {
 
 type GlobalRateLimit_Action_GenericKey struct {
 	// The value to use in the descriptor entry.
-	DescriptorValue string `json:"descriptor_value,omitempty" yaml:"descriptor_value,omitempty"`
+	// +kubebuilder:validation:MinLength=1
+	DescriptorValue string `json:"descriptor_value" yaml:"descriptor_value"`
 	// An optional key to use in the descriptor entry. If not set it defaults
 	// to 'generic_key' as the descriptor key.
 	DescriptorKey *string `json:"descriptor_key,omitempty" yaml:"descriptor_key,omitempty"`
@@ -76,14 +77,15 @@ type GlobalRateLimit_Action_GenericKey struct {
 
 type GlobalRateLimit_Action_HeaderValueMatch struct {
 	// The value to use in the descriptor entry.
-	DescriptorValue string `json:"descriptor_value,omitempty" yaml:"descriptor_value,omitempty"`
+	// +kubebuilder:validation:MinLength=1
+	DescriptorValue string `json:"descriptor_value" yaml:"descriptor_value"`
 	// If set to true, the action will append a descriptor entry when the
 	// request matches the headers. If set to false, the action will append a
 	// descriptor entry when the request does not match the headers. The
 	// default value is true.
 	ExpectMatch *bool `json:"expect_match,omitempty" yaml:"expect_match,omitempty"`
 	// Specifies a set of headers that the rate limit action should match
-	// on. The action will check the request’s headers against all the
+	// on. The action will check the request's headers against all the
 	// specified headers in the config. A match will happen if all the
 	// headers in the config are present in the request with the same values
 	// (or based on presence if the value field is not in the config).

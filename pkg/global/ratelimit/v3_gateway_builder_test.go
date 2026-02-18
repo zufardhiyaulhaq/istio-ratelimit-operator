@@ -7,8 +7,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/global/ratelimit"
+	"google.golang.org/protobuf/proto"
 
-	proto_types "github.com/gogo/protobuf/types"
+	proto_types "github.com/golang/protobuf/ptypes/struct"
 	networking "istio.io/api/networking/v1alpha3"
 	clientnetworking "istio.io/client-go/pkg/apis/networking/v1alpha3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -533,7 +534,7 @@ func TestNewV3GatewayBuilder(t *testing.T) {
 				assert.Equal(t, test.ratelimit.Namespace, envoyfilter.Namespace)
 
 				// match value generated
-				assert.Equal(t, test.expectedEnvoyFilter.Spec.ConfigPatches[0].Patch.Value, envoyfilter.Spec.ConfigPatches[0].Patch.Value)
+				assert.True(t, proto.Equal(test.expectedEnvoyFilter.Spec.ConfigPatches[0].Patch.Value, envoyfilter.Spec.ConfigPatches[0].Patch.Value))
 			}
 		})
 	}
