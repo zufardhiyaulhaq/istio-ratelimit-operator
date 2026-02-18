@@ -895,6 +895,25 @@ func TestConvertYaml2Struct_InvalidInputs(t *testing.T) {
 	}
 }
 
+func TestConvertValue_NonStringMapKeys(t *testing.T) {
+	// Test that non-string keys in map[interface{}]interface{} are skipped
+	input := map[interface{}]interface{}{
+		"string_key": "value1",
+		123:          "value2", // integer key - should be skipped
+		true:         "value3", // bool key - should be skipped
+	}
+
+	result := convertValue(input)
+	resultMap, ok := result.(map[string]interface{})
+	require.True(t, ok)
+
+	// Only string key should be present
+	assert.Len(t, resultMap, 1)
+	assert.Equal(t, "value1", resultMap["string_key"])
+	_, hasIntKey := resultMap["123"]
+	assert.False(t, hasIntKey, "integer key should not be converted")
+}
+
 func TestConvertYaml2Struct_LargeInput(t *testing.T) {
 	// Test with a moderately large YAML structure
 	input := `

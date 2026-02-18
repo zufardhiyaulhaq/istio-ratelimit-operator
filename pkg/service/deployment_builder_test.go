@@ -504,3 +504,28 @@ func TestDeploymentBuilder_BuildImageInfo(t *testing.T) {
 func stringPtr(s string) *string {
 	return &s
 }
+
+func TestDeploymentBuilder_NilKubernetes(t *testing.T) {
+	setting := settings.Settings{
+		RateLimitServiceImage: "test:latest",
+		StatsdExporterImage:   "statsd:latest",
+	}
+
+	rateLimitService := v1alpha1.RateLimitService{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-service",
+			Namespace: "default",
+		},
+		Spec: v1alpha1.RateLimitServiceSpec{
+			Kubernetes: nil, // nil Kubernetes spec
+		},
+	}
+
+	// Should not panic when Kubernetes is nil
+	assert.NotPanics(t, func() {
+		_, err := service.NewDeploymentBuilder(setting).
+			SetRateLimitService(rateLimitService).
+			Build()
+		assert.NoError(t, err)
+	})
+}

@@ -950,3 +950,11 @@ func TestNewRateLimitDescriptorFromMatcher_NestedRemoteAddress(t *testing.T) {
 	assert.Len(t, descriptors[0].Descriptors, 1)
 	assert.Equal(t, "api_key", descriptors[0].Descriptors[0].Key)
 }
+
+func TestSyncDescriptors_EmptySlice(t *testing.T) {
+	// Empty slice should not panic, should return nil
+	assert.NotPanics(t, func() {
+		result := service.SyncDescriptors([]types.RateLimit_Service_Descriptor{})
+		assert.Nil(t, result)
+	})
+}

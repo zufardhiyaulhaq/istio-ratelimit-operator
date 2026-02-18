@@ -226,7 +226,7 @@ func (n *DeploymentBuilder) BuildLabels() map[string]string {
 		labels[key] = value
 	}
 
-	if n.RateLimitService.Spec.Kubernetes.ExtraLabels != nil {
+	if n.RateLimitService.Spec.Kubernetes != nil && n.RateLimitService.Spec.Kubernetes.ExtraLabels != nil {
 		for key, value := range *n.RateLimitService.Spec.Kubernetes.ExtraLabels {
 			labels[key] = value
 		}
@@ -236,7 +236,7 @@ func (n *DeploymentBuilder) BuildLabels() map[string]string {
 }
 
 func (n *DeploymentBuilder) BuildImageInfo() string {
-	if n.RateLimitService.Spec.Kubernetes.Image != nil {
+	if n.RateLimitService.Spec.Kubernetes != nil && n.RateLimitService.Spec.Kubernetes.Image != nil {
 		return *n.RateLimitService.Spec.Kubernetes.Image
 	}
 

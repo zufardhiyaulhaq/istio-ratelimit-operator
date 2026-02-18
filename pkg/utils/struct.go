@@ -42,7 +42,11 @@ func convertValue(v interface{}) interface{} {
 	case map[interface{}]interface{}:
 		m := make(map[string]interface{})
 		for k, v := range val {
-			m[k.(string)] = convertValue(v)
+			keyStr, ok := k.(string)
+			if !ok {
+				continue
+			}
+			m[keyStr] = convertValue(v)
 		}
 		return m
 	case map[string]interface{}:

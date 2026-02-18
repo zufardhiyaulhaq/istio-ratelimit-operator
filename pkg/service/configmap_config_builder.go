@@ -80,6 +80,9 @@ func NewRateLimitDescriptor(globalRateLimitList []v1alpha1.GlobalRateLimit) ([]t
 }
 
 func SyncDescriptors(descriptorsData []types.RateLimit_Service_Descriptor) []types.RateLimit_Service_Descriptor {
+	if len(descriptorsData) == 0 {
+		return nil
+	}
 	var descriptors []types.RateLimit_Service_Descriptor
 	descriptors = append(descriptors, descriptorsData[0])
 
