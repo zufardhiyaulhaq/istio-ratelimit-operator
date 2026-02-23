@@ -22,12 +22,13 @@ import (
 
 // GlobalRateLimitSpec defines the desired state of GlobalRateLimit
 type GlobalRateLimitSpec struct {
-	Config     string                    `json:"config"`
-	Selector   GlobalRateLimitSelector   `json:"selector"`
-	Matcher    []*GlobalRateLimit_Action `json:"matcher"`
-	ShadowMode bool                      `json:"shadow_mode,omitempty"`
-	Limit      *GlobalRateLimit_Limit    `json:"limit,omitempty"`
-	Identifier *string                   `json:"identifier,omitempty"`
+	Config         string                    `json:"config"`
+	Selector       GlobalRateLimitSelector   `json:"selector"`
+	Matcher        []*GlobalRateLimit_Action `json:"matcher"`
+	ShadowMode     bool                      `json:"shadow_mode,omitempty"`
+	Limit          *GlobalRateLimit_Limit    `json:"limit,omitempty"`
+	Identifier     *string                   `json:"identifier,omitempty"`
+	DetailedMetric bool                      `json:"detailed_metric,omitempty"`
 }
 
 type GlobalRateLimitSelector struct {
@@ -38,6 +39,7 @@ type GlobalRateLimitSelector struct {
 type GlobalRateLimit_Limit struct {
 	Unit            string `json:"unit,omitempty" yaml:"unit,omitempty"`
 	RequestsPerUnit int    `json:"requests_per_unit,omitempty" yaml:"requests_per_unit,omitempty"`
+	Unlimited       bool   `json:"unlimited,omitempty" yaml:"unlimited,omitempty"`
 }
 
 type GlobalRateLimit_Action struct {

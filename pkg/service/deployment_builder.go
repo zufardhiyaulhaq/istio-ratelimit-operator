@@ -113,7 +113,8 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 	}
 
 	if n.RateLimitService.Spec.Monitoring != nil {
-		if n.RateLimitService.Spec.Monitoring.Enabled {
+		// Only add statsd sidecar when Type is empty (legacy behavior)
+		if n.RateLimitService.Spec.Monitoring.Enabled && n.RateLimitService.Spec.Monitoring.Type == "" {
 			deployment.Spec.Template.Spec.Containers = append([]corev1.Container{
 				{Name: n.RateLimitService.Name + "-statsd-exporter",
 					Image:   n.Settings.StatsdExporterImage,
@@ -170,6 +171,90 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 		}
 	}
 
+	// TLS volume mounts for Redis
+	if n.RateLimitService.Spec.Backend != nil && n.RateLimitService.Spec.Backend.Redis != nil &&
+		n.RateLimitService.Spec.Backend.Redis.TLS != nil && n.RateLimitService.Spec.Backend.Redis.TLS.SecretRef != "" {
+		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
+			Name: "redis-tls",
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: n.RateLimitService.Spec.Backend.Redis.TLS.SecretRef,
+				},
+			},
+		})
+		deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(
+			deployment.Spec.Template.Spec.Containers[0].VolumeMounts,
+			corev1.VolumeMount{
+				Name:      "redis-tls",
+				MountPath: "/tls/redis/",
+				ReadOnly:  true,
+			},
+		)
+	}
+
+	// TLS volume mounts for Redis PerSecond
+	if n.RateLimitService.Spec.Backend != nil && n.RateLimitService.Spec.Backend.Redis != nil &&
+		n.RateLimitService.Spec.Backend.Redis.PerSecond != nil && n.RateLimitService.Spec.Backend.Redis.PerSecond.TLS != nil &&
+		n.RateLimitService.Spec.Backend.Redis.PerSecond.TLS.SecretRef != "" {
+		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
+			Name: "redis-persecond-tls",
+			VolumeSource: corev1.VolumeSource{
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: n.RateLimitService.Spec.Backend.Redis.PerSecond.TLS.SecretRef,
+				},
+			},
+		})
+		deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(
+			deployment.Spec.Template.Spec.Containers[0].VolumeMounts,
+			corev1.VolumeMount{
+				Name:      "redis-persecond-tls",
+				MountPath: "/tls/redis-persecond/",
+				ReadOnly:  true,
+			},
+		)
+	}
+
+	// TLS volume mounts for gRPC
+	if n.RateLimitService.Spec.Server != nil && n.RateLimitService.Spec.Server.GRPC != nil {
+		grpc := n.RateLimitService.Spec.Server.GRPC
+		if grpc.TLS != nil && grpc.TLS.SecretRef != "" {
+			deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
+				Name: "grpc-tls",
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: grpc.TLS.SecretRef,
+					},
+				},
+			})
+			deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(
+				deployment.Spec.Template.Spec.Containers[0].VolumeMounts,
+				corev1.VolumeMount{
+					Name:      "grpc-tls",
+					MountPath: "/tls/grpc/",
+					ReadOnly:  true,
+				},
+			)
+		}
+		if grpc.ClientTLS != nil && grpc.ClientTLS.CACertSecretRef != "" {
+			deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
+				Name: "grpc-client-tls",
+				VolumeSource: corev1.VolumeSource{
+					Secret: &corev1.SecretVolumeSource{
+						SecretName: grpc.ClientTLS.CACertSecretRef,
+					},
+				},
+			})
+			deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(
+				deployment.Spec.Template.Spec.Containers[0].VolumeMounts,
+				corev1.VolumeMount{
+					Name:      "grpc-client-tls",
+					MountPath: "/tls/grpc-client/",
+					ReadOnly:  true,
+				},
+			)
+		}
+	}
+
 	if n.RateLimitService.Spec.Kubernetes != nil {
 		if n.RateLimitService.Spec.Kubernetes.ReplicaCount != nil {
 			deployment.Spec.Replicas = n.RateLimitService.Spec.Kubernetes.ReplicaCount
@@ -183,6 +268,39 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 					deployment.Spec.Template.Spec.Containers[1].Resources = *n.RateLimitService.Spec.Kubernetes.Resources
 				}
 			}
+		}
+
+		// Kubernetes scheduling fields
+		if n.RateLimitService.Spec.Kubernetes.NodeSelector != nil {
+			deployment.Spec.Template.Spec.NodeSelector = n.RateLimitService.Spec.Kubernetes.NodeSelector
+		}
+
+		if n.RateLimitService.Spec.Kubernetes.Tolerations != nil {
+			deployment.Spec.Template.Spec.Tolerations = n.RateLimitService.Spec.Kubernetes.Tolerations
+		}
+
+		if n.RateLimitService.Spec.Kubernetes.Affinity != nil {
+			deployment.Spec.Template.Spec.Affinity = n.RateLimitService.Spec.Kubernetes.Affinity
+		}
+
+		if n.RateLimitService.Spec.Kubernetes.SecurityContext != nil {
+			deployment.Spec.Template.Spec.SecurityContext = n.RateLimitService.Spec.Kubernetes.SecurityContext
+		}
+
+		if n.RateLimitService.Spec.Kubernetes.ContainerSecurityContext != nil {
+			deployment.Spec.Template.Spec.Containers[0].SecurityContext = n.RateLimitService.Spec.Kubernetes.ContainerSecurityContext
+		}
+
+		if n.RateLimitService.Spec.Kubernetes.ImagePullSecrets != nil {
+			deployment.Spec.Template.Spec.ImagePullSecrets = n.RateLimitService.Spec.Kubernetes.ImagePullSecrets
+		}
+
+		if n.RateLimitService.Spec.Kubernetes.Annotations != nil {
+			deployment.Spec.Template.ObjectMeta.Annotations = *n.RateLimitService.Spec.Kubernetes.Annotations
+		}
+
+		if n.RateLimitService.Spec.Kubernetes.LivenessProbe != nil {
+			deployment.Spec.Template.Spec.Containers[0].LivenessProbe = n.RateLimitService.Spec.Kubernetes.LivenessProbe
 		}
 	}
 
@@ -203,6 +321,56 @@ func (n *DeploymentBuilder) BuildEnv() []corev1.EnvVar {
 			Name:  "RUNTIME_IGNOREDOTFILES",
 			Value: "true",
 		},
+	}
+
+	// Add Redis auth from secret reference
+	if n.RateLimitService.Spec.Backend != nil && n.RateLimitService.Spec.Backend.Redis != nil {
+		redis := n.RateLimitService.Spec.Backend.Redis
+
+		// Redis authSecretRef
+		if redis.AuthSecretRef != nil {
+			env = append(env, corev1.EnvVar{
+				Name: "REDIS_AUTH",
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: redis.AuthSecretRef.Name,
+						},
+						Key: redis.AuthSecretRef.Key,
+					},
+				},
+			})
+		}
+
+		// Redis Sentinel auth
+		if redis.SentinelAuth != nil && redis.SentinelAuth.SecretRef != nil {
+			env = append(env, corev1.EnvVar{
+				Name: "REDIS_SENTINEL_PASSWORD",
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: redis.SentinelAuth.SecretRef.Name,
+						},
+						Key: redis.SentinelAuth.SecretRef.Key,
+					},
+				},
+			})
+		}
+
+		// Redis PerSecond authSecretRef
+		if redis.PerSecond != nil && redis.PerSecond.AuthSecretRef != nil {
+			env = append(env, corev1.EnvVar{
+				Name: "REDIS_PERSECOND_AUTH",
+				ValueFrom: &corev1.EnvVarSource{
+					SecretKeyRef: &corev1.SecretKeySelector{
+						LocalObjectReference: corev1.LocalObjectReference{
+							Name: redis.PerSecond.AuthSecretRef.Name,
+						},
+						Key: redis.PerSecond.AuthSecretRef.Key,
+					},
+				},
+			})
+		}
 	}
 
 	return env

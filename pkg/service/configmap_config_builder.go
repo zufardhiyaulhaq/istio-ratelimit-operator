@@ -125,7 +125,23 @@ func NewRateLimitDescriptorFromGlobalRateLimit(globalRateLimit v1alpha1.GlobalRa
 		return descriptor, err
 	}
 
+	// Apply detailed_metric to leaf descriptors
+	if globalRateLimit.Spec.DetailedMetric {
+		applyDetailedMetric(descriptor)
+	}
+
 	return descriptor, nil
+}
+
+func applyDetailedMetric(descriptors []types.RateLimit_Service_Descriptor) {
+	for i := range descriptors {
+		if len(descriptors[i].Descriptors) == 0 {
+			// Leaf descriptor — apply detailed_metric here
+			descriptors[i].DetailedMetric = true
+		} else {
+			applyDetailedMetric(descriptors[i].Descriptors)
+		}
+	}
 }
 
 func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Action, limit *v1alpha1.GlobalRateLimit_Limit, shadowMode bool) ([]types.RateLimit_Service_Descriptor, error) {
@@ -141,6 +157,7 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 		if len(matchers) == 1 {
 			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
 			descriptor[0].RateLimit.Unit = limit.Unit
+			descriptor[0].RateLimit.Unlimited = limit.Unlimited
 			descriptor[0].ShadowMode = shadowMode
 
 			return descriptor, nil
@@ -160,6 +177,7 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 		if len(matchers) == 1 {
 			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
 			descriptor[0].RateLimit.Unit = limit.Unit
+			descriptor[0].RateLimit.Unlimited = limit.Unlimited
 			descriptor[0].ShadowMode = shadowMode
 
 			return descriptor, nil
@@ -186,6 +204,7 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 		if len(matchers) == 1 {
 			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
 			descriptor[0].RateLimit.Unit = limit.Unit
+			descriptor[0].RateLimit.Unlimited = limit.Unlimited
 			descriptor[0].ShadowMode = shadowMode
 
 			return descriptor, nil
@@ -207,6 +226,7 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 		if len(matchers) == 1 {
 			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
 			descriptor[0].RateLimit.Unit = limit.Unit
+			descriptor[0].RateLimit.Unlimited = limit.Unlimited
 			descriptor[0].ShadowMode = shadowMode
 
 			return descriptor, nil

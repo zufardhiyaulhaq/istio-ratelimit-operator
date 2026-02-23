@@ -258,6 +258,319 @@ func TestEnvBuilder_BuildLabels(t *testing.T) {
 	}
 }
 
+func TestEnvBuilder_BuildRedisEnv_WithTLS(t *testing.T) {
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+					Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+						Type: "single",
+						URL:  "redis:6379",
+						TLS: &v1alpha1.RateLimitServiceSpec_Backend_Redis_TLS{
+							Enabled: true,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	env, err := builder.BuildRedisEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "true", env["REDIS_TLS"])
+}
+
+func TestEnvBuilder_BuildRedisEnv_WithTLSCert(t *testing.T) {
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+					Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+						Type: "single",
+						URL:  "redis:6379",
+						TLS: &v1alpha1.RateLimitServiceSpec_Backend_Redis_TLS{
+							Enabled:   true,
+							SecretRef: "redis-tls-secret",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	env, err := builder.BuildRedisEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "true", env["REDIS_TLS"])
+	assert.Equal(t, "/tls/redis/ca.crt", env["REDIS_TLS_CACERT"])
+	assert.Equal(t, "/tls/redis/tls.crt", env["REDIS_TLS_CLIENT_CERT"])
+	assert.Equal(t, "/tls/redis/tls.key", env["REDIS_TLS_CLIENT_KEY"])
+}
+
+func TestEnvBuilder_BuildRedisEnv_WithTLSSkipVerify(t *testing.T) {
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+					Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+						Type: "single",
+						URL:  "redis:6379",
+						TLS: &v1alpha1.RateLimitServiceSpec_Backend_Redis_TLS{
+							Enabled:                  true,
+							SkipHostnameVerification: true,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	env, err := builder.BuildRedisEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "true", env["REDIS_TLS"])
+	assert.Equal(t, "true", env["REDIS_TLS_SKIP_HOSTNAME_VERIFICATION"])
+}
+
+func strPtr(s string) *string { return &s }
+
+func TestEnvBuilder_BuildServerEnv(t *testing.T) {
+	grpcPort := int32(8081)
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				Server: &v1alpha1.RateLimitServiceSpec_Server{
+					GRPC: &v1alpha1.RateLimitServiceSpec_Server_GRPC{
+						Port: &grpcPort,
+						TLS: &v1alpha1.RateLimitServiceSpec_Server_GRPC_TLS{
+							Enabled:   true,
+							SecretRef: "grpc-tls-secret",
+						},
+						MaxConnectionAge:      strPtr("30m"),
+						MaxConnectionAgeGrace: strPtr("5m"),
+					},
+				},
+			},
+		},
+	}
+
+	env, err := builder.BuildServerEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "8081", env["GRPC_PORT"])
+	assert.Equal(t, "/tls/grpc/tls.crt", env["GRPC_SERVER_TLS_CERT"])
+	assert.Equal(t, "/tls/grpc/tls.key", env["GRPC_SERVER_TLS_KEY"])
+	assert.Equal(t, "30m", env["GRPC_MAX_CONNECTION_AGE"])
+	assert.Equal(t, "5m", env["GRPC_MAX_CONNECTION_AGE_GRACE"])
+}
+
+func TestEnvBuilder_BuildServerEnv_WithClientTLS(t *testing.T) {
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				Server: &v1alpha1.RateLimitServiceSpec_Server{
+					GRPC: &v1alpha1.RateLimitServiceSpec_Server_GRPC{
+						ClientTLS: &v1alpha1.RateLimitServiceSpec_Server_GRPC_ClientTLS{
+							CACertSecretRef: "grpc-ca-secret",
+							SAN:             "ratelimit.example.com",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	env, err := builder.BuildServerEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "/tls/grpc-client/ca.crt", env["GRPC_SERVER_TLS_CLIENT_CACERT"])
+	assert.Equal(t, "ratelimit.example.com", env["GRPC_CLIENT_TLS_SAN"])
+}
+
+func TestEnvBuilder_BuildMonitoringEnv_Prometheus(t *testing.T) {
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				Monitoring: &v1alpha1.RateLimitServiceSpec_Monitoring{
+					Enabled: true,
+					Type:    "prometheus",
+					Prometheus: &v1alpha1.RateLimitServiceSpec_Monitoring_Prometheus{
+						Addr: ":9102",
+						Path: "/metrics",
+					},
+					NearLimitRatio:     strPtr("0.8"),
+					StatsFlushInterval: strPtr("10s"),
+				},
+			},
+		},
+	}
+
+	env, err := builder.BuildMonitoringEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "false", env["USE_STATSD"])
+	assert.Equal(t, "true", env["USE_PROMETHEUS"])
+	assert.Equal(t, ":9102", env["PROMETHEUS_ADDR"])
+	assert.Equal(t, "/metrics", env["PROMETHEUS_PATH"])
+	assert.Equal(t, "0.8", env["NEAR_LIMIT_RATIO"])
+	assert.Equal(t, "10s", env["STATS_FLUSH_INTERVAL"])
+}
+
+func TestEnvBuilder_BuildMonitoringEnv_Tracing(t *testing.T) {
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				Monitoring: &v1alpha1.RateLimitServiceSpec_Monitoring{
+					Tracing: &v1alpha1.RateLimitServiceSpec_Monitoring_Tracing{
+						Enabled:          true,
+						ExporterProtocol: "http",
+						ServiceName:      "ratelimit",
+						ServiceNamespace: "default",
+						SamplingRate:     "0.1",
+					},
+				},
+			},
+		},
+	}
+
+	env, err := builder.BuildMonitoringEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "true", env["TRACING_ENABLED"])
+	assert.Equal(t, "http", env["TRACING_EXPORTER_PROTOCOL"])
+	assert.Equal(t, "ratelimit", env["TRACING_SERVICE_NAME"])
+	assert.Equal(t, "default", env["TRACING_SERVICE_NAMESPACE"])
+	assert.Equal(t, "0.1", env["TRACING_SAMPLING_RATE"])
+}
+
+func TestEnvBuilder_BuildResponseHeadersEnv(t *testing.T) {
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				ResponseHeaders: &v1alpha1.RateLimitServiceSpec_ResponseHeaders{
+					Enabled: true,
+				},
+			},
+		},
+	}
+
+	env, err := builder.BuildResponseHeadersEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "true", env["RESPONSE_HEADERS_ENABLED"])
+}
+
+func TestEnvBuilder_BuildLoggingEnv(t *testing.T) {
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				Logging: &v1alpha1.RateLimitServiceSpec_Logging{
+					Level:  "debug",
+					Format: "json",
+				},
+			},
+		},
+	}
+
+	env, err := builder.BuildLoggingEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "debug", env["LOG_LEVEL"])
+	assert.Equal(t, "json", env["LOG_FORMAT"])
+}
+
+func TestEnvBuilder_BuildShadowModeEnv(t *testing.T) {
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				ShadowMode: true,
+			},
+		},
+	}
+
+	env, err := builder.BuildShadowModeEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "true", env["SHADOW_MODE"])
+}
+
+func TestEnvBuilder_BuildRedisEnv_WithPool(t *testing.T) {
+	timeout := "2s"
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+					Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+						Type: "single",
+						URL:  "redis:6379",
+						Pool: &v1alpha1.RateLimitServiceSpec_Backend_Redis_Pool{
+							Size: 10,
+						},
+						Timeout:                     &timeout,
+						HealthCheckActiveConnection: true,
+					},
+				},
+			},
+		},
+	}
+
+	env, err := builder.BuildRedisEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "10", env["REDIS_POOL_SIZE"])
+	assert.Equal(t, "2s", env["REDIS_TIMEOUT"])
+	assert.Equal(t, "true", env["REDIS_HEALTH_CHECK_ACTIVE_CONNECTION"])
+}
+
+func TestEnvBuilder_BuildRedisEnv_WithPerSecond(t *testing.T) {
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+					Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+						Type: "single",
+						URL:  "redis:6379",
+						PerSecond: &v1alpha1.RateLimitServiceSpec_Backend_Redis_PerSecond{
+							Enabled: true,
+							URL:     "redis-ps:6379",
+							TLS: &v1alpha1.RateLimitServiceSpec_Backend_Redis_TLS{
+								Enabled:   true,
+								SecretRef: "redis-ps-tls",
+							},
+							Pool: &v1alpha1.RateLimitServiceSpec_Backend_Redis_Pool{
+								Size: 5,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	env, err := builder.BuildRedisEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "true", env["REDIS_PERSECOND"])
+	assert.Equal(t, "redis-ps:6379", env["REDIS_PERSECOND_URL"])
+	assert.Equal(t, "tcp", env["REDIS_PERSECOND_SOCKET_TYPE"])
+	assert.Equal(t, "true", env["REDIS_PERSECOND_TLS"])
+	assert.Equal(t, "/tls/redis-persecond/ca.crt", env["REDIS_PERSECOND_TLS_CACERT"])
+	assert.Equal(t, "/tls/redis-persecond/tls.crt", env["REDIS_PERSECOND_TLS_CLIENT_CERT"])
+	assert.Equal(t, "/tls/redis-persecond/tls.key", env["REDIS_PERSECOND_TLS_CLIENT_KEY"])
+	assert.Equal(t, "5", env["REDIS_PERSECOND_POOL_SIZE"])
+}
+
+func TestEnvBuilder_BuildBackendEnv(t *testing.T) {
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+					Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+						Type: "single",
+						URL:  "redis:6379",
+					},
+					CacheKeyPrefix:                     "my-svc",
+					StopCacheKeyIncrementWhenOverlimit: true,
+				},
+			},
+		},
+	}
+
+	env, err := builder.BuildBackendEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "my-svc", env["CACHE_KEY_PREFIX"])
+	assert.Equal(t, "true", env["STOP_CACHE_KEY_INCREMENT_WHEN_OVERLIMIT"])
+}
+
 func TestEnvBuilder_Build(t *testing.T) {
 	type fields struct {
 		RateLimitService v1alpha1.RateLimitService
@@ -499,4 +812,30 @@ func TestEnvBuilder_Build(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestEnvBuilder_BuildRedisEnv_WithPoolBehavior(t *testing.T) {
+	builder := &service.EnvBuilder{
+		RateLimitService: v1alpha1.RateLimitService{
+			Spec: v1alpha1.RateLimitServiceSpec{
+				Backend: &v1alpha1.RateLimitServiceSpec_Backend{
+					Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+						Type: "single",
+						URL:  "redis:6379",
+						Pool: &v1alpha1.RateLimitServiceSpec_Backend_Redis_Pool{
+							Size:                10,
+							OnEmptyBehavior:     "wait",
+							OnEmptyWaitDuration: "1s",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	env, err := builder.BuildRedisEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "10", env["REDIS_POOL_SIZE"])
+	assert.Equal(t, "wait", env["REDIS_POOL_ON_EMPTY_BEHAVIOR"])
+	assert.Equal(t, "1s", env["REDIS_POOL_ON_EMPTY_WAIT_DURATION"])
 }

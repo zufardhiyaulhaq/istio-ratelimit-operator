@@ -41,6 +41,8 @@ spec:
             properties:
               config:
                 type: string
+              detailed_metric:
+                type: boolean
               identifier:
                 type: string
               limit:
@@ -49,6 +51,8 @@ spec:
                     type: integer
                   unit:
                     type: string
+                  unlimited:
+                    type: boolean
                 type: object
               matcher:
                 items:

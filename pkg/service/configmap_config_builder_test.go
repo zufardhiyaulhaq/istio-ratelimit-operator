@@ -958,3 +958,29 @@ func TestSyncDescriptors_EmptySlice(t *testing.T) {
 		assert.Nil(t, result)
 	})
 }
+
+func TestNewRateLimitDescriptor_Unlimited(t *testing.T) {
+	globalRateLimitList := []v1alpha1.GlobalRateLimit{
+		{
+			Spec: v1alpha1.GlobalRateLimitSpec{
+				Matcher: []*v1alpha1.GlobalRateLimit_Action{
+					{
+						GenericKey: &v1alpha1.GlobalRateLimit_Action_GenericKey{
+							DescriptorValue: "internal-service",
+						},
+					},
+				},
+				Limit: &v1alpha1.GlobalRateLimit_Limit{
+					Unlimited: true,
+				},
+				DetailedMetric: true,
+			},
+		},
+	}
+
+	descriptors, err := service.NewRateLimitDescriptor(globalRateLimitList)
+	assert.NoError(t, err)
+	assert.Len(t, descriptors, 1)
+	assert.True(t, descriptors[0].RateLimit.Unlimited)
+	assert.True(t, descriptors[0].DetailedMetric)
+}
