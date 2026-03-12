@@ -10,6 +10,18 @@ metadata:
     {{- include "istioratelimitoperator.labels" . | nindent 4 }}
 rules:
 - apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+- apiGroups:
   - ""
   resources:
   - configmaps
@@ -226,26 +238,3 @@ rules:
   - /metrics
   verbs:
   - get
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: {{ .Release.Name }}-proxy-role
-  labels:
-    app.kubernetes.io/name: {{ .Release.Name }}
-    helm.sh/chart: {{ template "istio-ratelimit-operator.chart" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    manager: {{ .Release.Service }}
-rules:
-- apiGroups:
-  - authentication.k8s.io
-  resources:
-  - tokenreviews
-  verbs:
-  - create
-- apiGroups:
-  - authorization.k8s.io
-  resources:
-  - subjectaccessreviews
-  verbs:
-  - create

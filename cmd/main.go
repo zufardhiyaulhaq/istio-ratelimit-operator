@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"os"
 
@@ -27,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/filters"
 
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/internal/controller"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/settings"
@@ -57,11 +59,17 @@ func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
-	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
+	var secureMetrics bool
+	var enableHTTP2 bool
+	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8443", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
+	flag.BoolVar(&secureMetrics, "metrics-secure", true,
+		"If set, the metrics endpoint is served securely via HTTPS. Use --metrics-secure=false to use HTTP instead.")
+	flag.BoolVar(&enableHTTP2, "enable-http2", false,
+		"If set, HTTP/2 will be enabled for the metrics and webhook servers.")
 	opts := zap.Options{
 		Development: true,
 	}
@@ -69,6 +77,24 @@ func main() {
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+
+	var tlsOpts []func(*tls.Config)
+	if !enableHTTP2 {
+		tlsOpts = append(tlsOpts, func(c *tls.Config) {
+			setupLog.Info("disabling http/2")
+			c.NextProtos = []string{"http/1.1"}
+		})
+	}
+
+	metricsServerOptions := metricsserver.Options{
+		BindAddress:   metricsAddr,
+		SecureServing: secureMetrics,
+		TLSOpts:       tlsOpts,
+	}
+
+	if secureMetrics {
+		metricsServerOptions.FilterProvider = filters.WithAuthenticationAndAuthorization
+	}
 
 	settings, err := settings.NewSettings()
 	if err != nil {
@@ -79,11 +105,9 @@ func main() {
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
 		HealthProbeBindAddress: probeAddr,
-		Metrics: metricsserver.Options{
-			BindAddress: metricsAddr,
-		},
-		LeaderElection:   enableLeaderElection,
-		LeaderElectionID: "dfc871e8.zufardhiyaulhaq.com",
+		Metrics:                metricsServerOptions,
+		LeaderElection:         enableLeaderElection,
+		LeaderElectionID:       "dfc871e8.zufardhiyaulhaq.com",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
