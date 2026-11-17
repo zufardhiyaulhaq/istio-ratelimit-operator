@@ -69,9 +69,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -124,9 +124,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -179,9 +179,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -234,9 +234,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -289,9 +289,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -344,9 +344,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -399,9 +399,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -454,9 +454,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -509,9 +509,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -564,9 +564,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
