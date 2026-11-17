@@ -95,6 +95,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-gateway-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -150,6 +151,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-gateway-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -205,6 +207,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-gateway-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -260,6 +263,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-gateway-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -315,6 +319,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-sidecar-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -370,6 +375,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-sidecar-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -425,6 +431,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-sidecar-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -480,6 +487,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-sidecar-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -535,6 +543,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-local-sidecar-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -590,6 +599,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-local-gateway-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
