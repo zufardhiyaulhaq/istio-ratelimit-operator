@@ -64,14 +64,14 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes: ["v1.33"]
-        istio: ["1.26.2", "1.27.7", "1.28.4"]
+        istio: ["1.29.10", "1.30.8", "1.31.4", "1.32.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -95,6 +95,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-gateway-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -119,14 +120,14 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes: ["v1.33"]
-        istio: ["1.26.2", "1.27.7", "1.28.4"]
+        istio: ["1.29.10", "1.30.8", "1.31.4", "1.32.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -150,6 +151,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-gateway-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -174,14 +176,14 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes: ["v1.33"]
-        istio: ["1.26.2", "1.27.7", "1.28.4"]
+        istio: ["1.29.10", "1.30.8", "1.31.4", "1.32.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -205,6 +207,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-gateway-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -229,14 +232,14 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes: ["v1.33"]
-        istio: ["1.26.2", "1.27.7", "1.28.4"]
+        istio: ["1.29.10", "1.30.8", "1.31.4", "1.32.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -260,6 +263,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-gateway-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -284,14 +288,14 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes: ["v1.33"]
-        istio: ["1.26.2", "1.27.7", "1.28.4"]
+        istio: ["1.29.10", "1.30.8", "1.31.4", "1.32.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -315,6 +319,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-sidecar-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -339,14 +344,14 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes: ["v1.33"]
-        istio: ["1.26.2", "1.27.7", "1.28.4"]
+        istio: ["1.29.10", "1.30.8", "1.31.4", "1.32.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -370,6 +375,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-sidecar-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -394,14 +400,14 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes: ["v1.33"]
-        istio: ["1.26.2", "1.27.7", "1.28.4"]
+        istio: ["1.29.10", "1.30.8", "1.31.4", "1.32.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -425,6 +431,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-sidecar-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -449,14 +456,14 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes: ["v1.33"]
-        istio: ["1.26.2", "1.27.7", "1.28.4"]
+        istio: ["1.29.10", "1.30.8", "1.31.4", "1.32.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -480,6 +487,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-global-sidecar-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -504,14 +512,14 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes: ["v1.33"]
-        istio: ["1.26.2", "1.27.7", "1.28.4"]
+        istio: ["1.29.10", "1.30.8", "1.31.4", "1.32.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -535,6 +543,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-local-sidecar-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
@@ -559,14 +568,14 @@ jobs:
       fail-fast: false
       matrix:
         kubernetes: ["v1.33"]
-        istio: ["1.26.2", "1.27.7", "1.28.4"]
+        istio: ["1.29.10", "1.30.8", "1.31.4", "1.32.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.12'
           architecture: x64
       - name: Install Python dependencies
         uses: py-actions/py-dependency-install@v2
@@ -590,6 +599,7 @@ jobs:
           version: "${{ matrix.kubernetes }}"
           k3d-args: --no-lb
           k3d-name: "e2e-local-gateway-k3d-k3s"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Istioctl
         uses: zufardhiyaulhaq/setup-istioctl@v1.0.0
         with:
