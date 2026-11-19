@@ -301,16 +301,16 @@ func TestDeploymentBuilder_WithMonitoring(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, deployment)
 
-	// Should have 2 containers: statsd-exporter and ratelimit
+	// Should have 2 containers: ratelimit and statsd-exporter
 	assert.Len(t, deployment.Spec.Template.Spec.Containers, 2)
 
-	// First container should be statsd-exporter
-	assert.Equal(t, "monitoring-test-statsd-exporter", deployment.Spec.Template.Spec.Containers[0].Name)
-	assert.Equal(t, "statsd-exporter:latest", deployment.Spec.Template.Spec.Containers[0].Image)
+	// First container should be ratelimit, so per-container settings land on it
+	assert.Equal(t, "monitoring-test", deployment.Spec.Template.Spec.Containers[0].Name)
+	assert.Equal(t, "ratelimit:latest", deployment.Spec.Template.Spec.Containers[0].Image)
 
-	// Second container should be ratelimit
-	assert.Equal(t, "monitoring-test", deployment.Spec.Template.Spec.Containers[1].Name)
-	assert.Equal(t, "ratelimit:latest", deployment.Spec.Template.Spec.Containers[1].Image)
+	// Second container should be statsd-exporter
+	assert.Equal(t, "monitoring-test-statsd-exporter", deployment.Spec.Template.Spec.Containers[1].Name)
+	assert.Equal(t, "statsd-exporter:latest", deployment.Spec.Template.Spec.Containers[1].Image)
 
 	// Should have statsd-config volume
 	assert.Len(t, deployment.Spec.Template.Spec.Volumes, 2)
@@ -671,24 +671,14 @@ func TestDeploymentBuilder_WithPerSecondTLS(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	foundVolume := false
+	// envoy/ratelimit reuses the REDIS_TLS_* certificates for the per-second
+	// client, so perSecond.tls.secretRef is not mounted.
 	for _, v := range deployment.Spec.Template.Spec.Volumes {
-		if v.Name == "redis-persecond-tls" {
-			foundVolume = true
-			assert.Equal(t, "redis-ps-tls-secret", v.VolumeSource.Secret.SecretName)
-		}
+		assert.NotEqual(t, "redis-persecond-tls", v.Name)
 	}
-	assert.True(t, foundVolume, "redis-persecond-tls volume not found")
-
-	foundMount := false
 	for _, vm := range deployment.Spec.Template.Spec.Containers[0].VolumeMounts {
-		if vm.Name == "redis-persecond-tls" {
-			foundMount = true
-			assert.Equal(t, "/tls/redis-persecond/", vm.MountPath)
-			assert.True(t, vm.ReadOnly)
-		}
+		assert.NotEqual(t, "redis-persecond-tls", vm.Name)
 	}
-	assert.True(t, foundMount, "redis-persecond-tls volume mount not found")
 }
 
 func boolPtr(b bool) *bool { return &b }
@@ -857,16 +847,16 @@ func TestDeploymentBuilder_WithSentinelAuth(t *testing.T) {
 
 	assert.NoError(t, err)
 
-	// Find the REDIS_SENTINEL_PASSWORD env var
+	// Find the REDIS_SENTINEL_AUTH env var
 	var sentinelAuthEnv *corev1.EnvVar
 	for i, env := range deployment.Spec.Template.Spec.Containers[0].Env {
-		if env.Name == "REDIS_SENTINEL_PASSWORD" {
+		if env.Name == "REDIS_SENTINEL_AUTH" {
 			sentinelAuthEnv = &deployment.Spec.Template.Spec.Containers[0].Env[i]
 			break
 		}
 	}
 
-	assert.NotNil(t, sentinelAuthEnv, "REDIS_SENTINEL_PASSWORD env var should exist")
+	assert.NotNil(t, sentinelAuthEnv, "REDIS_SENTINEL_AUTH env var should exist")
 	assert.NotNil(t, sentinelAuthEnv.ValueFrom)
 	assert.NotNil(t, sentinelAuthEnv.ValueFrom.SecretKeyRef)
 	assert.Equal(t, "sentinel-auth-secret", sentinelAuthEnv.ValueFrom.SecretKeyRef.Name)

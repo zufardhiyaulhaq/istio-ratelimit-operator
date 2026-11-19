@@ -355,6 +355,7 @@ func TestEnvBuilder_BuildServerEnv(t *testing.T) {
 	env, err := builder.BuildServerEnv()
 	assert.NoError(t, err)
 	assert.Equal(t, "8081", env["GRPC_PORT"])
+	assert.Equal(t, "true", env["GRPC_SERVER_USE_TLS"])
 	assert.Equal(t, "/tls/grpc/tls.crt", env["GRPC_SERVER_TLS_CERT"])
 	assert.Equal(t, "/tls/grpc/tls.key", env["GRPC_SERVER_TLS_KEY"])
 	assert.Equal(t, "30m", env["GRPC_MAX_CONNECTION_AGE"])
@@ -379,7 +380,9 @@ func TestEnvBuilder_BuildServerEnv_WithClientTLS(t *testing.T) {
 
 	env, err := builder.BuildServerEnv()
 	assert.NoError(t, err)
-	assert.Equal(t, "/tls/grpc-client/ca.crt", env["GRPC_SERVER_TLS_CLIENT_CACERT"])
+	assert.Equal(t, "/tls/grpc-client/ca.crt", env["GRPC_CLIENT_TLS_CACERT"])
+	assert.NotContains(t, env, "GRPC_SERVER_TLS_CLIENT_CACERT")
+	assert.NotContains(t, env, "GRPC_SERVER_USE_TLS")
 	assert.Equal(t, "ratelimit.example.com", env["GRPC_CLIENT_TLS_SAN"])
 }
 
@@ -450,7 +453,8 @@ func TestEnvBuilder_BuildResponseHeadersEnv(t *testing.T) {
 
 	env, err := builder.BuildResponseHeadersEnv()
 	assert.NoError(t, err)
-	assert.Equal(t, "true", env["RESPONSE_HEADERS_ENABLED"])
+	assert.Equal(t, "true", env["LIMIT_RESPONSE_HEADERS_ENABLED"])
+	assert.NotContains(t, env, "RESPONSE_HEADERS_ENABLED")
 }
 
 func TestEnvBuilder_BuildLoggingEnv(t *testing.T) {
@@ -528,7 +532,8 @@ func TestEnvBuilder_BuildRedisEnv_WithPerSecond(t *testing.T) {
 								SecretRef: "redis-ps-tls",
 							},
 							Pool: &v1alpha1.RateLimitServiceSpec_Backend_Redis_Pool{
-								Size: 5,
+								Size:            5,
+								OnEmptyBehavior: "ERROR",
 							},
 						},
 					},
@@ -543,10 +548,12 @@ func TestEnvBuilder_BuildRedisEnv_WithPerSecond(t *testing.T) {
 	assert.Equal(t, "redis-ps:6379", env["REDIS_PERSECOND_URL"])
 	assert.Equal(t, "tcp", env["REDIS_PERSECOND_SOCKET_TYPE"])
 	assert.Equal(t, "true", env["REDIS_PERSECOND_TLS"])
-	assert.Equal(t, "/tls/redis-persecond/ca.crt", env["REDIS_PERSECOND_TLS_CACERT"])
-	assert.Equal(t, "/tls/redis-persecond/tls.crt", env["REDIS_PERSECOND_TLS_CLIENT_CERT"])
-	assert.Equal(t, "/tls/redis-persecond/tls.key", env["REDIS_PERSECOND_TLS_CLIENT_KEY"])
+	// envoy/ratelimit has no per-second TLS certificate settings
+	assert.NotContains(t, env, "REDIS_PERSECOND_TLS_CACERT")
+	assert.NotContains(t, env, "REDIS_PERSECOND_TLS_CLIENT_CERT")
+	assert.NotContains(t, env, "REDIS_PERSECOND_TLS_CLIENT_KEY")
 	assert.Equal(t, "5", env["REDIS_PERSECOND_POOL_SIZE"])
+	assert.Equal(t, "ERROR", env["REDIS_PERSECOND_POOL_ON_EMPTY_BEHAVIOR"])
 }
 
 func TestEnvBuilder_BuildBackendEnv(t *testing.T) {
@@ -824,7 +831,7 @@ func TestEnvBuilder_BuildRedisEnv_WithPoolBehavior(t *testing.T) {
 						URL:  "redis:6379",
 						Pool: &v1alpha1.RateLimitServiceSpec_Backend_Redis_Pool{
 							Size:                10,
-							OnEmptyBehavior:     "wait",
+							OnEmptyBehavior:     "WAIT",
 							OnEmptyWaitDuration: "1s",
 						},
 					},
@@ -836,6 +843,7 @@ func TestEnvBuilder_BuildRedisEnv_WithPoolBehavior(t *testing.T) {
 	env, err := builder.BuildRedisEnv()
 	assert.NoError(t, err)
 	assert.Equal(t, "10", env["REDIS_POOL_SIZE"])
-	assert.Equal(t, "wait", env["REDIS_POOL_ON_EMPTY_BEHAVIOR"])
-	assert.Equal(t, "1s", env["REDIS_POOL_ON_EMPTY_WAIT_DURATION"])
+	assert.Equal(t, "WAIT", env["REDIS_POOL_ON_EMPTY_BEHAVIOR"])
+	// envoy/ratelimit has no wait-duration setting, so the deprecated field is ignored
+	assert.NotContains(t, env, "REDIS_POOL_ON_EMPTY_WAIT_DURATION")
 }

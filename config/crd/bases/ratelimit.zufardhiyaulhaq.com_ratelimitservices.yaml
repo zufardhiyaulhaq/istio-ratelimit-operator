@@ -85,8 +85,16 @@ spec:
                           pool:
                             properties:
                               onEmptyBehavior:
+                                description: |-
+                                  OnEmptyBehavior is what a request does when the pool has no free connection:
+                                  WAIT for one up to the request deadline, or fail with ERROR.
+                                enum:
+                                - WAIT
+                                - ERROR
                                 type: string
                               onEmptyWaitDuration:
+                                description: 'Deprecated: envoy/ratelimit has no such
+                                  setting. This field is ignored.'
                                 type: string
                               size:
                                 type: integer
@@ -96,6 +104,11 @@ spec:
                               enabled:
                                 type: boolean
                               secretRef:
+                                description: |-
+                                  SecretRef names a Secret with ca.crt, tls.crt and tls.key.
+                                  Only honoured on the top-level redis.tls: envoy/ratelimit has no separate
+                                  per-second certificate settings, so perSecond.tls reuses these certificates
+                                  and perSecond.tls.secretRef is ignored.
                                 type: string
                               skipHostnameVerification:
                                 type: boolean
@@ -106,8 +119,16 @@ spec:
                       pool:
                         properties:
                           onEmptyBehavior:
+                            description: |-
+                              OnEmptyBehavior is what a request does when the pool has no free connection:
+                              WAIT for one up to the request deadline, or fail with ERROR.
+                            enum:
+                            - WAIT
+                            - ERROR
                             type: string
                           onEmptyWaitDuration:
+                            description: 'Deprecated: envoy/ratelimit has no such
+                              setting. This field is ignored.'
                             type: string
                           size:
                             type: integer
@@ -133,6 +154,11 @@ spec:
                           enabled:
                             type: boolean
                           secretRef:
+                            description: |-
+                              SecretRef names a Secret with ca.crt, tls.crt and tls.key.
+                              Only honoured on the top-level redis.tls: envoy/ratelimit has no separate
+                              per-second certificate settings, so perSecond.tls reuses these certificates
+                              and perSecond.tls.secretRef is ignored.
                             type: string
                           skipHostnameVerification:
                             type: boolean

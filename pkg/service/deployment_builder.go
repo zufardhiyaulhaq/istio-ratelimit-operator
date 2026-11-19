@@ -112,11 +112,20 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 		},
 	}
 
+	if prometheusPort := PrometheusPort(n.RateLimitService.Spec.Monitoring); prometheusPort != 0 {
+		deployment.Spec.Template.Spec.Containers[0].Ports = append(deployment.Spec.Template.Spec.Containers[0].Ports, corev1.ContainerPort{
+			Name:          "http-metrics",
+			ContainerPort: prometheusPort,
+			Protocol:      corev1.ProtocolTCP,
+		})
+	}
+
 	if n.RateLimitService.Spec.Monitoring != nil {
-		// Only add statsd sidecar when Type is empty (legacy behavior)
-		if n.RateLimitService.Spec.Monitoring.Enabled && n.RateLimitService.Spec.Monitoring.Type == "" {
-			deployment.Spec.Template.Spec.Containers = append([]corev1.Container{
-				{Name: n.RateLimitService.Name + "-statsd-exporter",
+		// The statsd-exporter sidecar runs for the legacy path and for type statsd
+		if UsesStatsdExporter(n.RateLimitService.Spec.Monitoring) {
+			// Appended, so Containers[0] is always the ratelimit container
+			deployment.Spec.Template.Spec.Containers = append(deployment.Spec.Template.Spec.Containers,
+				corev1.Container{Name: n.RateLimitService.Name + "-statsd-exporter",
 					Image:   n.Settings.StatsdExporterImage,
 					Command: []string{"/bin/statsd_exporter"},
 					Args: []string{
@@ -156,7 +165,7 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 							MountPath: "/etc/prometheus-statsd-exporter/",
 						},
 					}},
-			}, deployment.Spec.Template.Spec.Containers...)
+			)
 
 			deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
 				Name: n.RateLimitService.Name + "-statsd-config",
@@ -187,28 +196,6 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 			corev1.VolumeMount{
 				Name:      "redis-tls",
 				MountPath: "/tls/redis/",
-				ReadOnly:  true,
-			},
-		)
-	}
-
-	// TLS volume mounts for Redis PerSecond
-	if n.RateLimitService.Spec.Backend != nil && n.RateLimitService.Spec.Backend.Redis != nil &&
-		n.RateLimitService.Spec.Backend.Redis.PerSecond != nil && n.RateLimitService.Spec.Backend.Redis.PerSecond.TLS != nil &&
-		n.RateLimitService.Spec.Backend.Redis.PerSecond.TLS.SecretRef != "" {
-		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
-			Name: "redis-persecond-tls",
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: n.RateLimitService.Spec.Backend.Redis.PerSecond.TLS.SecretRef,
-				},
-			},
-		})
-		deployment.Spec.Template.Spec.Containers[0].VolumeMounts = append(
-			deployment.Spec.Template.Spec.Containers[0].VolumeMounts,
-			corev1.VolumeMount{
-				Name:      "redis-persecond-tls",
-				MountPath: "/tls/redis-persecond/",
 				ReadOnly:  true,
 			},
 		)
@@ -263,10 +250,8 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 		if n.RateLimitService.Spec.Kubernetes.Resources != nil {
 			deployment.Spec.Template.Spec.Containers[0].Resources = *n.RateLimitService.Spec.Kubernetes.Resources
 
-			if n.RateLimitService.Spec.Monitoring != nil {
-				if n.RateLimitService.Spec.Monitoring.Enabled {
-					deployment.Spec.Template.Spec.Containers[1].Resources = *n.RateLimitService.Spec.Kubernetes.Resources
-				}
+			if len(deployment.Spec.Template.Spec.Containers) > 1 {
+				deployment.Spec.Template.Spec.Containers[1].Resources = *n.RateLimitService.Spec.Kubernetes.Resources
 			}
 		}
 
@@ -345,7 +330,7 @@ func (n *DeploymentBuilder) BuildEnv() []corev1.EnvVar {
 		// Redis Sentinel auth
 		if redis.SentinelAuth != nil && redis.SentinelAuth.SecretRef != nil {
 			env = append(env, corev1.EnvVar{
-				Name: "REDIS_SENTINEL_PASSWORD",
+				Name: "REDIS_SENTINEL_AUTH",
 				ValueFrom: &corev1.EnvVarSource{
 					SecretKeyRef: &corev1.SecretKeySelector{
 						LocalObjectReference: corev1.LocalObjectReference{
@@ -367,6 +352,28 @@ func (n *DeploymentBuilder) BuildEnv() []corev1.EnvVar {
 							Name: redis.PerSecond.AuthSecretRef.Name,
 						},
 						Key: redis.PerSecond.AuthSecretRef.Key,
+					},
+				},
+			})
+		}
+	}
+
+	// dogstatsd: send metrics to the Datadog agent on the node, unless the
+	// user points STATSD_HOST somewhere else through spec.environment.
+	if n.RateLimitService.Spec.Monitoring != nil && n.RateLimitService.Spec.Monitoring.Type == "dogstatsd" {
+		overridden := false
+		if n.RateLimitService.Spec.Environment != nil {
+			_, overridden = (*n.RateLimitService.Spec.Environment)["STATSD_HOST"]
+		}
+		if !overridden {
+			env = append(env, corev1.EnvVar{
+				Name: "STATSD_HOST",
+				ValueFrom: &corev1.EnvVarSource{
+					FieldRef: &corev1.ObjectFieldSelector{
+						// set explicitly: the API server defaults it, and the
+						// controller compares env to decide on updates
+						APIVersion: "v1",
+						FieldPath:  "status.hostIP",
 					},
 				},
 			})

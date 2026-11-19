@@ -83,6 +83,15 @@ func checkDeploymentSpecDiff(existing, new appsv1.DeploymentSpec) bool {
 				if existingContainer.Image != newContainer.Image {
 					return true
 				}
+
+				// env and ports change with spec.monitoring and the backend secrets
+				if !equality.Semantic.DeepEqual(existingContainer.Env, newContainer.Env) {
+					return true
+				}
+
+				if !equality.Semantic.DeepEqual(existingContainer.Ports, newContainer.Ports) {
+					return true
+				}
 			}
 		}
 	}
@@ -412,13 +421,11 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	if !equality.Semantic.DeepEqual(createdConfigMapStatsd.Data, configMapStatsd.Data) {
 		createdConfigMapStatsd.Data = configMapStatsd.Data
 
-		if rateLimitService.Spec.Monitoring != nil {
-			if rateLimitService.Spec.Monitoring.Enabled {
-				rateLimitService.Status.TriggerStatsdExporterReload = true
-				err = r.Client.Status().Update(context.TODO(), rateLimitService)
-				if err != nil {
-					return ctrl.Result{}, err
-				}
+		if service.UsesStatsdExporter(rateLimitService.Spec.Monitoring) {
+			rateLimitService.Status.TriggerStatsdExporterReload = true
+			err = r.Client.Status().Update(context.TODO(), rateLimitService)
+			if err != nil {
+				return ctrl.Result{}, err
 			}
 		}
 

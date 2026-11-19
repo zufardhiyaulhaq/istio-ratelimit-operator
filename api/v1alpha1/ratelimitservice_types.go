@@ -92,7 +92,11 @@ type SecretKeyRef struct {
 }
 
 type RateLimitServiceSpec_Backend_Redis_TLS struct {
-	Enabled                  bool   `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled,omitempty"`
+	// SecretRef names a Secret with ca.crt, tls.crt and tls.key.
+	// Only honoured on the top-level redis.tls: envoy/ratelimit has no separate
+	// per-second certificate settings, so perSecond.tls reuses these certificates
+	// and perSecond.tls.secretRef is ignored.
 	SecretRef                string `json:"secretRef,omitempty"`
 	SkipHostnameVerification bool   `json:"skipHostnameVerification,omitempty"`
 }
@@ -102,8 +106,14 @@ type RateLimitServiceSpec_Backend_Redis_SentinelAuth struct {
 }
 
 type RateLimitServiceSpec_Backend_Redis_Pool struct {
-	Size                int    `json:"size,omitempty"`
-	OnEmptyBehavior     string `json:"onEmptyBehavior,omitempty"`
+	Size int `json:"size,omitempty"`
+	// OnEmptyBehavior is what a request does when the pool has no free connection:
+	// WAIT for one up to the request deadline, or fail with ERROR.
+	// +kubebuilder:validation:Enum=WAIT;ERROR
+	// +optional
+	OnEmptyBehavior string `json:"onEmptyBehavior,omitempty"`
+	// Deprecated: envoy/ratelimit has no such setting. This field is ignored.
+	// +optional
 	OnEmptyWaitDuration string `json:"onEmptyWaitDuration,omitempty"`
 }
 
