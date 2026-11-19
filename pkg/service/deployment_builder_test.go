@@ -271,6 +271,11 @@ func TestDeploymentBuilder(t *testing.T) {
 			SetRateLimitService(tc.rateLimitService).Build()
 
 		assert.NoError(t, err)
+
+		expectedHash, err := service.PodTemplateHash(tc.expectedDeployment.Spec.Template)
+		assert.NoError(t, err)
+		tc.expectedDeployment.Annotations = map[string]string{service.PodTemplateHashAnnotation: expectedHash}
+
 		assert.Equal(t, tc.expectedDeployment, existingDeployment)
 	}
 }

@@ -4,8 +4,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/service"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func deploymentSpecWith(container corev1.Container) appsv1.DeploymentSpec {
@@ -61,4 +63,19 @@ func TestCheckDeploymentSpecDiff(t *testing.T) {
 		desired.Template.Spec.Containers = append(desired.Template.Spec.Containers, sidecar)
 		assert.True(t, checkDeploymentSpecDiff(existing, desired))
 	})
+}
+
+func TestCheckDeploymentTemplateHashDiff(t *testing.T) {
+	withHash := func(hash string) *appsv1.Deployment {
+		deployment := &appsv1.Deployment{}
+		if hash != "" {
+			deployment.ObjectMeta = metav1.ObjectMeta{Annotations: map[string]string{service.PodTemplateHashAnnotation: hash}}
+		}
+		return deployment
+	}
+
+	assert.False(t, checkDeploymentTemplateHashDiff(withHash("abc"), withHash("abc")))
+	assert.True(t, checkDeploymentTemplateHashDiff(withHash("abc"), withHash("def")))
+	// Deployments created before the hash existed get updated once
+	assert.True(t, checkDeploymentTemplateHashDiff(withHash(""), withHash("abc")))
 }

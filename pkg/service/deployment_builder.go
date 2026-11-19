@@ -1,6 +1,10 @@
 package service
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/settings"
 
@@ -289,7 +293,33 @@ func (n *DeploymentBuilder) Build() (*appsv1.Deployment, error) {
 		}
 	}
 
+	templateHash, err := PodTemplateHash(deployment.Spec.Template)
+	if err != nil {
+		return deployment, err
+	}
+	deployment.Annotations = map[string]string{
+		PodTemplateHashAnnotation: templateHash,
+	}
+
 	return deployment, nil
+}
+
+// PodTemplateHashAnnotation holds the hash of the pod template the operator
+// built. Comparing hashes catches every change the builder makes, which a
+// field-by-field comparison against the live object cannot do reliably
+// because the API server fills in defaults (probe timeouts, volume modes,
+// resource requests, tolerations).
+const PodTemplateHashAnnotation = "ratelimit.zufardhiyaulhaq.com/pod-template-hash"
+
+// PodTemplateHash returns a stable hash of a pod template.
+func PodTemplateHash(template corev1.PodTemplateSpec) (string, error) {
+	data, err := json.Marshal(template)
+	if err != nil {
+		return "", err
+	}
+
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:])[:16], nil
 }
 
 func (n *DeploymentBuilder) BuildEnv() []corev1.EnvVar {

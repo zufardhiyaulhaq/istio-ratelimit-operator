@@ -282,3 +282,49 @@ func TestDeploymentBuilder_StatsdSidecar_RateLimitContainerKeepsSettings(t *test
 	assert.Nil(t, containers[1].SecurityContext)
 	assert.Nil(t, containers[1].LivenessProbe)
 }
+
+func TestDeploymentBuilder_PodTemplateHash_ChangesWithTemplate(t *testing.T) {
+	build := func(mutate func(*v1alpha1.RateLimitService)) string {
+		rateLimitService := monitoringRateLimitService(nil)
+		rateLimitService.Spec.Backend = &v1alpha1.RateLimitServiceSpec_Backend{
+			Redis: &v1alpha1.RateLimitServiceSpec_Backend_Redis{
+				Type: "single",
+				URL:  "redis:6379",
+				TLS:  &v1alpha1.RateLimitServiceSpec_Backend_Redis_TLS{Enabled: true, SecretRef: "redis-tls"},
+			},
+		}
+		if mutate != nil {
+			mutate(&rateLimitService)
+		}
+		deployment, err := service.NewDeploymentBuilder(monitoringSettings()).
+			SetRateLimitService(rateLimitService).
+			Build()
+		assert.NoError(t, err)
+		return deployment.Annotations[service.PodTemplateHashAnnotation]
+	}
+
+	base := build(nil)
+	assert.NotEmpty(t, base)
+	assert.Equal(t, base, build(nil), "hash must be stable across builds")
+
+	// a TLS secret rename only changes a volume's SecretName
+	assert.NotEqual(t, base, build(func(r *v1alpha1.RateLimitService) {
+		r.Spec.Backend.Redis.TLS.SecretRef = "redis-tls-v2"
+	}))
+
+	// resources are not compared field by field by the controller
+	assert.NotEqual(t, base, build(func(r *v1alpha1.RateLimitService) {
+		r.Spec.Kubernetes = &v1alpha1.RateLimitServiceSpec_Kubernetes{
+			Resources: &corev1.ResourceRequirements{
+				Limits: corev1.ResourceList{corev1.ResourceCPU: resource.MustParse("200m")},
+			},
+		}
+	}))
+
+	// scheduling
+	assert.NotEqual(t, base, build(func(r *v1alpha1.RateLimitService) {
+		r.Spec.Kubernetes = &v1alpha1.RateLimitServiceSpec_Kubernetes{
+			Tolerations: []corev1.Toleration{{Key: "dedicated", Operator: corev1.TolerationOpExists}},
+		}
+	}))
+}
