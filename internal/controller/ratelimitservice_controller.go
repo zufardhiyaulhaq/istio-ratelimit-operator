@@ -83,11 +83,27 @@ func checkDeploymentSpecDiff(existing, new appsv1.DeploymentSpec) bool {
 				if existingContainer.Image != newContainer.Image {
 					return true
 				}
+
+				// env and ports change with spec.monitoring and the backend auth secrets;
+				// everything else the builder sets is covered by the pod template hash
+				if !equality.Semantic.DeepEqual(existingContainer.Env, newContainer.Env) {
+					return true
+				}
+
+				if !equality.Semantic.DeepEqual(existingContainer.Ports, newContainer.Ports) {
+					return true
+				}
 			}
 		}
 	}
 
 	return false
+}
+
+// checkDeploymentTemplateHashDiff reports whether the pod template the
+// operator built differs from the one it last applied.
+func checkDeploymentTemplateHashDiff(existing, desired *appsv1.Deployment) bool {
+	return existing.Annotations[service.PodTemplateHashAnnotation] != desired.Annotations[service.PodTemplateHashAnnotation]
 }
 
 //+kubebuilder:rbac:groups=ratelimit.zufardhiyaulhaq.com,resources=ratelimitservices,verbs=get;list;watch;create;update;patch;delete
@@ -412,13 +428,11 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	if !equality.Semantic.DeepEqual(createdConfigMapStatsd.Data, configMapStatsd.Data) {
 		createdConfigMapStatsd.Data = configMapStatsd.Data
 
-		if rateLimitService.Spec.Monitoring != nil {
-			if rateLimitService.Spec.Monitoring.Enabled {
-				rateLimitService.Status.TriggerStatsdExporterReload = true
-				err = r.Client.Status().Update(context.TODO(), rateLimitService)
-				if err != nil {
-					return ctrl.Result{}, err
-				}
+		if service.UsesStatsdExporter(rateLimitService.Spec.Monitoring) {
+			rateLimitService.Status.TriggerStatsdExporterReload = true
+			err = r.Client.Status().Update(context.TODO(), rateLimitService)
+			if err != nil {
+				return ctrl.Result{}, err
 			}
 		}
 
@@ -428,16 +442,23 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			return ctrl.Result{}, err
 		}
 
-		log.Info("reload statsd exporter")
-		err = reloadStatsdExporter(fmt.Sprintf("%s.%s.svc.cluster.local", svc.Name, svc.Namespace))
-		if err != nil {
-			return ctrl.Result{}, err
+		// only the statsd-exporter sidecar serves the reload endpoint
+		if service.UsesStatsdExporter(rateLimitService.Spec.Monitoring) {
+			log.Info("reload statsd exporter")
+			err = reloadStatsdExporter(fmt.Sprintf("%s.%s.svc.cluster.local", svc.Name, svc.Namespace))
+			if err != nil {
+				return ctrl.Result{}, err
+			}
 		}
 	}
 
 	// check diff & update deployment
-	if checkDeploymentSpecDiff(createdDeployment.Spec, deployment.Spec) {
+	if checkDeploymentSpecDiff(createdDeployment.Spec, deployment.Spec) || checkDeploymentTemplateHashDiff(createdDeployment, deployment) {
 		createdDeployment.Spec = deployment.Spec
+		if createdDeployment.Annotations == nil {
+			createdDeployment.Annotations = map[string]string{}
+		}
+		createdDeployment.Annotations[service.PodTemplateHashAnnotation] = deployment.Annotations[service.PodTemplateHashAnnotation]
 
 		log.Info("update deployment")
 		err := r.Client.Update(ctx, createdDeployment, &client.UpdateOptions{})
@@ -462,6 +483,9 @@ func (r *RateLimitServiceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	if restartDeployment {
 		log.Info("restart ratelimitservice deployment")
 
+		if createdDeployment.Spec.Template.Annotations == nil {
+			createdDeployment.Spec.Template.Annotations = map[string]string{}
+		}
 		createdDeployment.Spec.Template.Annotations["RateLimitService.zufardhiyaulhaq.com/restartedAt"] = time.Now().String()
 		err := r.Client.Update(ctx, createdDeployment, &client.UpdateOptions{})
 		if err != nil {

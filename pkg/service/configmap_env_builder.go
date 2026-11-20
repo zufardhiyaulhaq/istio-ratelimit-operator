@@ -68,7 +68,7 @@ func (n *EnvBuilder) BuildEnv() (map[string]string, error) {
 		}
 	}
 
-	if n.RateLimitService.Spec.Backend.Redis != nil {
+	if n.RateLimitService.Spec.Backend != nil && n.RateLimitService.Spec.Backend.Redis != nil {
 		redisEnv, err := n.BuildRedisEnv()
 		if err != nil {
 			return env, err
@@ -205,9 +205,6 @@ func (n *EnvBuilder) BuildRedisEnv() (map[string]string, error) {
 		if n.RateLimitService.Spec.Backend.Redis.Pool.OnEmptyBehavior != "" {
 			data["REDIS_POOL_ON_EMPTY_BEHAVIOR"] = n.RateLimitService.Spec.Backend.Redis.Pool.OnEmptyBehavior
 		}
-		if n.RateLimitService.Spec.Backend.Redis.Pool.OnEmptyWaitDuration != "" {
-			data["REDIS_POOL_ON_EMPTY_WAIT_DURATION"] = n.RateLimitService.Spec.Backend.Redis.Pool.OnEmptyWaitDuration
-		}
 	}
 
 	if n.RateLimitService.Spec.Backend.Redis.Timeout != nil {
@@ -226,16 +223,18 @@ func (n *EnvBuilder) BuildRedisEnv() (map[string]string, error) {
 			if ps.URL != "" {
 				data["REDIS_PERSECOND_URL"] = ps.URL
 			}
+			// envoy/ratelimit has no per-second TLS certificate settings: the
+			// per-second client reuses the REDIS_TLS_* certificates.
 			if ps.TLS != nil && ps.TLS.Enabled {
 				data["REDIS_PERSECOND_TLS"] = "true"
-				if ps.TLS.SecretRef != "" {
-					data["REDIS_PERSECOND_TLS_CACERT"] = "/tls/redis-persecond/ca.crt"
-					data["REDIS_PERSECOND_TLS_CLIENT_CERT"] = "/tls/redis-persecond/tls.crt"
-					data["REDIS_PERSECOND_TLS_CLIENT_KEY"] = "/tls/redis-persecond/tls.key"
-				}
 			}
-			if ps.Pool != nil && ps.Pool.Size > 0 {
-				data["REDIS_PERSECOND_POOL_SIZE"] = strconv.Itoa(ps.Pool.Size)
+			if ps.Pool != nil {
+				if ps.Pool.Size > 0 {
+					data["REDIS_PERSECOND_POOL_SIZE"] = strconv.Itoa(ps.Pool.Size)
+				}
+				if ps.Pool.OnEmptyBehavior != "" {
+					data["REDIS_PERSECOND_POOL_ON_EMPTY_BEHAVIOR"] = ps.Pool.OnEmptyBehavior
+				}
 			}
 		}
 	}
@@ -279,7 +278,10 @@ func (n *EnvBuilder) BuildMonitoringEnv() (map[string]string, error) {
 
 	mon := n.RateLimitService.Spec.Monitoring
 
-	if mon.Type == "prometheus" {
+	// envoy/ratelimit refuses to start when more than one stats sink is enabled,
+	// so each type turns on exactly one of USE_STATSD, USE_DOG_STATSD and USE_PROMETHEUS.
+	switch mon.Type {
+	case "prometheus":
 		data["USE_STATSD"] = "false"
 		data["USE_PROMETHEUS"] = "true"
 		if mon.Prometheus != nil {
@@ -290,7 +292,21 @@ func (n *EnvBuilder) BuildMonitoringEnv() (map[string]string, error) {
 				data["PROMETHEUS_PATH"] = mon.Prometheus.Path
 			}
 		}
-	} else {
+	case "statsd":
+		// Same as the legacy path: metrics go to the statsd-exporter sidecar.
+		statsdEnv, err := n.BuildStatsdEnv()
+		if err != nil {
+			return data, err
+		}
+		for key, value := range statsdEnv {
+			data[key] = value
+		}
+	case "dogstatsd":
+		// STATSD_HOST defaults to the node IP (see DeploymentBuilder.BuildEnv),
+		// where the Datadog agent listens on port 8125.
+		data["USE_STATSD"] = "false"
+		data["USE_DOG_STATSD"] = "true"
+	default:
 		data["USE_STATSD"] = "false"
 	}
 
@@ -325,7 +341,7 @@ func (n *EnvBuilder) BuildResponseHeadersEnv() (map[string]string, error) {
 	data := make(map[string]string)
 
 	if n.RateLimitService.Spec.ResponseHeaders != nil && n.RateLimitService.Spec.ResponseHeaders.Enabled {
-		data["RESPONSE_HEADERS_ENABLED"] = "true"
+		data["LIMIT_RESPONSE_HEADERS_ENABLED"] = "true"
 	}
 
 	return data, nil
@@ -374,6 +390,7 @@ func (n *EnvBuilder) BuildServerEnv() (map[string]string, error) {
 		}
 
 		if grpc.TLS != nil && grpc.TLS.Enabled {
+			data["GRPC_SERVER_USE_TLS"] = "true"
 			if grpc.TLS.SecretRef != "" {
 				data["GRPC_SERVER_TLS_CERT"] = "/tls/grpc/tls.crt"
 				data["GRPC_SERVER_TLS_KEY"] = "/tls/grpc/tls.key"
@@ -382,7 +399,7 @@ func (n *EnvBuilder) BuildServerEnv() (map[string]string, error) {
 
 		if grpc.ClientTLS != nil {
 			if grpc.ClientTLS.CACertSecretRef != "" {
-				data["GRPC_SERVER_TLS_CLIENT_CACERT"] = "/tls/grpc-client/ca.crt"
+				data["GRPC_CLIENT_TLS_CACERT"] = "/tls/grpc-client/ca.crt"
 			}
 			if grpc.ClientTLS.SAN != "" {
 				data["GRPC_CLIENT_TLS_SAN"] = grpc.ClientTLS.SAN

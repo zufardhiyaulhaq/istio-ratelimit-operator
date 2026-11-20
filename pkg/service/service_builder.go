@@ -78,6 +78,16 @@ func (n *ServiceBuilder) Build() (*corev1.Service, error) {
 		},
 	}
 
+	if prometheusPort := PrometheusPort(n.RateLimitService.Spec.Monitoring); prometheusPort != 0 {
+		Service.Spec.Ports = append(Service.Spec.Ports, corev1.ServicePort{
+			Name:        "http-metrics",
+			Port:        prometheusPort,
+			TargetPort:  intstr.FromInt(int(prometheusPort)),
+			Protocol:    corev1.ProtocolTCP,
+			AppProtocol: swag.String("http"),
+		})
+	}
+
 	return Service, nil
 }
 

@@ -15,7 +15,7 @@ func TestNewSettings_WithDefaultValues(t *testing.T) {
 	settings, err := NewSettings()
 
 	assert.NoError(t, err)
-	assert.Equal(t, "envoyproxy/ratelimit:5e1be594", settings.RateLimitServiceImage)
+	assert.Equal(t, "envoyproxy/ratelimit:3dfe2f9a", settings.RateLimitServiceImage)
 	assert.Equal(t, "prom/statsd-exporter:v0.23.1", settings.StatsdExporterImage)
 }
 
@@ -38,7 +38,7 @@ func TestNewSettings_WithCustomEnvironmentVariables(t *testing.T) {
 			name:                          "custom statsd exporter image only",
 			rateLimitServiceImage:         "",
 			statsdExporterImage:           "custom/statsd:v2.0.0",
-			expectedRateLimitServiceImage: "envoyproxy/ratelimit:5e1be594",
+			expectedRateLimitServiceImage: "envoyproxy/ratelimit:3dfe2f9a",
 			expectedStatsdExporterImage:   "custom/statsd:v2.0.0",
 		},
 		{
@@ -130,7 +130,7 @@ func TestNewSettings_ReturnsNewSettingsEachTime(t *testing.T) {
 
 	// The two settings should be different
 	assert.NotEqual(t, settings1.RateLimitServiceImage, settings2.RateLimitServiceImage)
-	assert.Equal(t, "envoyproxy/ratelimit:5e1be594", settings1.RateLimitServiceImage)
+	assert.Equal(t, "envoyproxy/ratelimit:3dfe2f9a", settings1.RateLimitServiceImage)
 	assert.Equal(t, "changed-image:v2.0.0", settings2.RateLimitServiceImage)
 
 	// Clean up
