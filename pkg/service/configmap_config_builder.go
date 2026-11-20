@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/types"
@@ -144,6 +145,10 @@ func applyDetailedMetric(descriptors []types.RateLimit_Service_Descriptor) {
 	}
 }
 
+// NewRateLimitDescriptorFromMatcher builds the ratelimit descriptors for the
+// matchers. The unit is written in lower case. envoy/ratelimit matches it
+// case-insensitively, so this only keeps the generated config consistent
+// with the case-insensitive CRD validation.
 func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Action, limit *v1alpha1.GlobalRateLimit_Limit, shadowMode bool) ([]types.RateLimit_Service_Descriptor, error) {
 	descriptor := []types.RateLimit_Service_Descriptor{
 		{},
@@ -156,7 +161,7 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 
 		if len(matchers) == 1 {
 			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
-			descriptor[0].RateLimit.Unit = limit.Unit
+			descriptor[0].RateLimit.Unit = strings.ToLower(limit.Unit)
 			descriptor[0].RateLimit.Unlimited = limit.Unlimited
 			descriptor[0].ShadowMode = shadowMode
 
@@ -176,7 +181,7 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 
 		if len(matchers) == 1 {
 			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
-			descriptor[0].RateLimit.Unit = limit.Unit
+			descriptor[0].RateLimit.Unit = strings.ToLower(limit.Unit)
 			descriptor[0].RateLimit.Unlimited = limit.Unlimited
 			descriptor[0].ShadowMode = shadowMode
 
@@ -203,7 +208,7 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 
 		if len(matchers) == 1 {
 			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
-			descriptor[0].RateLimit.Unit = limit.Unit
+			descriptor[0].RateLimit.Unit = strings.ToLower(limit.Unit)
 			descriptor[0].RateLimit.Unlimited = limit.Unlimited
 			descriptor[0].ShadowMode = shadowMode
 
@@ -225,7 +230,7 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 
 		if len(matchers) == 1 {
 			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
-			descriptor[0].RateLimit.Unit = limit.Unit
+			descriptor[0].RateLimit.Unit = strings.ToLower(limit.Unit)
 			descriptor[0].RateLimit.Unlimited = limit.Unlimited
 			descriptor[0].ShadowMode = shadowMode
 

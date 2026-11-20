@@ -985,8 +985,20 @@ func TestNewRateLimitDescriptor_Unlimited(t *testing.T) {
 	assert.True(t, descriptors[0].DetailedMetric)
 }
 
-func TestNewRateLimitConfig_LongUnits(t *testing.T) {
-	for _, unit := range []string{"week", "month", "year"} {
+func TestNewRateLimitConfig_Units(t *testing.T) {
+	tests := []struct {
+		unit string
+		want string
+	}{
+		{"week", "week"},
+		{"month", "month"},
+		{"year", "year"},
+		{"WEEK", "week"},
+		{"Hour", "hour"},
+	}
+
+	for _, tt := range tests {
+		unit := tt.unit
 		t.Run(unit, func(t *testing.T) {
 			descriptors, err := service.NewRateLimitDescriptor([]v1alpha1.GlobalRateLimit{
 				{
@@ -1013,8 +1025,39 @@ func TestNewRateLimitConfig_LongUnits(t *testing.T) {
 
 			rendered, err := config.String()
 			assert.NoError(t, err)
-			assert.Contains(t, rendered, "unit: "+unit+"\n")
+			assert.Contains(t, rendered, "unit: "+tt.want+"\n")
 			assert.Contains(t, rendered, "requests_per_unit: 1000\n")
+		})
+	}
+}
+
+func TestNewRateLimitDescriptorFromMatcher_LowercasesUnitForEveryMatcher(t *testing.T) {
+	descriptorValue := "foo"
+	matchers := map[string]*v1alpha1.GlobalRateLimit_Action{
+		"remote_address": {RemoteAddress: &v1alpha1.GlobalRateLimit_Action_RemoteAddress{}},
+		"request_headers": {RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
+			HeaderName:    "x-api-key",
+			DescriptorKey: "api_key",
+		}},
+		"generic_key": {GenericKey: &v1alpha1.GlobalRateLimit_Action_GenericKey{
+			DescriptorValue: descriptorValue,
+		}},
+		"header_value_match": {HeaderValueMatch: &v1alpha1.GlobalRateLimit_Action_HeaderValueMatch{
+			DescriptorValue: descriptorValue,
+		}},
+	}
+
+	for name, matcher := range matchers {
+		t.Run(name, func(t *testing.T) {
+			descriptors, err := service.NewRateLimitDescriptorFromMatcher(
+				[]*v1alpha1.GlobalRateLimit_Action{matcher},
+				&v1alpha1.GlobalRateLimit_Limit{Unit: "MONTH", RequestsPerUnit: 5},
+				false,
+			)
+			assert.NoError(t, err)
+			assert.Len(t, descriptors, 1)
+			assert.Equal(t, "month", descriptors[0].RateLimit.Unit)
+			assert.Equal(t, 5, descriptors[0].RateLimit.RequestsPerUnit)
 		})
 	}
 }
