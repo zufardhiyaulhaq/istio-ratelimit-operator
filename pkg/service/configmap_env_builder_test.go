@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/go-openapi/swag"
 	"github.com/stretchr/testify/assert"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/api/v1alpha1"
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/service"
@@ -866,8 +867,13 @@ func TestEnvBuilder_BuildWindowEnv(t *testing.T) {
 		},
 		{
 			name:   "calendar month",
-			window: &v1alpha1.RateLimitServiceSpec_Window{CalendarMonth: true},
+			window: &v1alpha1.RateLimitServiceSpec_Window{CalendarMonth: swag.Bool(true)},
 			want:   map[string]string{"USE_CALENDAR_MONTH_RATE_LIMIT": "true"},
+		},
+		{
+			name:   "calendar month explicitly off",
+			window: &v1alpha1.RateLimitServiceSpec_Window{CalendarMonth: swag.Bool(false)},
+			want:   map[string]string{"USE_CALENDAR_MONTH_RATE_LIMIT": "false"},
 		},
 		{
 			name:   "week reset day",
@@ -876,7 +882,7 @@ func TestEnvBuilder_BuildWindowEnv(t *testing.T) {
 		},
 		{
 			name:   "both",
-			window: &v1alpha1.RateLimitServiceSpec_Window{CalendarMonth: true, WeekResetDay: "sunday"},
+			window: &v1alpha1.RateLimitServiceSpec_Window{CalendarMonth: swag.Bool(true), WeekResetDay: "sunday"},
 			want: map[string]string{
 				"USE_CALENDAR_MONTH_RATE_LIMIT": "true",
 				"WEEK_RATE_LIMIT_RESET_DAY":     "sunday",
@@ -896,7 +902,7 @@ func TestEnvBuilder_BuildWindowEnv(t *testing.T) {
 			for key, value := range tt.want {
 				assert.Equal(t, value, env[key])
 			}
-			if tt.window == nil || !tt.window.CalendarMonth {
+			if tt.window == nil || tt.window.CalendarMonth == nil {
 				assert.NotContains(t, env, "USE_CALENDAR_MONTH_RATE_LIMIT")
 			}
 			if tt.window == nil || tt.window.WeekResetDay == "" {
@@ -907,15 +913,22 @@ func TestEnvBuilder_BuildWindowEnv(t *testing.T) {
 }
 
 func TestEnvBuilder_BuildWindowEnv_OverridesEnvironment(t *testing.T) {
-	environment := map[string]string{"WEEK_RATE_LIMIT_RESET_DAY": "Friday"}
+	environment := map[string]string{
+		"WEEK_RATE_LIMIT_RESET_DAY":     "Friday",
+		"USE_CALENDAR_MONTH_RATE_LIMIT": "true",
+	}
 	builder := service.NewEnvBuilder().SetRateLimitService(v1alpha1.RateLimitService{
 		Spec: v1alpha1.RateLimitServiceSpec{
 			Environment: &environment,
-			Window:      &v1alpha1.RateLimitServiceSpec_Window{WeekResetDay: "Monday"},
+			Window: &v1alpha1.RateLimitServiceSpec_Window{
+				CalendarMonth: swag.Bool(false),
+				WeekResetDay:  "Monday",
+			},
 		},
 	})
 
 	env, err := builder.BuildEnv()
 	assert.NoError(t, err)
 	assert.Equal(t, "Monday", env["WEEK_RATE_LIMIT_RESET_DAY"])
+	assert.Equal(t, "false", env["USE_CALENDAR_MONTH_RATE_LIMIT"])
 }

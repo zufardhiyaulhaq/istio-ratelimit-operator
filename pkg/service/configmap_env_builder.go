@@ -389,8 +389,8 @@ func (n *EnvBuilder) BuildWindowEnv() map[string]string {
 		return data
 	}
 
-	if window.CalendarMonth {
-		data["USE_CALENDAR_MONTH_RATE_LIMIT"] = "true"
+	if window.CalendarMonth != nil {
+		data["USE_CALENDAR_MONTH_RATE_LIMIT"] = strconv.FormatBool(*window.CalendarMonth)
 	}
 
 	if window.WeekResetDay != "" {
