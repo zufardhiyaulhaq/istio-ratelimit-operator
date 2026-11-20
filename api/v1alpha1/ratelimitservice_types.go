@@ -30,7 +30,9 @@ type RateLimitServiceSpec struct {
 	ResponseHeaders *RateLimitServiceSpec_ResponseHeaders `json:"responseHeaders,omitempty"`
 	Logging         *RateLimitServiceSpec_Logging         `json:"logging,omitempty"`
 	ShadowMode      bool                                  `json:"shadowMode,omitempty"`
-	Environment     *map[string]string                    `json:"environment,omitempty"`
+	// Window sets when week and month limits reset.
+	Window      *RateLimitServiceSpec_Window `json:"window,omitempty"`
+	Environment *map[string]string           `json:"environment,omitempty"`
 }
 
 type RateLimitServiceSpec_Kubernetes struct {
@@ -193,6 +195,17 @@ type RateLimitServiceSpec_Monitoring_Statsd struct {
 type RateLimitServiceSpec_Monitoring_Statsd_Spec struct {
 	Host string `json:"host,omitempty"`
 	Port int    `json:"port,omitempty"`
+}
+
+type RateLimitServiceSpec_Window struct {
+	// CalendarMonth makes month limits reset on the 1st of each calendar month
+	// (UTC) instead of every 30 days. Turning it on moves the reset time of
+	// existing month limits.
+	CalendarMonth bool `json:"calendarMonth,omitempty"`
+	// WeekResetDay is the day week limits reset, at 00:00 UTC. Case-insensitive.
+	// The ratelimit service default is Thursday.
+	// +kubebuilder:validation:Pattern=`^(?i)(sunday|monday|tuesday|wednesday|thursday|friday|saturday)$`
+	WeekResetDay string `json:"weekResetDay,omitempty"`
 }
 
 type RateLimitServiceSpec_ResponseHeaders struct {

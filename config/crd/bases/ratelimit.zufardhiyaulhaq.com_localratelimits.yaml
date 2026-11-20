@@ -46,6 +46,10 @@ spec:
                   requests_per_unit:
                     type: integer
                   unit:
+                    description: |-
+                      Unit is the token bucket fill interval: second, minute, hour, day, week
+                      (7 days), month (30 days) or year (365 days). Case-insensitive.
+                    pattern: ^(?i)(second|minute|hour|day|week|month|year)$
                     type: string
                 type: object
               selector:

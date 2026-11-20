@@ -847,3 +847,75 @@ func TestEnvBuilder_BuildRedisEnv_WithPoolBehavior(t *testing.T) {
 	// envoy/ratelimit has no wait-duration setting, so the deprecated field is ignored
 	assert.NotContains(t, env, "REDIS_POOL_ON_EMPTY_WAIT_DURATION")
 }
+
+func TestEnvBuilder_BuildWindowEnv(t *testing.T) {
+	tests := []struct {
+		name   string
+		window *v1alpha1.RateLimitServiceSpec_Window
+		want   map[string]string
+	}{
+		{
+			name:   "no window",
+			window: nil,
+			want:   map[string]string{},
+		},
+		{
+			name:   "empty window",
+			window: &v1alpha1.RateLimitServiceSpec_Window{},
+			want:   map[string]string{},
+		},
+		{
+			name:   "calendar month",
+			window: &v1alpha1.RateLimitServiceSpec_Window{CalendarMonth: true},
+			want:   map[string]string{"USE_CALENDAR_MONTH_RATE_LIMIT": "true"},
+		},
+		{
+			name:   "week reset day",
+			window: &v1alpha1.RateLimitServiceSpec_Window{WeekResetDay: "Monday"},
+			want:   map[string]string{"WEEK_RATE_LIMIT_RESET_DAY": "Monday"},
+		},
+		{
+			name:   "both",
+			window: &v1alpha1.RateLimitServiceSpec_Window{CalendarMonth: true, WeekResetDay: "sunday"},
+			want: map[string]string{
+				"USE_CALENDAR_MONTH_RATE_LIMIT": "true",
+				"WEEK_RATE_LIMIT_RESET_DAY":     "sunday",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			builder := service.NewEnvBuilder().SetRateLimitService(v1alpha1.RateLimitService{
+				Spec: v1alpha1.RateLimitServiceSpec{Window: tt.window},
+			})
+			assert.Equal(t, tt.want, builder.BuildWindowEnv())
+
+			env, err := builder.BuildEnv()
+			assert.NoError(t, err)
+			for key, value := range tt.want {
+				assert.Equal(t, value, env[key])
+			}
+			if tt.window == nil || !tt.window.CalendarMonth {
+				assert.NotContains(t, env, "USE_CALENDAR_MONTH_RATE_LIMIT")
+			}
+			if tt.window == nil || tt.window.WeekResetDay == "" {
+				assert.NotContains(t, env, "WEEK_RATE_LIMIT_RESET_DAY")
+			}
+		})
+	}
+}
+
+func TestEnvBuilder_BuildWindowEnv_OverridesEnvironment(t *testing.T) {
+	environment := map[string]string{"WEEK_RATE_LIMIT_RESET_DAY": "Friday"}
+	builder := service.NewEnvBuilder().SetRateLimitService(v1alpha1.RateLimitService{
+		Spec: v1alpha1.RateLimitServiceSpec{
+			Environment: &environment,
+			Window:      &v1alpha1.RateLimitServiceSpec_Window{WeekResetDay: "Monday"},
+		},
+	})
+
+	env, err := builder.BuildEnv()
+	assert.NoError(t, err)
+	assert.Equal(t, "Monday", env["WEEK_RATE_LIMIT_RESET_DAY"])
+}

@@ -37,6 +37,10 @@ type GlobalRateLimitSelector struct {
 }
 
 type GlobalRateLimit_Limit struct {
+	// Unit is the time window of the limit: second, minute, hour, day, week,
+	// month or year. Case-insensitive. Week and month reset times are set by
+	// the RateLimitService spec.window.
+	// +kubebuilder:validation:Pattern=`^(?i)(second|minute|hour|day|week|month|year)$`
 	Unit            string `json:"unit,omitempty" yaml:"unit,omitempty"`
 	RequestsPerUnit int    `json:"requests_per_unit,omitempty" yaml:"requests_per_unit,omitempty"`
 	Unlimited       bool   `json:"unlimited,omitempty" yaml:"unlimited,omitempty"`

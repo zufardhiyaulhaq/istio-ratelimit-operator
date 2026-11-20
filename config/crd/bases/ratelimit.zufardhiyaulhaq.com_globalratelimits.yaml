@@ -50,6 +50,11 @@ spec:
                   requests_per_unit:
                     type: integer
                   unit:
+                    description: |-
+                      Unit is the time window of the limit: second, minute, hour, day, week,
+                      month or year. Case-insensitive. Week and month reset times are set by
+                      the RateLimitService spec.window.
+                    pattern: ^(?i)(second|minute|hour|day|week|month|year)$
                     type: string
                   unlimited:
                     type: boolean

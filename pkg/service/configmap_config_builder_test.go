@@ -984,3 +984,37 @@ func TestNewRateLimitDescriptor_Unlimited(t *testing.T) {
 	assert.True(t, descriptors[0].RateLimit.Unlimited)
 	assert.True(t, descriptors[0].DetailedMetric)
 }
+
+func TestNewRateLimitConfig_LongUnits(t *testing.T) {
+	for _, unit := range []string{"week", "month", "year"} {
+		t.Run(unit, func(t *testing.T) {
+			descriptors, err := service.NewRateLimitDescriptor([]v1alpha1.GlobalRateLimit{
+				{
+					Spec: v1alpha1.GlobalRateLimitSpec{
+						Matcher: []*v1alpha1.GlobalRateLimit_Action{
+							{
+								RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
+									HeaderName:    "x-api-key",
+									DescriptorKey: "api_key",
+								},
+							},
+						},
+						Limit: &v1alpha1.GlobalRateLimit_Limit{
+							Unit:            unit,
+							RequestsPerUnit: 1000,
+						},
+					},
+				},
+			})
+			assert.NoError(t, err)
+
+			config, err := service.NewRateLimitConfig("public-gateway", descriptors)
+			assert.NoError(t, err)
+
+			rendered, err := config.String()
+			assert.NoError(t, err)
+			assert.Contains(t, rendered, "unit: "+unit+"\n")
+			assert.Contains(t, rendered, "requests_per_unit: 1000\n")
+		})
+	}
+}
