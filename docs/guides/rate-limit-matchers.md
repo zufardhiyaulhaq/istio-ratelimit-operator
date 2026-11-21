@@ -18,6 +18,8 @@ This guide explains the three types of rate limit matchers available for configu
 
 **Best for:** APIs where you want to limit requests per tenant, per API version, or per feature flag.
 
+Every `request_headers` matcher needs `header_name` (the header to read) and `descriptor_key` (the name the ratelimit service uses for it). If the header is missing from a request, Envoy doesn't apply the rule to that request. With `skip_if_absent: true`, Envoy leaves out only that header and still applies the rest of the rule.
+
 ### Example: Limit by Tenant
 
 You have a multi-tenant API and want to limit each tenant to 100 requests per minute.
@@ -35,6 +37,7 @@ spec:
   matcher:
     - request_headers:
         header_name: "x-tenant-id"
+        descriptor_key: "tenant"
   limit:
     unit: minute
     requests_per_unit: 100
@@ -62,8 +65,10 @@ spec:
   matcher:
     - request_headers:
         header_name: "x-tenant-id"
+        descriptor_key: "tenant"
     - request_headers:
         header_name: "x-api-version"
+        descriptor_key: "api_version"
   limit:
     unit: minute
     requests_per_unit: 100
@@ -351,7 +356,7 @@ spec:
   selector:
     vhost: "api.example.com:443"
   matcher:
-    - remote_address: true
+    - remote_address: {}
   limit:
     unit: minute
     requests_per_unit: 60
@@ -377,9 +382,10 @@ spec:
   selector:
     vhost: "api.example.com:443"
   matcher:
-    - remote_address: true
+    - remote_address: {}
     - request_headers:
         header_name: "x-tenant-id"
+        descriptor_key: "tenant"
   limit:
     unit: minute
     requests_per_unit: 100
@@ -422,11 +428,13 @@ You can combine multiple matchers in a single rule. The rate limit applies to th
 
 ```yaml
 matcher:
-  - remote_address: true           # + client IP
+  - remote_address: {}             # + client IP
   - request_headers:
       header_name: "x-tenant-id"   # + tenant ID
+      descriptor_key: "tenant"
   - request_headers:
       header_name: "x-api-key"     # + API key
+      descriptor_key: "api_key"
 ```
 
 This creates a rate limit counter for each unique combination of: `IP + tenant + API key`.
@@ -442,7 +450,7 @@ Apply multiple rate limits with different scopes:
 ```yaml
 # Global limit per IP (protection against abuse)
 - matcher:
-    - remote_address: true
+    - remote_address: {}
   limit:
     unit: minute
     requests_per_unit: 1000
@@ -451,6 +459,7 @@ Apply multiple rate limits with different scopes:
 - matcher:
     - request_headers:
         header_name: "x-tenant-id"
+        descriptor_key: "tenant"
   limit:
     unit: minute
     requests_per_unit: 500
@@ -459,9 +468,14 @@ Apply multiple rate limits with different scopes:
 - matcher:
     - request_headers:
         header_name: "x-tenant-id"
+        descriptor_key: "tenant"
     - request_headers:
         header_name: ":path"
-        header_value: "/api/v1/expensive-operation"
+        descriptor_key: "path"
+        # :path includes the query string, so match it with "*"
+        # and share one counter across all query strings
+        value: "/api/v1/expensive-operation*"
+        share_threshold: true
   limit:
     unit: minute
     requests_per_unit: 10
@@ -483,7 +497,8 @@ spec:
   matcher:
     - request_headers:
         header_name: "x-subscription-tier"
-        header_value: "enterprise"
+        descriptor_key: "subscription_tier"
+        value: "enterprise"
   limit:
     unlimited: true  # No rate limit for enterprise customers
 ```
@@ -510,3 +525,5 @@ Enable `detailed_metric: true` to get per-value metrics:
 spec:
   detailed_metric: true  # Adds metrics per unique header value
 ```
+
+To choose which matchers add their value to the metrics, set `value_to_metric: true` on those `request_headers` or `remote_address` matchers instead. See [Per-Value Metrics](#example-per-value-metrics).
