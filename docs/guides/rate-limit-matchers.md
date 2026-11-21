@@ -75,6 +75,82 @@ spec:
 - `tenant-b` + `v1` = 100 req/min (separate counter)
 - Each combination gets its own limit
 
+### Example: Limit Only Matching Values
+
+You only want to limit downloads under `/files/`, with each file getting its own limit. Set `value` to the values to limit. `*` matches any characters, anywhere in the value.
+
+```yaml
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: GlobalRateLimit
+metadata:
+  name: file-download-rate-limit
+  namespace: istio-system
+spec:
+  config: "production-ratelimit"
+  selector:
+    vhost: "api.example.com:443"
+  matcher:
+    - request_headers:
+        header_name: ":path"
+        descriptor_key: "path"
+        value: "/files/*"
+  limit:
+    unit: minute
+    requests_per_unit: 10
+```
+
+**How it works:**
+- `/files/a.pdf` gets 10 req/min
+- `/files/b.csv` gets 10 req/min (separate counter)
+- `/api/users` isn't limited by this rule
+
+### Example: Share One Limit Across Matching Values
+
+You want all of `/files/*` together to get 10 requests per minute, whichever file is requested. Add `share_threshold: true`. It needs a `value` that contains `*`, and the API server rejects the rule otherwise.
+
+```yaml
+  matcher:
+    - request_headers:
+        header_name: ":path"
+        descriptor_key: "path"
+        value: "/files/*"
+        share_threshold: true
+  limit:
+    unit: minute
+    requests_per_unit: 10
+```
+
+**How it works:**
+- `/files/a.pdf`, `/files/b.csv` and `/files/c.txt` share one counter of 10 req/min
+- After 5 requests for `/files/a.pdf` and 5 for `/files/b.csv`, a request for `/files/c.txt` is limited
+
+On clusters older than Kubernetes 1.25 the API server doesn't run this check. There, the operator leaves `share_threshold` out of the ratelimit config instead, so the other rules keep working.
+
+### Example: Per-Value Metrics
+
+By default, the ratelimit service's metric keys are built from the descriptor keys only, so all tenants are counted together in one metric. Add `value_to_metric: true` to put the header value in the metric name, so each tenant gets its own metrics.
+
+```yaml
+  matcher:
+    - request_headers:
+        header_name: "x-tenant-id"
+        descriptor_key: "tenant"
+        value_to_metric: true
+  limit:
+    unit: minute
+    requests_per_unit: 100
+```
+
+**How it works:**
+- Without it: one metric, `production.tenant`
+- With it: `production.tenant_tenant-a`, `production.tenant_tenant-b`, and so on (here `production` is the domain of the `GlobalRateLimitConfig`)
+- Every new value creates new metrics, so avoid it for headers with many distinct values, such as user IDs
+- With `share_threshold`, the metric uses the wildcard prefix of `value` instead of each full value, since those values share one counter
+- `remote_address` takes `value_to_metric: true` as well (`remote_address: {value_to_metric: true}`), but every client IP then gets its own metrics
+- If the rule also sets `detailed_metric: true`, that wins on the last matcher and `value_to_metric` is ignored there
+
+`value`, `share_threshold` and `value_to_metric` are only used by the ratelimit service. The operator doesn't send them to Envoy.
+
 ---
 
 ## 2. Unique Request Header Matcher
@@ -338,6 +414,7 @@ spec:
 |----------------|-----|
 | Each customer has **own** rate limit counter | `request_headers` (any value) |
 | Multiple customers **share** one rate limit counter | `header_value_match` with `regex_match` |
+| All values matching a wildcard **share** one counter | `request_headers` with `value: "prefix*"` and `share_threshold: true` |
 
 ### Combining Matchers
 

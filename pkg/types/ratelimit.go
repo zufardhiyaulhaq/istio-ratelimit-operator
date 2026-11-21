@@ -15,6 +15,8 @@ type RateLimit_Service_Descriptor struct {
 	Value          string                         `json:"value,omitempty" yaml:"value,omitempty"`
 	ShadowMode     bool                           `json:"shadow_mode,omitempty" yaml:"shadow_mode,omitempty"`
 	DetailedMetric bool                           `json:"detailed_metric,omitempty" yaml:"detailed_metric,omitempty"`
+	ValueToMetric  bool                           `json:"value_to_metric,omitempty" yaml:"value_to_metric,omitempty"`
+	ShareThreshold bool                           `json:"share_threshold,omitempty" yaml:"share_threshold,omitempty"`
 	RateLimit      v1alpha1.GlobalRateLimit_Limit `json:"rate_limit,omitempty" yaml:"rate_limit,omitempty"`
 	Descriptors    []RateLimit_Service_Descriptor `json:"descriptors,omitempty" yaml:"descriptors,omitempty"`
 }

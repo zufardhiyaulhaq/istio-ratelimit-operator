@@ -1024,3 +1024,53 @@ func TestV3GatewayBuilder_WithRequestHeadersSkipIfAbsent(t *testing.T) {
 	assert.NotNil(t, skipIfAbsent)
 	assert.True(t, skipIfAbsent.GetBoolValue())
 }
+
+func TestV3GatewayBuilder_RatelimitServiceOnlyFieldsStayOutOfEnvoy(t *testing.T) {
+	config := v1alpha1.GlobalRateLimitConfig{
+		ObjectMeta: metav1.ObjectMeta{Name: "public-gateway-config", Namespace: "istio-system"},
+		Spec: v1alpha1.GlobalRateLimitConfigSpec{
+			Type: "gateway",
+			Selector: v1alpha1.GlobalRateLimitConfigSelector{
+				Labels:       map[string]string{"app": "gateway"},
+				IstioVersion: []string{"1.9"},
+			},
+		},
+	}
+
+	rateLimitObj := v1alpha1.GlobalRateLimit{
+		ObjectMeta: metav1.ObjectMeta{Name: "test-ratelimit", Namespace: "istio-system"},
+		Spec: v1alpha1.GlobalRateLimitSpec{
+			Config:   "public-gateway-config",
+			Selector: v1alpha1.GlobalRateLimitSelector{VHost: "example.com:443"},
+			Matcher: []*v1alpha1.GlobalRateLimit_Action{
+				{RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
+					HeaderName:     ":path",
+					DescriptorKey:  "path",
+					SkipIfAbsent:   true,
+					Value:          "/files/*",
+					ShareThreshold: true,
+					ValueToMetric:  true,
+				}},
+				{RemoteAddress: &v1alpha1.GlobalRateLimit_Action_RemoteAddress{ValueToMetric: true}},
+			},
+		},
+	}
+
+	envoyfilter, err := ratelimit.NewV3GatewayBuilder(config, rateLimitObj, "1.9").Build()
+	assert.NoError(t, err)
+
+	patchValue := envoyfilter.Spec.ConfigPatches[0].Patch.Value
+	actions := patchValue.GetFields()["route"].GetStructValue().GetFields()["rate_limits"].
+		GetListValue().GetValues()[0].GetStructValue().GetFields()["actions"].GetListValue().GetValues()
+	assert.Len(t, actions, 2)
+
+	requestHeaders := actions[0].GetStructValue().GetFields()["request_headers"].GetStructValue().GetFields()
+	assert.Equal(t, ":path", requestHeaders["header_name"].GetStringValue())
+	assert.Equal(t, "path", requestHeaders["descriptor_key"].GetStringValue())
+	assert.True(t, requestHeaders["skip_if_absent"].GetBoolValue())
+	assert.Len(t, requestHeaders, 3, "Envoy only knows header_name, descriptor_key and skip_if_absent")
+
+	remoteAddress, ok := actions[1].GetStructValue().GetFields()["remote_address"]
+	assert.True(t, ok)
+	assert.Empty(t, remoteAddress.GetStructValue().GetFields(), "remote_address must stay an empty object for Envoy")
+}
