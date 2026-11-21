@@ -149,6 +149,13 @@ spec:
                       - descriptor_value
                       type: object
                     remote_address:
+                      properties:
+                        value_to_metric:
+                          description: |-
+                            ValueToMetric adds the client address to the ratelimit service metric
+                            names, so each address gets its own metrics. Every new address creates
+                            new metrics. Only the ratelimit service uses it; it isn't sent to Envoy.
+                          type: boolean
                       type: object
                     request_headers:
                       properties:
@@ -161,16 +168,42 @@ spec:
                             value is used to populate the value of the descriptor entry for the
                             descriptor_key.
                           type: string
+                        share_threshold:
+                          description: |-
+                            ShareThreshold makes all header values that match Value share one
+                            counter, instead of one counter per value. Value must contain "*".
+                          type: boolean
                         skip_if_absent:
                           description: |-
                             If set to true, Envoy skips the descriptor while calling rate limiting service
                             when header is not present in the request. By default it skips calling the
                             rate limiting service if this header is not present in the request.
                           type: boolean
+                        value:
+                          description: |-
+                            Value limits only requests whose header value matches it. "*" matches
+                            any characters, for example "/files/*". Requests with other values
+                            aren't limited by this rule. Without it, every value is limited, each
+                            with its own counter.
+                          maxLength: 1024
+                          minLength: 1
+                          type: string
+                        value_to_metric:
+                          description: |-
+                            ValueToMetric adds the header value to the ratelimit service metric
+                            names, so each value gets its own metrics. With ShareThreshold, the part
+                            of Value before "*" is used instead. Every new value creates new
+                            metrics, so avoid it for headers with many distinct values.
+                          type: boolean
                       type: object
+                      x-kubernetes-validations:
+                      - message: share_threshold needs a value that contains '*'
+                        rule: '!(has(self.share_threshold) && self.share_threshold)
+                          || (has(self.value) && self.value.contains(''*''))'
                     source_cluster:
                       type: object
                   type: object
+                maxItems: 32
                 type: array
               selector:
                 properties:

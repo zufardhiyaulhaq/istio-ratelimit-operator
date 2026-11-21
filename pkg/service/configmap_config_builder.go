@@ -92,6 +92,11 @@ func SyncDescriptors(descriptorsData []types.RateLimit_Service_Descriptor) []typ
 
 		for descriptorIndex, descriptor := range descriptors {
 			if descriptor.Key == descriptorData.Key && descriptor.Value == descriptorData.Value {
+				// envoy/ratelimit allows one descriptor per key and value, so
+				// rules that share one are merged. If any of them asks for
+				// value_to_metric or share_threshold, the merged one has it.
+				descriptors[descriptorIndex].ValueToMetric = descriptor.ValueToMetric || descriptorData.ValueToMetric
+				descriptors[descriptorIndex].ShareThreshold = descriptor.ShareThreshold || descriptorData.ShareThreshold
 				descriptors[descriptorIndex].Descriptors = SyncDescriptors(append(descriptors[descriptorIndex].Descriptors, descriptorData.Descriptors...))
 				shouldAppend = false
 				continue
@@ -158,6 +163,7 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 
 	if matcher.RemoteAddress != nil {
 		descriptor[0].Key = "remote_address"
+		descriptor[0].ValueToMetric = matcher.RemoteAddress.ValueToMetric
 
 		if len(matchers) == 1 {
 			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit
@@ -178,6 +184,12 @@ func NewRateLimitDescriptorFromMatcher(matchers []*v1alpha1.GlobalRateLimit_Acti
 	}
 	if matcher.RequestHeaders != nil {
 		descriptor[0].Key = matcher.RequestHeaders.DescriptorKey
+		descriptor[0].Value = matcher.RequestHeaders.Value
+		// envoy/ratelimit rejects the whole config when share_threshold is set
+		// on a value without "*". The CRD blocks that, but clusters older
+		// than Kubernetes 1.25 don't enforce CEL rules, so check again here.
+		descriptor[0].ShareThreshold = matcher.RequestHeaders.ShareThreshold && strings.Contains(matcher.RequestHeaders.Value, "*")
+		descriptor[0].ValueToMetric = matcher.RequestHeaders.ValueToMetric
 
 		if len(matchers) == 1 {
 			descriptor[0].RateLimit.RequestsPerUnit = limit.RequestsPerUnit

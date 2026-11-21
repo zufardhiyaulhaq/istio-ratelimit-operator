@@ -1061,3 +1061,137 @@ func TestNewRateLimitDescriptorFromMatcher_LowercasesUnitForEveryMatcher(t *test
 		})
 	}
 }
+
+func TestNewRateLimitDescriptorFromMatcher_ValueShareThresholdValueToMetric(t *testing.T) {
+	limit := &v1alpha1.GlobalRateLimit_Limit{Unit: "hour", RequestsPerUnit: 10}
+
+	tests := []struct {
+		name    string
+		matcher *v1alpha1.GlobalRateLimit_Action
+		want    types.RateLimit_Service_Descriptor
+	}{
+		{
+			name: "request headers with wildcard value, shared threshold and metrics",
+			matcher: &v1alpha1.GlobalRateLimit_Action{RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
+				HeaderName: ":path", DescriptorKey: "path", Value: "/files/*", ShareThreshold: true, ValueToMetric: true,
+			}},
+			want: types.RateLimit_Service_Descriptor{
+				Key: "path", Value: "/files/*", ShareThreshold: true, ValueToMetric: true, RateLimit: *limit,
+			},
+		},
+		{
+			name: "request headers with exact value",
+			matcher: &v1alpha1.GlobalRateLimit_Action{RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
+				HeaderName: ":method", DescriptorKey: "method", Value: "GET",
+			}},
+			want: types.RateLimit_Service_Descriptor{Key: "method", Value: "GET", RateLimit: *limit},
+		},
+		{
+			name: "share threshold without wildcard is dropped",
+			matcher: &v1alpha1.GlobalRateLimit_Action{RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
+				HeaderName: ":path", DescriptorKey: "path", Value: "/files", ShareThreshold: true,
+			}},
+			want: types.RateLimit_Service_Descriptor{Key: "path", Value: "/files", RateLimit: *limit},
+		},
+		{
+			name: "share threshold without value is dropped",
+			matcher: &v1alpha1.GlobalRateLimit_Action{RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
+				HeaderName: ":path", DescriptorKey: "path", ShareThreshold: true,
+			}},
+			want: types.RateLimit_Service_Descriptor{Key: "path", RateLimit: *limit},
+		},
+		{
+			name:    "remote address with value_to_metric",
+			matcher: &v1alpha1.GlobalRateLimit_Action{RemoteAddress: &v1alpha1.GlobalRateLimit_Action_RemoteAddress{ValueToMetric: true}},
+			want:    types.RateLimit_Service_Descriptor{Key: "remote_address", ValueToMetric: true, RateLimit: *limit},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			descriptors, err := service.NewRateLimitDescriptorFromMatcher([]*v1alpha1.GlobalRateLimit_Action{tt.matcher}, limit, false)
+			assert.NoError(t, err)
+			assert.Equal(t, []types.RateLimit_Service_Descriptor{tt.want}, descriptors)
+		})
+	}
+}
+
+func TestNewRateLimitDescriptorFromMatcher_NestedValueToMetric(t *testing.T) {
+	descriptors, err := service.NewRateLimitDescriptorFromMatcher([]*v1alpha1.GlobalRateLimit_Action{
+		{RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{HeaderName: ":path", DescriptorKey: "path", Value: "/api/*", ShareThreshold: true, ValueToMetric: true}},
+		{RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{HeaderName: ":method", DescriptorKey: "method", ValueToMetric: true}},
+	}, &v1alpha1.GlobalRateLimit_Limit{Unit: "minute", RequestsPerUnit: 60}, false)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "/api/*", descriptors[0].Value)
+	assert.True(t, descriptors[0].ShareThreshold)
+	assert.True(t, descriptors[0].ValueToMetric)
+	assert.Equal(t, 0, descriptors[0].RateLimit.RequestsPerUnit, "the parent descriptor carries no limit")
+
+	child := descriptors[0].Descriptors[0]
+	assert.Equal(t, "method", child.Key)
+	assert.True(t, child.ValueToMetric)
+	assert.False(t, child.ShareThreshold)
+	assert.Equal(t, 60, child.RateLimit.RequestsPerUnit)
+}
+
+func TestSyncDescriptors_MergesValueToMetricAndShareThreshold(t *testing.T) {
+	merged := service.SyncDescriptors([]types.RateLimit_Service_Descriptor{
+		{Key: "path", Value: "/files/*", Descriptors: []types.RateLimit_Service_Descriptor{{Key: "method", Value: "GET"}}},
+		{Key: "path", Value: "/files/*", ShareThreshold: true, ValueToMetric: true, Descriptors: []types.RateLimit_Service_Descriptor{{Key: "method", Value: "POST"}}},
+		{Key: "path", Value: "/other/*"},
+	})
+
+	assert.Len(t, merged, 2)
+	assert.Equal(t, "/files/*", merged[0].Value)
+	assert.True(t, merged[0].ShareThreshold)
+	assert.True(t, merged[0].ValueToMetric)
+	assert.Len(t, merged[0].Descriptors, 2)
+	assert.False(t, merged[1].ShareThreshold)
+	assert.False(t, merged[1].ValueToMetric)
+}
+
+func TestNewRateLimitConfig_RendersValueShareThresholdValueToMetric(t *testing.T) {
+	descriptors, err := service.NewRateLimitDescriptor([]v1alpha1.GlobalRateLimit{{
+		Spec: v1alpha1.GlobalRateLimitSpec{
+			Matcher: []*v1alpha1.GlobalRateLimit_Action{
+				{RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{
+					HeaderName: ":path", DescriptorKey: "path", Value: "/files/*", ShareThreshold: true, ValueToMetric: true,
+				}},
+			},
+			Limit: &v1alpha1.GlobalRateLimit_Limit{Unit: "hour", RequestsPerUnit: 10},
+		},
+	}})
+	assert.NoError(t, err)
+
+	config, err := service.NewRateLimitConfig("public-gateway", descriptors)
+	assert.NoError(t, err)
+	rendered, err := config.String()
+	assert.NoError(t, err)
+
+	assert.Contains(t, rendered, "key: path\n")
+	assert.Contains(t, rendered, "value: /files/*\n")
+	assert.Contains(t, rendered, "share_threshold: true\n")
+	assert.Contains(t, rendered, "value_to_metric: true\n")
+}
+
+func TestNewRateLimitConfig_OmitsUnsetValueShareThresholdValueToMetric(t *testing.T) {
+	descriptors, err := service.NewRateLimitDescriptor([]v1alpha1.GlobalRateLimit{{
+		Spec: v1alpha1.GlobalRateLimitSpec{
+			Matcher: []*v1alpha1.GlobalRateLimit_Action{
+				{RequestHeaders: &v1alpha1.GlobalRateLimit_Action_RequestHeaders{HeaderName: ":path", DescriptorKey: "path"}},
+			},
+			Limit: &v1alpha1.GlobalRateLimit_Limit{Unit: "hour", RequestsPerUnit: 10},
+		},
+	}})
+	assert.NoError(t, err)
+
+	config, err := service.NewRateLimitConfig("public-gateway", descriptors)
+	assert.NoError(t, err)
+	rendered, err := config.String()
+	assert.NoError(t, err)
+
+	assert.NotContains(t, rendered, "value:")
+	assert.NotContains(t, rendered, "share_threshold")
+	assert.NotContains(t, rendered, "value_to_metric")
+}

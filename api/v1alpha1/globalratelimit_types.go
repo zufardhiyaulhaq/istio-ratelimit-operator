@@ -22,8 +22,9 @@ import (
 
 // GlobalRateLimitSpec defines the desired state of GlobalRateLimit
 type GlobalRateLimitSpec struct {
-	Config         string                    `json:"config"`
-	Selector       GlobalRateLimitSelector   `json:"selector"`
+	Config   string                  `json:"config"`
+	Selector GlobalRateLimitSelector `json:"selector"`
+	// +kubebuilder:validation:MaxItems=32
 	Matcher        []*GlobalRateLimit_Action `json:"matcher"`
 	ShadowMode     bool                      `json:"shadow_mode,omitempty"`
 	Limit          *GlobalRateLimit_Limit    `json:"limit,omitempty"`
@@ -57,8 +58,18 @@ type GlobalRateLimit_Action struct {
 
 type GlobalRateLimit_Action_SourceCluster struct{}
 type GlobalRateLimit_Action_DestinationCluster struct{}
-type GlobalRateLimit_Action_RemoteAddress struct{}
+type GlobalRateLimit_Action_RemoteAddress struct {
+	// ValueToMetric adds the client address to the ratelimit service metric
+	// names, so each address gets its own metrics. Every new address creates
+	// new metrics. Only the ratelimit service uses it; it isn't sent to Envoy.
+	ValueToMetric bool `json:"value_to_metric,omitempty" yaml:"-"`
+}
 
+// Note for maintainers: value, share_threshold and value_to_metric only go to
+// the ratelimit service config. Their yaml:"-" tag keeps them out of the Envoy
+// rate limit action, which is marshalled from this struct's yaml tags.
+
+// +kubebuilder:validation:XValidation:rule="!(has(self.share_threshold) && self.share_threshold) || (has(self.value) && self.value.contains('*'))",message="share_threshold needs a value that contains '*'"
 type GlobalRateLimit_Action_RequestHeaders struct {
 	// The header name to be queried from the request headers. The header’s
 	// value is used to populate the value of the descriptor entry for the
@@ -70,6 +81,21 @@ type GlobalRateLimit_Action_RequestHeaders struct {
 	// when header is not present in the request. By default it skips calling the
 	// rate limiting service if this header is not present in the request.
 	SkipIfAbsent bool `json:"skip_if_absent,omitempty" yaml:"skip_if_absent,omitempty"`
+	// Value limits only requests whose header value matches it. "*" matches
+	// any characters, for example "/files/*". Requests with other values
+	// aren't limited by this rule. Without it, every value is limited, each
+	// with its own counter.
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=1024
+	Value string `json:"value,omitempty" yaml:"-"`
+	// ShareThreshold makes all header values that match Value share one
+	// counter, instead of one counter per value. Value must contain "*".
+	ShareThreshold bool `json:"share_threshold,omitempty" yaml:"-"`
+	// ValueToMetric adds the header value to the ratelimit service metric
+	// names, so each value gets its own metrics. With ShareThreshold, the part
+	// of Value before "*" is used instead. Every new value creates new
+	// metrics, so avoid it for headers with many distinct values.
+	ValueToMetric bool `json:"value_to_metric,omitempty" yaml:"-"`
 }
 
 type GlobalRateLimit_Action_GenericKey struct {
