@@ -33,7 +33,7 @@ func TestLocalRateLimitLimitToTokenBucket(t *testing.T) {
 			bucket := LocalRateLimit_Limit{Unit: tt.unit, RequestsPerUnit: 10}.ToTokenBucket()
 			assert.Equal(t, tt.want, bucket.FillInterval)
 			assert.Equal(t, 10, bucket.MaxTokens)
-			assert.Equal(t, 1, bucket.TokensPerFill)
+			assert.Equal(t, 10, bucket.TokensPerFill)
 		})
 	}
 }
@@ -51,6 +51,15 @@ type crdFile struct {
 			} `yaml:"schema"`
 		} `yaml:"versions"`
 	} `yaml:"spec"`
+}
+
+func TestLocalRateLimitLimitToTokenBucket_RefillsFullLimit(t *testing.T) {
+	for _, requests := range []int{1, 5, 100, 60000} {
+		bucket := LocalRateLimit_Limit{Unit: "minute", RequestsPerUnit: requests}.ToTokenBucket()
+		assert.Equal(t, requests, bucket.MaxTokens)
+		assert.Equal(t, requests, bucket.TokensPerFill, "a unit must give back the whole limit, not one token")
+		assert.Equal(t, "60s", bucket.FillInterval)
+	}
 }
 
 // crdPattern returns the pattern the generated CRD puts on the property at

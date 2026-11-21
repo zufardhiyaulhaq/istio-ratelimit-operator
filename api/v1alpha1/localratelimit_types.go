@@ -43,6 +43,9 @@ type LocalRateLimit_Limit struct {
 	RequestsPerUnit int    `json:"requests_per_unit,omitempty" yaml:"requests_per_unit,omitempty"`
 }
 
+// ToTokenBucket builds an Envoy token bucket that allows RequestsPerUnit
+// requests per unit: it holds RequestsPerUnit tokens and refills all of them
+// at the end of each unit.
 func (l LocalRateLimit_Limit) ToTokenBucket() *types.LocalRateLimit_TokenBucket {
 	var interval string
 
@@ -67,7 +70,7 @@ func (l LocalRateLimit_Limit) ToTokenBucket() *types.LocalRateLimit_TokenBucket 
 
 	return &types.LocalRateLimit_TokenBucket{
 		MaxTokens:     l.RequestsPerUnit,
-		TokensPerFill: 1,
+		TokensPerFill: l.RequestsPerUnit,
 		FillInterval:  interval,
 	}
 }
