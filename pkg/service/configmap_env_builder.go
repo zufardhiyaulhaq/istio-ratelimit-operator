@@ -130,6 +130,12 @@ func (n *EnvBuilder) BuildEnv() (map[string]string, error) {
 		}
 	}
 
+	if n.RateLimitService.Spec.Window != nil {
+		for key, value := range n.BuildWindowEnv() {
+			env[key] = value
+		}
+	}
+
 	if n.RateLimitService.Spec.Server != nil {
 		serverEnv, err := n.BuildServerEnv()
 		if err != nil {
@@ -373,6 +379,25 @@ func (n *EnvBuilder) BuildShadowModeEnv() (map[string]string, error) {
 	}
 
 	return data, nil
+}
+
+func (n *EnvBuilder) BuildWindowEnv() map[string]string {
+	data := make(map[string]string)
+
+	window := n.RateLimitService.Spec.Window
+	if window == nil {
+		return data
+	}
+
+	if window.CalendarMonth != nil {
+		data["USE_CALENDAR_MONTH_RATE_LIMIT"] = strconv.FormatBool(*window.CalendarMonth)
+	}
+
+	if window.WeekResetDay != "" {
+		data["WEEK_RATE_LIMIT_RESET_DAY"] = window.WeekResetDay
+	}
+
+	return data
 }
 
 func (n *EnvBuilder) BuildServerEnv() (map[string]string, error) {

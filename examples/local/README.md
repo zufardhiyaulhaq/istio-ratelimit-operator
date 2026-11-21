@@ -83,3 +83,5 @@ spec:
 You must define the `LocalRateLimitConfig` in the `spec.config`. Also you must define the selector, which is contain two things:
 - **vhost**: combination of domain and port from Gateway object
 - **route**: route name you define in VirtualService object
+
+`spec.limit.unit` accepts `second`, `minute`, `hour`, `day`, `week` (7 days), `month` (30 days) or `year` (365 days), in any case. Local rate limiting uses an Envoy token bucket: it holds `requests_per_unit` tokens and adds one token back each unit, so it isn't a fixed window that resets on a calendar boundary.

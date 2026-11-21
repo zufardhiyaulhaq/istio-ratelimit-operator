@@ -55,6 +55,31 @@ spec:
 
 It's support single, sentinel, or clustered Redis. `spec.backend.redis.url` is very depends on `spec.backend.redis.type`. You can check official [Envoy ratelimit service](https://github.com/envoyproxy/ratelimit#redis-type) service for Sentinel and Clustered Redis.
 
+#### Limit units
+`spec.limit.unit` in `GlobalRateLimit` accepts `second`, `minute`, `hour`, `day`, `week`, `month` or `year`, in any case.
+
+By default the ratelimit service counts `week` and `month` windows from the Unix epoch: a week resets every Thursday at 00:00 UTC, and a month is a fixed 30 days that doesn't line up with calendar months. `spec.window` in `RateLimitService` changes both:
+
+```
+apiVersion: ratelimit.zufardhiyaulhaq.com/v1alpha1
+kind: RateLimitService
+metadata:
+  name: public-gateway-ratelimit-service
+  namespace: istio-system
+spec:
+  window:
+    # month limits reset on the 1st of each month (UTC)
+    calendarMonth: true
+    # week limits reset on Monday 00:00 UTC
+    weekResetDay: Monday
+  backend:
+    redis:
+      type: "single"
+      url: "172.30.0.13:6379"
+```
+
+Changing either setting on a running service moves the window boundary, so the counters of the current week or month start again.
+
 ## Gateway
 To setup rate limit in Gateway, the first thing you need to do is to make sure the gateway is aware of external rate limit service, you can create `GlobalRateLimitConfig` object to enable that:
 

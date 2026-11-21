@@ -162,6 +162,11 @@ spec:
                   requests_per_unit:
                     type: integer
                   unit:
+                    description: |-
+                      Unit is the time window of the limit: second, minute, hour, day, week,
+                      month or year. Case-insensitive. Week and month reset times are set by
+                      the RateLimitService spec.window.
+                    pattern: ^(?i)(second|minute|hour|day|week|month|year)$
                     type: string
                   unlimited:
                     type: boolean
@@ -2207,6 +2212,24 @@ spec:
                 type: object
               shadowMode:
                 type: boolean
+              window:
+                description: Window sets when week and month limits reset.
+                properties:
+                  calendarMonth:
+                    description: |-
+                      CalendarMonth makes month limits reset on the 1st of each calendar month
+                      (UTC) instead of every 30 days. Turning it on moves the reset time of
+                      existing month limits. When set, true or false, it overrides
+                      USE_CALENDAR_MONTH_RATE_LIMIT in spec.environment.
+                    type: boolean
+                  weekResetDay:
+                    description: |-
+                      WeekResetDay is the day week limits reset, at 00:00 UTC. Case-insensitive.
+                      The ratelimit service default is Thursday. When set, it overrides
+                      WEEK_RATE_LIMIT_RESET_DAY in spec.environment.
+                    pattern: ^(?i)(sunday|monday|tuesday|wednesday|thursday|friday|saturday)$
+                    type: string
+                type: object
             type: object
           status:
             properties:
@@ -2342,6 +2365,10 @@ spec:
                   requests_per_unit:
                     type: integer
                   unit:
+                    description: |-
+                      Unit is the token bucket fill interval: second, minute, hour, day, week
+                      (7 days), month (30 days) or year (365 days). Case-insensitive.
+                    pattern: ^(?i)(second|minute|hour|day|week|month|year)$
                     type: string
                 type: object
               selector:

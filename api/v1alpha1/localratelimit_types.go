@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"strings"
+
 	"github.com/zufardhiyaulhaq/istio-ratelimit-operator/pkg/local/types"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -34,6 +36,9 @@ type LocalRateLimitSelector struct {
 }
 
 type LocalRateLimit_Limit struct {
+	// Unit is the token bucket fill interval: second, minute, hour, day, week
+	// (7 days), month (30 days) or year (365 days). Case-insensitive.
+	// +kubebuilder:validation:Pattern=`^(?i)(second|minute|hour|day|week|month|year)$`
 	Unit            string `json:"unit,omitempty" yaml:"unit,omitempty"`
 	RequestsPerUnit int    `json:"requests_per_unit,omitempty" yaml:"requests_per_unit,omitempty"`
 }
@@ -41,7 +46,7 @@ type LocalRateLimit_Limit struct {
 func (l LocalRateLimit_Limit) ToTokenBucket() *types.LocalRateLimit_TokenBucket {
 	var interval string
 
-	switch l.Unit {
+	switch strings.ToLower(l.Unit) {
 	case "second":
 		interval = "1s"
 	case "minute":
@@ -50,6 +55,12 @@ func (l LocalRateLimit_Limit) ToTokenBucket() *types.LocalRateLimit_TokenBucket 
 		interval = "3600s"
 	case "day":
 		interval = "86400s"
+	case "week":
+		interval = "604800s"
+	case "month":
+		interval = "2592000s"
+	case "year":
+		interval = "31536000s"
 	default:
 		interval = "1s"
 	}
